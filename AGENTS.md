@@ -44,6 +44,7 @@ mercadal-digital360/
 ## Infrastructure Model (Hybrid Local & Staging VPS)
 - **Local PC (Windows 11 / Antigravity 2.0)**:
   - Desarrollo de storefronts Next.js 15, maquetado UI, gestión Git y orquestación del proyecto.
+  - `apps/backend` corre en Node 22 LTS; no se ejecuta `medusa develop` contra staging sin pasar por el contenedor del VPS.
   - **No** se instalan Docker Desktop, WSL2, PostgreSQL ni Redis en la PC Windows.
 - **Staging VPS (Ubuntu 24.04 LTS)**:
   - Aloja Medusa 2, PostgreSQL 16 y Redis 7 en **contenedores exclusivos de Staging**.
