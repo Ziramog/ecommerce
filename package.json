@@ -1,0 +1,25 @@
+{
+  "name": "mercadal-digital360",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mercadal Digital 360 — Monorepo E-Commerce B2B (Talabartería Mercadal) & B2C (Pampa Novus)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.0",
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

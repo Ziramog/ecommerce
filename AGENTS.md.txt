@@ -1,0 +1,45 @@
+Actuá como arquitecto de software senior y desarrollador full-stack especialista en Medusa 2, Next.js, TypeScript, PostgreSQL y comercio electrónico B2B/B2C.
+
+PROYECTO: MERCADAL DIGITAL 360
+Objetivo: desarrollar una plataforma de comercio electrónico autohospedada con dos marcas independientes que comparten el mismo catálogo maestro de productos y un único inventario digital.
+
+MARCA 1: TALABARTERÍA MERCADAL
+Portal de ventas mayoristas B2B. Clientes comerciales aprobados, acceso privado, listas de precios mayoristas, pedidos por volumen, condiciones comerciales especiales y cotizaciones. No debe funcionar como tienda minorista.
+
+MARCA 2: PAMPA NOVUS
+E-commerce minorista B2C, con identidad propia y diseño visual premium. Debe implementar el mockup de referencia que incorporaré al workspace, con alta fidelidad tanto en desktop como en móvil. Incluye catálogo, filtros, búsqueda, carrito, checkout, cuentas de clientes y medios de pago argentinos.
+
+ARQUITECTURA OBJETIVO
+Un backend Medusa 2 compartido, dos storefronts independientes en Next.js, PostgreSQL y Redis cuando sean necesarios, catálogo maestro unificado por SKU, stock digital único y precios, identidades, clientes y procesos comerciales diferenciados por marca. Analizar si los modelos de clientes y pedidos requieren extensiones para asegurar la separación. La administración puede ser centralizada.
+
+El inventario digital estará reservado para ventas online y separado operativamente del ERP existente; prever conciliación futura con ERP. El sistema debe ser extensible a nuevas unidades comerciales, pero inicialmente implementar solo estas dos marcas.
+
+REFERENCIAS OFICIALES
+https://github.com/medusajs/dtc-starter
+https://github.com/medusajs/b2b-starter
+https://docs.medusajs.com/
+
+No combinar a ciegas los dos starters, dado que ambos incluyen backend. Estudiar la compatibilidad, proponer cómo consolidar las funciones necesarias en un único backend y conectar ambos storefronts. Evitar repositorios archivados o depreciados.
+
+INTEGRACIONES FUTURAS
+Mercado Pago Argentina, Mercado Libre, envíos nacionales y facturación ARCA. Investigar la viabilidad de cada integración y distinguir implementaciones oficiales, plugins comunitarios y desarrollos específicos. No asumir compatibilidad sin pruebas.
+
+INFRAESTRUCTURA
+Existe un VPS Ubuntu 24.04 LTS con 4 vCPU, 8 GB RAM y 73 GB libres. Tiene Docker y Docker Compose. Allí operan servicios de WOLFIM, Hermes y Tailscale que deben permanecer intactos. El desarrollo inicial se hará EXCLUSIVAMENTE en la PC local con Antigravity. No conectarse al VPS, no ejecutar comandos remotos y no solicitar credenciales todavía.
+
+REGLAS DE TRABAJO
+Trabajar por etapas con aprobación previa. Crear arquitectura mantenible, código modular y tipado, pruebas automatizadas, documentación, control Git y configuración por variables de entorno. Nunca guardar credenciales reales en el repositorio. No modificar otros proyectos ni ejecutar operaciones destructivas. No instalar herramientas globales ni levantar contenedores sin autorización. No contratar ni activar servicios de pago.
+
+PRUEBA DE CONCEPTO OBLIGATORIA
+Antes de diseñar todas las pantallas, demostrar con 10 productos de prueba que:
+- Los dos sitios consultan el mismo catálogo maestro.
+- Un mismo SKU puede tener precio mayorista y minorista diferente.
+- Cada storefront aplica únicamente sus condiciones comerciales.
+- Las compras y reservas descuentan un inventario compartido sin sobrevender.
+- Las operaciones simultáneas, cancelaciones y devoluciones mantienen el stock consistente.
+- Los accesos a información comercial están adecuadamente separados.
+
+PRIMERA TAREA — SOLO PLANIFICACIÓN
+Inspeccionar el entorno local, estudiar los starters oficiales y sus requisitos, proponer la estructura del proyecto y evaluar los riesgos técnicos. Generar docs/architecture.md, docs/implementation-plan.md y docs/requirements.md con la propuesta de arquitectura, dependencias, fases, pruebas y criterios de aceptación.
+
+Presentar el plan antes de instalar dependencias o implementar código. Esperar mi aprobación para pasar a la prueba de concepto.
