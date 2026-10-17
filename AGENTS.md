@@ -62,10 +62,14 @@ mercadal-digital360/
 - **Cero secretos en Git / Cero exposición en logs**: nunca commitear credenciales reales, archivos `.env` privados ni claves API. Nunca imprimir secretos en chat, consola o logs.
 - **No commit / push sin autorización explícita**: no hacer push al remoto (actualmente no existe remoto configurado).
 - **Verificación de build y lint**: correr verificaciones de build y lint antes de proponer despliegues o cierres de milestones.
+- **Pruebas automatizadas obligatorias**: todo cambio funcional debe incluir pruebas automatizadas adecuadas y ejecutarse antes de considerar una tarea terminada.
+- **Servicios y cobros de pago**: no contratar, activar ni habilitar servicios o cobros de pago reales sin aprobación explícita del usuario.
 
 ## Reglas de Trabajo & Metodología
 - Trabajar por etapas con aprobación previa.
 - Crear arquitectura mantenible, código modular, tipado estricto con TypeScript, documentación y control Git.
+- Todo cambio funcional debe incluir pruebas automatizadas adecuadas y ejecutarse antes de considerar una tarea terminada.
+- No contratar, activar ni habilitar servicios o cobros de pago reales sin aprobación explícita del usuario.
 - No modificar otros proyectos ni ejecutar operaciones destructivas.
 - No instalar herramientas globales ni levantar contenedores sin autorización.
 
