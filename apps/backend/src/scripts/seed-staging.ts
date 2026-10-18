@@ -43,6 +43,51 @@ import {
   ProductStatus,
 } from '@medusajs/framework/utils'
 import type { ExecArgs } from '@medusajs/framework/types'
+import {
+  classifyAndValidatePreflight,
+  KNOWN_STARTER_CHANNELS,
+  KNOWN_STARTER_LOCATIONS,
+  KNOWN_STARTER_KEYS,
+  KNOWN_STARTER_PRODUCTS,
+  MAX_STARTER_CHANNELS_TO_DELETE,
+  MAX_STARTER_LOCATIONS_TO_DELETE,
+  MAX_STARTER_KEYS_TO_DELETE,
+  MAX_STARTER_PRODUCTS_TO_DELETE,
+  MERCADAL_CHANNELS,
+  MERCADAL_LOCATIONS,
+  MERCADAL_KEYS,
+  MERCADAL_PRODUCT_HANDLES,
+  type PreflightInput,
+  type PreflightClassificationResult,
+  type RawPreflightChannel,
+  type RawPreflightLocation,
+  type RawPreflightKey,
+  type RawPreflightProduct,
+  type SanitizationItem,
+} from './seed-preflight'
+
+export {
+  classifyAndValidatePreflight,
+  KNOWN_STARTER_CHANNELS,
+  KNOWN_STARTER_LOCATIONS,
+  KNOWN_STARTER_KEYS,
+  KNOWN_STARTER_PRODUCTS,
+  MAX_STARTER_CHANNELS_TO_DELETE,
+  MAX_STARTER_LOCATIONS_TO_DELETE,
+  MAX_STARTER_KEYS_TO_DELETE,
+  MAX_STARTER_PRODUCTS_TO_DELETE,
+  MERCADAL_CHANNELS,
+  MERCADAL_LOCATIONS,
+  MERCADAL_KEYS,
+  MERCADAL_PRODUCT_HANDLES,
+  type PreflightInput,
+  type PreflightClassificationResult,
+  type RawPreflightChannel,
+  type RawPreflightLocation,
+  type RawPreflightKey,
+  type RawPreflightProduct,
+  type SanitizationItem,
+}
 
 // Entidades de Dominio Mercadal Digital 360
 const CHANNEL_B2C = 'sc_pampa_novus_b2c'
@@ -51,185 +96,6 @@ const STOCK_LOCATION_NAME = 'loc_digital_warehouse'
 const KEY_TITLE_B2C = 'pk_pampa_novus_b2c'
 const KEY_TITLE_B2B = 'pk_talabarteria_b2b'
 const B2B_PRICE_LIST_TITLE = 'Lista Mayorista Talabarteria B2B'
-
-// Whitelist Estricta de Artefactos Conocidos del Starter de Medusa
-export const KNOWN_STARTER_CHANNELS = new Set(['Default Sales Channel'])
-export const KNOWN_STARTER_LOCATIONS = new Set(['European Warehouse'])
-export const KNOWN_STARTER_KEYS = new Set(['Default Publishable API Key'])
-export const KNOWN_STARTER_PRODUCTS = new Set(['t-shirt', 'sweatshirt', 'sweatpants', 'shorts'])
-
-// Umbrales Fail-Closed de Seguridad para Saneamiento
-export const MAX_STARTER_CHANNELS_TO_DELETE = 1
-export const MAX_STARTER_LOCATIONS_TO_DELETE = 1
-export const MAX_STARTER_KEYS_TO_DELETE = 1
-export const MAX_STARTER_PRODUCTS_TO_DELETE = 4
-
-// Entidades de Dominio Autorizadas de Mercadal Digital 360
-export const MERCADAL_CHANNELS = new Set([CHANNEL_B2C, CHANNEL_B2B])
-export const MERCADAL_LOCATIONS = new Set([STOCK_LOCATION_NAME])
-export const MERCADAL_KEYS = new Set([KEY_TITLE_B2C, KEY_TITLE_B2B])
-
-export interface RawPreflightChannel {
-  id: string
-  name?: string | null
-}
-
-export interface RawPreflightLocation {
-  id: string
-  name?: string | null
-}
-
-export interface RawPreflightKey {
-  id: string
-  title?: string | null
-}
-
-export interface RawPreflightProduct {
-  id: string
-  title?: string | null
-  handle?: string | null
-}
-
-export interface PreflightInput {
-  channels: RawPreflightChannel[]
-  locations: RawPreflightLocation[]
-  keys: RawPreflightKey[]
-  products: RawPreflightProduct[]
-  mercadalHandles?: Set<string>
-}
-
-export interface SanitizationItem {
-  id: string
-  identifier: string
-  type: 'channel' | 'location' | 'key' | 'product'
-}
-
-export interface PreflightClassificationResult {
-  channelsToDelete: RawPreflightChannel[]
-  locationsToDelete: RawPreflightLocation[]
-  keysToDelete: RawPreflightKey[]
-  productsToDelete: RawPreflightProduct[]
-  unknownChannels: RawPreflightChannel[]
-  unknownLocations: RawPreflightLocation[]
-  unknownKeys: RawPreflightKey[]
-  unknownProducts: RawPreflightProduct[]
-  sanitizationPlan: SanitizationItem[]
-}
-
-/**
- * Función pura de pre-flight audit y clasificación fail-closed
- */
-export function classifyAndValidatePreflight(input: PreflightInput): PreflightClassificationResult {
-  const allowedHandles = input.mercadalHandles ?? MERCADAL_PRODUCT_HANDLES_DEFAULT
-
-  const channelsToDelete = input.channels.filter((c) => c.name && KNOWN_STARTER_CHANNELS.has(c.name))
-  const unknownChannels = input.channels.filter((c) => {
-    if (!c.name || typeof c.name !== 'string' || c.name.trim() === '') return true
-    return !MERCADAL_CHANNELS.has(c.name) && !KNOWN_STARTER_CHANNELS.has(c.name)
-  })
-
-  const locationsToDelete = input.locations.filter((l) => l.name && KNOWN_STARTER_LOCATIONS.has(l.name))
-  const unknownLocations = input.locations.filter((l) => {
-    if (!l.name || typeof l.name !== 'string' || l.name.trim() === '') return true
-    return !MERCADAL_LOCATIONS.has(l.name) && !KNOWN_STARTER_LOCATIONS.has(l.name)
-  })
-
-  const keysToDelete = input.keys.filter((k) => k.title && KNOWN_STARTER_KEYS.has(k.title))
-  const unknownKeys = input.keys.filter((k) => {
-    if (!k.title || typeof k.title !== 'string' || k.title.trim() === '') return true
-    return !MERCADAL_KEYS.has(k.title) && !KNOWN_STARTER_KEYS.has(k.title)
-  })
-
-  const productsToDelete = input.products.filter(
-    (p) => p.handle && KNOWN_STARTER_PRODUCTS.has(p.handle)
-  )
-  const unknownProducts = input.products.filter((p) => {
-    if (!p.handle || typeof p.handle !== 'string' || p.handle.trim() === '') {
-      return true
-    }
-    return !allowedHandles.has(p.handle) && !KNOWN_STARTER_PRODUCTS.has(p.handle)
-  })
-
-  if (
-    unknownChannels.length > 0 ||
-    unknownLocations.length > 0 ||
-    unknownKeys.length > 0 ||
-    unknownProducts.length > 0
-  ) {
-    const errorMsg =
-      `[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas fuera de whitelist. Abortado sin mutaciones:\n` +
-      `  - Canales desconocidos (${unknownChannels.length}): ${
-        unknownChannels.map((c) => c.name || `[ID:${c.id} (nombre nulo/invalido)]`).join(', ') || 'ninguno'
-      }\n` +
-      `  - Ubicaciones desconocidas (${unknownLocations.length}): ${
-        unknownLocations.map((l) => l.name || `[ID:${l.id} (nombre nulo/invalido)]`).join(', ') || 'ninguno'
-      }\n` +
-      `  - API keys desconocidas (${unknownKeys.length}): ${
-        unknownKeys.map((k) => k.title || `[ID:${k.id} (title nulo/invalido)]`).join(', ') || 'ninguno'
-      }\n` +
-      `  - Productos desconocidos (${unknownProducts.length}): ${
-        unknownProducts
-          .map((p) =>
-            p.handle && p.handle.trim().length > 0
-              ? p.handle
-              : `[ID:${p.id} | Titulo:${p.title || 'N/A'} (handle nulo/invalido)]`
-          )
-          .join(', ') || 'ninguno'
-      }`
-    throw new Error(errorMsg)
-  }
-
-  if (
-    channelsToDelete.length > MAX_STARTER_CHANNELS_TO_DELETE ||
-    locationsToDelete.length > MAX_STARTER_LOCATIONS_TO_DELETE ||
-    keysToDelete.length > MAX_STARTER_KEYS_TO_DELETE ||
-    productsToDelete.length > MAX_STARTER_PRODUCTS_TO_DELETE
-  ) {
-    const thresholdMsg =
-      `[FAIL-CLOSED THRESHOLD] Cantidad de eliminaciones excede los umbrales autorizados:\n` +
-      `  - Canales a eliminar: ${channelsToDelete.length} (Max: ${MAX_STARTER_CHANNELS_TO_DELETE})\n` +
-      `  - Ubicaciones a eliminar: ${locationsToDelete.length} (Max: ${MAX_STARTER_LOCATIONS_TO_DELETE})\n` +
-      `  - Claves a eliminar: ${keysToDelete.length} (Max: ${MAX_STARTER_KEYS_TO_DELETE})\n` +
-      `  - Productos a eliminar: ${productsToDelete.length} (Max: ${MAX_STARTER_PRODUCTS_TO_DELETE})`
-    throw new Error(thresholdMsg)
-  }
-
-  const sanitizationPlan: SanitizationItem[] = [
-    ...channelsToDelete.map((c) => ({ id: c.id, identifier: c.name!, type: 'channel' as const })),
-    ...locationsToDelete.map((l) => ({ id: l.id, identifier: l.name!, type: 'location' as const })),
-    ...keysToDelete.map((k) => ({ id: k.id, identifier: k.title!, type: 'key' as const })),
-    ...productsToDelete.map((p) => ({
-      id: p.id,
-      identifier: `${p.handle} (${p.title || 'N/A'})`,
-      type: 'product' as const,
-    })),
-  ]
-
-  return {
-    channelsToDelete,
-    locationsToDelete,
-    keysToDelete,
-    productsToDelete,
-    unknownChannels,
-    unknownLocations,
-    unknownKeys,
-    unknownProducts,
-    sanitizationPlan,
-  }
-}
-
-const MERCADAL_PRODUCT_HANDLES_DEFAULT = new Set([
-  'montura-criolla-de-trabajo',
-  'bozal-cuero-crudo-trenzado',
-  'cinturon-carpincho-alpaca',
-  'rollo-lonja-vacuna-pack-x10',
-  'estribos-chaquenos-acero-inoxidable',
-  'cinchon-lona-reforzado-cuero-suela',
-  'freno-criollo-cabeza-de-moro',
-  'manta-sudadero-lana-pura',
-  'cuchillo-criollo-vaina-repujada',
-  'grasa-de-potro-cuero-500g',
-])
 
 interface SeedProductSpec {
   sku: string
