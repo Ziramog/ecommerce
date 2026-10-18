@@ -87,12 +87,27 @@ docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.sta
 ```
 *(Nota: Pasar la contraseña por variable de entorno temporal del comando para evitar que quede registrada en el historial o en texto plano).*
 
-### 3.7. Carga de Semillas / Seed (Cuando Exista)
-Para sembrar datos de prueba (10 productos de prueba de la PoC):
+### 3.7. Carga de Semillas / Seed de Staging (10 SKU de PoC)
+
+> [!WARNING]
+> **PROHIBIDO ejecutar el seed de demo del starter (`seed-demo-products.ts`) en Staging.**
+> Los 50 productos sintéticos contaminan los conteos de inventario y falsean las pruebas de concurrencia e inconsistencias de precio. Dicho script ha sido neutralizado y archivado en `docs/historical/`.
+
+Para sembrar la configuración comercial (2 sales channels, 1 ubicación de stock, 2 publishable keys) y los **10 SKU reproducibles con inventario controlado**:
 
 ```bash
 cd ~/mercadal-staging
+# Opción 1 (Recomendada CLI directa):
+docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec medusa-api npx medusa exec ./src/scripts/seed-staging.ts
+
+# Opción 2 (Script de package.json):
 docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec medusa-api npm run seed
+```
+
+Para auditar y verificar el estado comercial mediante Admin API autenticada:
+```bash
+cd ~/mercadal-staging
+bash ~/mercadal-staging/verify-seed.sh
 ```
 
 ### 3.8. Detención del Servicio (`stop` vs `down` — ¡SIN `-v`!)
