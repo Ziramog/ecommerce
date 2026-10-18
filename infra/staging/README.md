@@ -31,6 +31,7 @@ La imagen se construye en el VPS bajo límites estrictos de CPU y memoria para p
 docker build \
   --memory=2g \
   --cpu-quota=150000 \
+  --build-arg GIT_SHA=<full_sha> \
   -f apps/backend/Dockerfile \
   -t mercadal-staging-medusa:2.21.2-<shortsha> .
 ```
@@ -100,11 +101,11 @@ Para sembrar la configuración comercial (2 sales channels, 1 ubicación de stoc
 
 ```bash
 cd ~/mercadal-staging
-# Opción 1 (Recomendada CLI directa con banderas de confirmación):
-docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npx medusa exec ./src/scripts/seed-staging.ts
+# Opción 1 (Recomendada CLI directa en runtime con JS compilado e horneado):
+docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npx medusa exec ./src/scripts/seed-staging.js
 
-# Opción 2 (Script de package.json):
-docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npm run seed
+# Opción 2 (Script de package.json para runtime compilado):
+docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npm run seed:runtime
 ```
 
 Para auditar y verificar el estado comercial mediante Admin API autenticada:

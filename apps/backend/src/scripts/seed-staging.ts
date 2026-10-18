@@ -16,8 +16,11 @@
  * - Si se detecta cualquier entidad ajena/desconocida, aborta inmediatamente sin mutaciones.
  * - Umbrales máximos de saneamiento para evitar borrados masivos imprevistos.
  *
- * Ejecución dentro del contenedor:
+ * Ejecución:
+ * - Desarrollo local (source TS):
  *   MERCADAL_SEED_ENV=staging ALLOW_DESTRUCTIVE_SEED=true npx medusa exec ./src/scripts/seed-staging.ts
+ * - Contenedor staging / runtime (JS compilado):
+ *   MERCADAL_SEED_ENV=staging ALLOW_DESTRUCTIVE_SEED=true npx medusa exec ./src/scripts/seed-staging.js
  */
 import {
   createSalesChannelsWorkflow,
