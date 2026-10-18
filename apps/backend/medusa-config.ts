@@ -5,7 +5,14 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    databaseDriverOptions: process.env.DATABASE_DRIVER_OPTIONS
+      ? JSON.parse(process.env.DATABASE_DRIVER_OPTIONS)
+      : undefined,
     redisUrl: process.env.REDIS_URL,
+    workerMode: (process.env.MEDUSA_WORKER_MODE as "shared" | "worker" | "server") || "shared",
+    ...(process.env.MEDUSA_STAGING_RELAX_COOKIES === "true"
+      ? { cookieOptions: { sameSite: "lax", secure: false } }
+      : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -13,5 +20,9 @@ module.exports = defineConfig({
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
     }
+  },
+  admin: {
+    disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
   }
 })
+
