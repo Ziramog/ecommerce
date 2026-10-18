@@ -52,8 +52,20 @@ Dado que el entorno de staging de Medusa corre con `NODE_ENV=production` para em
   - Ubicaciones: `European Warehouse`
   - Claves: `Default Publishable API Key`
   - Productos: `t-shirt`, `sweatshirt`, `sweatpants`, `shorts`
-- **Fallo Seguro ante Entidades Desconocidas**:
+- **Fallo Seguro ante Entidades Desconocidas y Handles Nulos/Vacíos**:
   Si la base contiene entidades que no pertenecen ni a la whitelist del starter ni al catálogo/configuración oficial de Mercadal, el script aborta inmediatamente en la fase pre-flight sin ejecutar mutaciones de ningún tipo.
+  Asimismo, cualquier producto con `handle` nulo, indefinido o vacío es clasificado explícitamente como desconocido (`unknown`), reportando de forma segura su identificador (`ID: <id> | Titulo: <titulo>`) sin exponer datos sensibles, impidiendo que quede invisible ante filtros condicionales.
+- **Gate de Idempotencia y Conteos Absolutos**:
+  Al finalizar la ejecución, el script mide el conteo absoluto de productos en base de datos (`productTotal`) sin filtros de ningún tipo, contrastándolo con el conteo de productos del catálogo Mercadal (`seedProductCount`). Si `productTotal !== 10` o `seedProductCount !== 10`, el script aborta con error fail-closed (`[IDEMPOTENCY GATE FAILURE]`), garantizando que no existan productos residuales o duplicados.
+- **Desacoplamiento en Función Pura Testeable (`classifyAndValidatePreflight`)**:
+  Para permitir la verificación rigurosa de las ramas de bootstrap y saneamiento sin requerir mutaciones sintéticas en la base viva de staging, la lógica de pre-flight audit se desacopló en una función pura testeable con fixtures sintéticos que cubren exhaustivamente:
+  - (a) Starter exacto permitido -> plan de 1/1/1/4.
+  - (b) Entidad desconocida fuera de whitelist -> throw antes de mutación.
+  - (c) Producto con handle nulo o vacío -> throw seguro por ID/título.
+  - (d) Exceso de umbrales máximos autorizados -> throw.
+  - (e) Estado limpio idempotente de Mercadal -> 0 eliminaciones.
+- **Trazabilidad de Saneamiento sin Secretos**:
+  Tanto el plan previo como el resumen final enumeran de forma determinística cada artefacto a purgar mediante su ID y nombre/título/handle seguro (`[ID: ... | Nombre: ...]`), garantizando que los valores de publishable keys o datos sensibles nunca sean registrados en logs ni consola.
 - **Umbrales Máximos de Seguridad**:
   Se definen topes máximos por entidad (`MAX_STARTER_*_TO_DELETE`) para impedir borrados masivos imprevistos ante eventuales inconsistencias de catálogo.
 
@@ -62,7 +74,7 @@ Dado que el entorno de staging de Medusa corre con `NODE_ENV=production` para em
 ## Consecuencias
 - **Consistencia de Inventario**: Ambas marcas consultan y reservan sobre un stock común verificable en tiempo real.
 - **Aislamiento Comercial**: Los storefronts B2C y B2B consultan sus respectivos catálogos de forma aislada a través de su Publishable Key, manteniendo la partición visual y de precios.
-- **Idempotencia Garantizada**: El seed puede ejecutarse reiteradas veces en staging sin duplicar productos, canales, ubicaciones ni claves.
-- **Protección Fail-Closed**: Imposibilidad de ejecutar el seed accidentalmente o borrar entidades ajenas a la whitelist del starter.
+- **Idempotencia y Pureza Garantizada**: El seed puede ejecutarse reiteradas veces en staging sin duplicar productos, canales, ubicaciones ni claves; el gate absoluto de catálogo aborta ante cualquier desvío de `productTotal !== 10`.
+- **Protección Fail-Closed y Verificabilidad Offline**: Imposibilidad de ejecutar el seed accidentalmente o borrar entidades ajenas a la whitelist del starter, con cobertura de pruebas unitarias 100% aisladas para bootstrap y saneamiento.
 - **Preparación para Pruebas**: Queda disponible el SKU `SKU-CRI-001` con existencia exacta = 1 para la ejecución de pruebas de concurrencia y sobreventa (INV-01).
 

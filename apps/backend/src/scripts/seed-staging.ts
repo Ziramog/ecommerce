@@ -53,16 +53,183 @@ const KEY_TITLE_B2B = 'pk_talabarteria_b2b'
 const B2B_PRICE_LIST_TITLE = 'Lista Mayorista Talabarteria B2B'
 
 // Whitelist Estricta de Artefactos Conocidos del Starter de Medusa
-const KNOWN_STARTER_CHANNELS = new Set(['Default Sales Channel'])
-const KNOWN_STARTER_LOCATIONS = new Set(['European Warehouse'])
-const KNOWN_STARTER_KEYS = new Set(['Default Publishable API Key'])
-const KNOWN_STARTER_PRODUCTS = new Set(['t-shirt', 'sweatshirt', 'sweatpants', 'shorts'])
+export const KNOWN_STARTER_CHANNELS = new Set(['Default Sales Channel'])
+export const KNOWN_STARTER_LOCATIONS = new Set(['European Warehouse'])
+export const KNOWN_STARTER_KEYS = new Set(['Default Publishable API Key'])
+export const KNOWN_STARTER_PRODUCTS = new Set(['t-shirt', 'sweatshirt', 'sweatpants', 'shorts'])
 
 // Umbrales Fail-Closed de Seguridad para Saneamiento
-const MAX_STARTER_CHANNELS_TO_DELETE = 1
-const MAX_STARTER_LOCATIONS_TO_DELETE = 1
-const MAX_STARTER_KEYS_TO_DELETE = 1
-const MAX_STARTER_PRODUCTS_TO_DELETE = 4
+export const MAX_STARTER_CHANNELS_TO_DELETE = 1
+export const MAX_STARTER_LOCATIONS_TO_DELETE = 1
+export const MAX_STARTER_KEYS_TO_DELETE = 1
+export const MAX_STARTER_PRODUCTS_TO_DELETE = 4
+
+// Entidades de Dominio Autorizadas de Mercadal Digital 360
+export const MERCADAL_CHANNELS = new Set([CHANNEL_B2C, CHANNEL_B2B])
+export const MERCADAL_LOCATIONS = new Set([STOCK_LOCATION_NAME])
+export const MERCADAL_KEYS = new Set([KEY_TITLE_B2C, KEY_TITLE_B2B])
+
+export interface RawPreflightChannel {
+  id: string
+  name?: string | null
+}
+
+export interface RawPreflightLocation {
+  id: string
+  name?: string | null
+}
+
+export interface RawPreflightKey {
+  id: string
+  title?: string | null
+}
+
+export interface RawPreflightProduct {
+  id: string
+  title?: string | null
+  handle?: string | null
+}
+
+export interface PreflightInput {
+  channels: RawPreflightChannel[]
+  locations: RawPreflightLocation[]
+  keys: RawPreflightKey[]
+  products: RawPreflightProduct[]
+  mercadalHandles?: Set<string>
+}
+
+export interface SanitizationItem {
+  id: string
+  identifier: string
+  type: 'channel' | 'location' | 'key' | 'product'
+}
+
+export interface PreflightClassificationResult {
+  channelsToDelete: RawPreflightChannel[]
+  locationsToDelete: RawPreflightLocation[]
+  keysToDelete: RawPreflightKey[]
+  productsToDelete: RawPreflightProduct[]
+  unknownChannels: RawPreflightChannel[]
+  unknownLocations: RawPreflightLocation[]
+  unknownKeys: RawPreflightKey[]
+  unknownProducts: RawPreflightProduct[]
+  sanitizationPlan: SanitizationItem[]
+}
+
+/**
+ * Función pura de pre-flight audit y clasificación fail-closed
+ */
+export function classifyAndValidatePreflight(input: PreflightInput): PreflightClassificationResult {
+  const allowedHandles = input.mercadalHandles ?? MERCADAL_PRODUCT_HANDLES_DEFAULT
+
+  const channelsToDelete = input.channels.filter((c) => c.name && KNOWN_STARTER_CHANNELS.has(c.name))
+  const unknownChannels = input.channels.filter((c) => {
+    if (!c.name || typeof c.name !== 'string' || c.name.trim() === '') return true
+    return !MERCADAL_CHANNELS.has(c.name) && !KNOWN_STARTER_CHANNELS.has(c.name)
+  })
+
+  const locationsToDelete = input.locations.filter((l) => l.name && KNOWN_STARTER_LOCATIONS.has(l.name))
+  const unknownLocations = input.locations.filter((l) => {
+    if (!l.name || typeof l.name !== 'string' || l.name.trim() === '') return true
+    return !MERCADAL_LOCATIONS.has(l.name) && !KNOWN_STARTER_LOCATIONS.has(l.name)
+  })
+
+  const keysToDelete = input.keys.filter((k) => k.title && KNOWN_STARTER_KEYS.has(k.title))
+  const unknownKeys = input.keys.filter((k) => {
+    if (!k.title || typeof k.title !== 'string' || k.title.trim() === '') return true
+    return !MERCADAL_KEYS.has(k.title) && !KNOWN_STARTER_KEYS.has(k.title)
+  })
+
+  const productsToDelete = input.products.filter(
+    (p) => p.handle && KNOWN_STARTER_PRODUCTS.has(p.handle)
+  )
+  const unknownProducts = input.products.filter((p) => {
+    if (!p.handle || typeof p.handle !== 'string' || p.handle.trim() === '') {
+      return true
+    }
+    return !allowedHandles.has(p.handle) && !KNOWN_STARTER_PRODUCTS.has(p.handle)
+  })
+
+  if (
+    unknownChannels.length > 0 ||
+    unknownLocations.length > 0 ||
+    unknownKeys.length > 0 ||
+    unknownProducts.length > 0
+  ) {
+    const errorMsg =
+      `[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas fuera de whitelist. Abortado sin mutaciones:\n` +
+      `  - Canales desconocidos (${unknownChannels.length}): ${
+        unknownChannels.map((c) => c.name || `[ID:${c.id} (nombre nulo/invalido)]`).join(', ') || 'ninguno'
+      }\n` +
+      `  - Ubicaciones desconocidas (${unknownLocations.length}): ${
+        unknownLocations.map((l) => l.name || `[ID:${l.id} (nombre nulo/invalido)]`).join(', ') || 'ninguno'
+      }\n` +
+      `  - API keys desconocidas (${unknownKeys.length}): ${
+        unknownKeys.map((k) => k.title || `[ID:${k.id} (title nulo/invalido)]`).join(', ') || 'ninguno'
+      }\n` +
+      `  - Productos desconocidos (${unknownProducts.length}): ${
+        unknownProducts
+          .map((p) =>
+            p.handle && p.handle.trim().length > 0
+              ? p.handle
+              : `[ID:${p.id} | Titulo:${p.title || 'N/A'} (handle nulo/invalido)]`
+          )
+          .join(', ') || 'ninguno'
+      }`
+    throw new Error(errorMsg)
+  }
+
+  if (
+    channelsToDelete.length > MAX_STARTER_CHANNELS_TO_DELETE ||
+    locationsToDelete.length > MAX_STARTER_LOCATIONS_TO_DELETE ||
+    keysToDelete.length > MAX_STARTER_KEYS_TO_DELETE ||
+    productsToDelete.length > MAX_STARTER_PRODUCTS_TO_DELETE
+  ) {
+    const thresholdMsg =
+      `[FAIL-CLOSED THRESHOLD] Cantidad de eliminaciones excede los umbrales autorizados:\n` +
+      `  - Canales a eliminar: ${channelsToDelete.length} (Max: ${MAX_STARTER_CHANNELS_TO_DELETE})\n` +
+      `  - Ubicaciones a eliminar: ${locationsToDelete.length} (Max: ${MAX_STARTER_LOCATIONS_TO_DELETE})\n` +
+      `  - Claves a eliminar: ${keysToDelete.length} (Max: ${MAX_STARTER_KEYS_TO_DELETE})\n` +
+      `  - Productos a eliminar: ${productsToDelete.length} (Max: ${MAX_STARTER_PRODUCTS_TO_DELETE})`
+    throw new Error(thresholdMsg)
+  }
+
+  const sanitizationPlan: SanitizationItem[] = [
+    ...channelsToDelete.map((c) => ({ id: c.id, identifier: c.name!, type: 'channel' as const })),
+    ...locationsToDelete.map((l) => ({ id: l.id, identifier: l.name!, type: 'location' as const })),
+    ...keysToDelete.map((k) => ({ id: k.id, identifier: k.title!, type: 'key' as const })),
+    ...productsToDelete.map((p) => ({
+      id: p.id,
+      identifier: `${p.handle} (${p.title || 'N/A'})`,
+      type: 'product' as const,
+    })),
+  ]
+
+  return {
+    channelsToDelete,
+    locationsToDelete,
+    keysToDelete,
+    productsToDelete,
+    unknownChannels,
+    unknownLocations,
+    unknownKeys,
+    unknownProducts,
+    sanitizationPlan,
+  }
+}
+
+const MERCADAL_PRODUCT_HANDLES_DEFAULT = new Set([
+  'montura-criolla-de-trabajo',
+  'bozal-cuero-crudo-trenzado',
+  'cinturon-carpincho-alpaca',
+  'rollo-lonja-vacuna-pack-x10',
+  'estribos-chaquenos-acero-inoxidable',
+  'cinchon-lona-reforzado-cuero-suela',
+  'freno-criollo-cabeza-de-moro',
+  'manta-sudadero-lana-pura',
+  'cuchillo-criollo-vaina-repujada',
+  'grasa-de-potro-cuero-500g',
+])
 
 interface SeedProductSpec {
   sku: string
@@ -234,14 +401,8 @@ export default async function seedStaging({ container }: ExecArgs) {
   })
   const adminUserId = users[0]?.id ?? 'admin'
 
-  // Conjuntos de validación de Mercadal
-  const mercadalProductHandles = new Set(SEED_PRODUCTS.map((p) => p.handle))
-  const mercadalChannels = new Set([CHANNEL_B2C, CHANNEL_B2B])
-  const mercadalLocations = new Set([STOCK_LOCATION_NAME])
-  const mercadalKeys = new Set([KEY_TITLE_B2C, KEY_TITLE_B2B])
-
   // =========================================================================
-  // GUARDA 2: PRE-FLIGHT AUDIT — DETECCIÓN DE ENTIDADES DESCONOCIDAS
+  // GUARDA 2 & 3: PRE-FLIGHT AUDIT & UMBRALES — INVOCACIÓN DE FUNCIÓN PURA
   // =========================================================================
   const { data: preflightChannels } = await query.graph({
     entity: 'sales_channel',
@@ -261,75 +422,36 @@ export default async function seedStaging({ container }: ExecArgs) {
     fields: ['id', 'handle', 'title'],
   })
 
-  // Clasificación de Sales Channels
-  const channelsToDelete = preflightChannels.filter((c) => KNOWN_STARTER_CHANNELS.has(c.name))
-  const unknownChannels = preflightChannels.filter(
-    (c) => !mercadalChannels.has(c.name) && !KNOWN_STARTER_CHANNELS.has(c.name)
-  )
-
-  // Clasificación de Stock Locations
-  const locationsToDelete = preflightLocations.filter((l) => KNOWN_STARTER_LOCATIONS.has(l.name))
-  const unknownLocations = preflightLocations.filter(
-    (l) => !mercadalLocations.has(l.name) && !KNOWN_STARTER_LOCATIONS.has(l.name)
-  )
-
-  // Clasificación de Publishable API Keys
-  const keysToDelete = preflightKeys.filter((k) => KNOWN_STARTER_KEYS.has(k.title))
-  const unknownKeys = preflightKeys.filter(
-    (k) => !mercadalKeys.has(k.title) && !KNOWN_STARTER_KEYS.has(k.title)
-  )
-
-  // Clasificación de Productos
-  const productsToDelete = preflightProducts.filter(
-    (p) => p.handle && KNOWN_STARTER_PRODUCTS.has(p.handle)
-  )
-  const unknownProducts = preflightProducts.filter(
-    (p) => p.handle && !mercadalProductHandles.has(p.handle) && !KNOWN_STARTER_PRODUCTS.has(p.handle)
-  )
-
-  // Si existen entidades desconocidas no autorizadas, abortar de inmediato (cero mutaciones)
-  if (
-    unknownChannels.length > 0 ||
-    unknownLocations.length > 0 ||
-    unknownKeys.length > 0 ||
-    unknownProducts.length > 0
-  ) {
-    logger.error(
-      `[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas en base de datos. Abortando sin mutaciones:\n` +
-      `  - Canales desconocidos (${unknownChannels.length}): ${unknownChannels.map((c) => c.name).join(', ') || 'ninguno'}\n` +
-      `  - Ubicaciones desconocidas (${unknownLocations.length}): ${unknownLocations.map((l) => l.name).join(', ') || 'ninguno'}\n` +
-      `  - API keys desconocidas (${unknownKeys.length}): ${unknownKeys.map((k) => k.title).join(', ') || 'ninguno'}\n` +
-      `  - Productos desconocidos (${unknownProducts.length}): ${unknownProducts.map((p) => p.handle).join(', ') || 'ninguno'}`
-    )
-    throw new Error('[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas fuera de whitelist. Abortado.')
-  }
-
-  // =========================================================================
-  // GUARDA 3: CONTROL DE UMBRALES DE SANEAMIENTO FAIL-CLOSED
-  // =========================================================================
-  if (
-    channelsToDelete.length > MAX_STARTER_CHANNELS_TO_DELETE ||
-    locationsToDelete.length > MAX_STARTER_LOCATIONS_TO_DELETE ||
-    keysToDelete.length > MAX_STARTER_KEYS_TO_DELETE ||
-    productsToDelete.length > MAX_STARTER_PRODUCTS_TO_DELETE
-  ) {
-    logger.error(
-      `[FAIL-CLOSED THRESHOLD] Cantidad de eliminaciones excede los umbrales de seguridad autorizados:\n` +
-      `  - Canales a eliminar: ${channelsToDelete.length} (Max: ${MAX_STARTER_CHANNELS_TO_DELETE})\n` +
-      `  - Ubicaciones a eliminar: ${locationsToDelete.length} (Max: ${MAX_STARTER_LOCATIONS_TO_DELETE})\n` +
-      `  - Claves a eliminar: ${keysToDelete.length} (Max: ${MAX_STARTER_KEYS_TO_DELETE})\n` +
-      `  - Productos a eliminar: ${productsToDelete.length} (Max: ${MAX_STARTER_PRODUCTS_TO_DELETE})`
-    )
-    throw new Error('[FAIL-CLOSED THRESHOLD] Umbrales de eliminacion excedidos. Abortado sin mutaciones.')
-  }
+  // Ejecuta clasificación contra whitelist, detección de desconocidos/nulos y umbrales
+  const {
+    channelsToDelete,
+    locationsToDelete,
+    keysToDelete,
+    productsToDelete,
+  } = classifyAndValidatePreflight({
+    channels: preflightChannels,
+    locations: preflightLocations,
+    keys: preflightKeys,
+    products: preflightProducts,
+  })
 
   logger.info(
     `[PLAN DE SANEAMIENTO STARTER AUTORIZADO]\n` +
-    `  - Canales de starter a purgar (${channelsToDelete.length}): ${channelsToDelete.map((c) => c.name).join(', ') || 'ninguno'}\n` +
-    `  - Ubicaciones de starter a purgar (${locationsToDelete.length}): ${locationsToDelete.map((l) => l.name).join(', ') || 'ninguno'}\n` +
-    `  - Claves de starter a purgar (${keysToDelete.length}): ${keysToDelete.map((k) => k.title).join(', ') || 'ninguno'}\n` +
-    `  - Productos de starter a purgar (${productsToDelete.length}): ${productsToDelete.map((p) => p.handle).join(', ') || 'ninguno'}`
+    `  - Canales de starter a purgar (${channelsToDelete.length}): ${
+      channelsToDelete.map((c) => `[ID:${c.id} | Nombre:${c.name}]`).join(', ') || 'ninguno'
+    }\n` +
+    `  - Ubicaciones de starter a purgar (${locationsToDelete.length}): ${
+      locationsToDelete.map((l) => `[ID:${l.id} | Nombre:${l.name}]`).join(', ') || 'ninguno'
+    }\n` +
+    `  - Claves de starter a purgar (${keysToDelete.length}): ${
+      keysToDelete.map((k) => `[ID:${k.id} | Titulo:${k.title}]`).join(', ') || 'ninguno'
+    }\n` +
+    `  - Productos de starter a purgar (${productsToDelete.length}): ${
+      productsToDelete.map((p) => `[ID:${p.id} | Handle:${p.handle} | Titulo:${p.title || 'N/A'}]`).join(', ') || 'ninguno'
+    }`
   )
+
+  const mercadalProductHandles = new Set(SEED_PRODUCTS.map((p) => p.handle))
 
   // =========================================================================
   // 1. SALES CHANNELS (sc_pampa_novus_b2c y sc_talabarteria_b2b)
@@ -858,6 +980,37 @@ export default async function seedStaging({ container }: ExecArgs) {
     fields: ['id', 'sku'],
   })
 
+  // =========================================================================
+  // GATE DE IDEMPOTENCIA Y VERIFICACIÓN ABSOLUTA DE CONTEOS
+  // =========================================================================
+  const productTotal = finalProducts.length
+  const seedProductCount = finalProducts.filter(
+    (p) => p.handle && mercadalProductHandles.has(p.handle)
+  ).length
+
+  if (productTotal !== 10 || seedProductCount !== 10) {
+    logger.error(
+      `[IDEMPOTENCY GATE FAILURE] Discrepancia en conteos absolutos de catalogo:\n` +
+      `  - Total absoluto de productos en BD (productTotal): ${productTotal} (Esperado: 10)\n` +
+      `  - Productos correspondientes al Seed Mercadal (seedProductCount): ${seedProductCount} (Esperado: 10)`
+    )
+    throw new Error(
+      `[IDEMPOTENCY GATE FAILURE] Abortando por violacion de conteo: productTotal=${productTotal}, seedProductCount=${seedProductCount}. Ambos deben ser exactamente 10.`
+    )
+  }
+
+  if (finalChannels.length !== 2 || finalLocations.length !== 1 || finalKeys.length !== 2) {
+    logger.error(
+      `[INTEGRITY GATE FAILURE] Discrepancia en configuracion comercial:\n` +
+      `  - Canales: ${finalChannels.length} (Esperado: 2)\n` +
+      `  - Ubicaciones: ${finalLocations.length} (Esperado: 1)\n` +
+      `  - Publishable Keys: ${finalKeys.length} (Esperado: 2)`
+    )
+    throw new Error(
+      `[INTEGRITY GATE FAILURE] Abortando por violacion de entidades base: canales=${finalChannels.length}, ubicaciones=${finalLocations.length}, keys=${finalKeys.length}`
+    )
+  }
+
   const itemToSku = new Map(finalItems.map((i) => [i.id, i.sku]))
   const skuStock = new Map<string, number>()
   for (const lvl of finalLevels) {
@@ -872,12 +1025,12 @@ export default async function seedStaging({ container }: ExecArgs) {
   console.log('\n============================================================')
   console.log('       MERCADAL DIGITAL 360 — RESUMEN DE SEED STAGING       ')
   console.log('============================================================')
-  console.log(`Sales Channels (${finalChannels.length}):`)
+  console.log(`Sales Channels (${finalChannels.length} / 2 requeridos):`)
   for (const sc of finalChannels) {
     console.log(`  - [${sc.name}] (ID: ${sc.id})`)
   }
 
-  console.log(`\nStock Locations (${finalLocations.length}):`)
+  console.log(`\nStock Locations (${finalLocations.length} / 1 requerida):`)
   for (const sl of finalLocations) {
     const linked = (sl.sales_channels ?? [])
       .map((c: any) => c?.name as string)
@@ -886,7 +1039,7 @@ export default async function seedStaging({ container }: ExecArgs) {
     console.log(`  - [${sl.name}] (ID: ${sl.id}) -> Canales vinculados (${(sl.sales_channels ?? []).length}): ${linked}`)
   }
 
-  console.log(`\nPublishable Keys (${finalKeys.length}):`)
+  console.log(`\nPublishable Keys (${finalKeys.length} / 2 requeridas):`)
   for (const k of finalKeys) {
     const linked = (k.sales_channels ?? [])
       .map((c: any) => c?.name as string)
@@ -895,12 +1048,36 @@ export default async function seedStaging({ container }: ExecArgs) {
     console.log(`  - Key: ${k.title} (ID: ${k.id}) -> Canal: ${linked || 'NINGUNO'}`)
   }
 
-  console.log(`\nCatalogo Maestro e Inventario Digital (${finalProducts.length} productos / 10 requeridos):`)
+  console.log(
+    `\nCatalogo Maestro e Inventario Digital (productTotal: ${productTotal} | seedProductCount: ${seedProductCount} / 10 requeridos):`
+  )
   for (const spec of SEED_PRODUCTS) {
     const measuredStock = skuStock.get(spec.sku) ?? 'SIN_NIVEL'
     console.log(
       `  - SKU: ${spec.sku.padEnd(14)} | Stock: ${String(measuredStock).padStart(3)} | Canales: [${spec.channels.join(', ')}] | Caso: ${spec.testCase}`
     )
   }
+
+  console.log(`\nArtefactos Starter Saneados / Eliminados en esta corrida:`)
+  console.log(
+    `  - Canales (${channelsToDelete.length}): ${
+      channelsToDelete.map((c) => `[ID:${c.id} | Nombre:${c.name}]`).join(', ') || 'ninguno'
+    }`
+  )
+  console.log(
+    `  - Ubicaciones (${locationsToDelete.length}): ${
+      locationsToDelete.map((l) => `[ID:${l.id} | Nombre:${l.name}]`).join(', ') || 'ninguno'
+    }`
+  )
+  console.log(
+    `  - Claves (${keysToDelete.length}): ${
+      keysToDelete.map((k) => `[ID:${k.id} | Titulo:${k.title}]`).join(', ') || 'ninguno'
+    }`
+  )
+  console.log(
+    `  - Productos (${productsToDelete.length}): ${
+      productsToDelete.map((p) => `[ID:${p.id} | Handle:${p.handle} | Titulo:${p.title || 'N/A'}]`).join(', ') || 'ninguno'
+    }`
+  )
   console.log('============================================================\n')
 }
