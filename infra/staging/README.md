@@ -95,13 +95,16 @@ docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.sta
 
 Para sembrar la configuración comercial (2 sales channels, 1 ubicación de stock, 2 publishable keys) y los **10 SKU reproducibles con inventario controlado**:
 
+> [!IMPORTANT]
+> **Guardas de Seguridad Fail-Closed**: Dado que el contenedor corre en `NODE_ENV=production`, el script aborta inmediatamente sin mutaciones si no se pasan explícitamente ambas variables: `MERCADAL_SEED_ENV=staging` y `ALLOW_DESTRUCTIVE_SEED=true`. Además, el script cuenta con un pre-flight audit estricto que sólo admite sanear artefactos conocidos del starter dentro de umbrales máximos autorizados.
+
 ```bash
 cd ~/mercadal-staging
-# Opción 1 (Recomendada CLI directa):
-docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec medusa-api npx medusa exec ./src/scripts/seed-staging.ts
+# Opción 1 (Recomendada CLI directa con banderas de confirmación):
+docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npx medusa exec ./src/scripts/seed-staging.ts
 
 # Opción 2 (Script de package.json):
-docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec medusa-api npm run seed
+docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml exec -e MERCADAL_SEED_ENV=staging -e ALLOW_DESTRUCTIVE_SEED=true medusa-api npm run seed
 ```
 
 Para auditar y verificar el estado comercial mediante Admin API autenticada:

@@ -40,10 +40,29 @@ El script provisto por el starter oficial (`apps/backend/src/scripts/seed-demo-p
 - **Justificación**: Cincuenta productos de demo contaminan las métricas de inventario, falsean las pruebas de concurrencia y contradicen la especificación de la PoC (10 SKU de dominio real con inventario digital conocido y trazable).
 - En su lugar, se implementa un script único, reproducible e idempotente (`apps/backend/src/scripts/seed-staging.ts`).
 
+### 4. Guardas de Seguridad Fail-Closed y Saneamiento Restringido a Whitelist
+Dado que el entorno de staging de Medusa corre con `NODE_ENV=production` para emular fidelidad operativa, cualquier script de seed con capacidad de mutación o saneamiento destructivo introduce riesgos de seguridad y estabilidad si se invoca erróneamente en contextos inadecuados o con datos no previstos.
+
+- **Doble Bandera de Confirmación Obligatoria**:
+  El script aborta inmediatamente con excepción antes de resolver cualquier workflow o mutar la base si no se proporcionan deliberadamente ambas variables de entorno:
+  `MERCADAL_SEED_ENV=staging` y `ALLOW_DESTRUCTIVE_SEED=true`.
+- **Pre-flight Audit y Whitelist Estricta de Artefactos de Starter**:
+  Queda prohibido el uso de filtros genéricos de exclusión (`name !== ...` o `handle !== ...`). El saneamiento sólo puede operar sobre una whitelist estricta y explícita de artefactos conocidos del starter oficial de Medusa:
+  - Canales: `Default Sales Channel`
+  - Ubicaciones: `European Warehouse`
+  - Claves: `Default Publishable API Key`
+  - Productos: `t-shirt`, `sweatshirt`, `sweatpants`, `shorts`
+- **Fallo Seguro ante Entidades Desconocidas**:
+  Si la base contiene entidades que no pertenecen ni a la whitelist del starter ni al catálogo/configuración oficial de Mercadal, el script aborta inmediatamente en la fase pre-flight sin ejecutar mutaciones de ningún tipo.
+- **Umbrales Máximos de Seguridad**:
+  Se definen topes máximos por entidad (`MAX_STARTER_*_TO_DELETE`) para impedir borrados masivos imprevistos ante eventuales inconsistencias de catálogo.
+
 ---
 
 ## Consecuencias
 - **Consistencia de Inventario**: Ambas marcas consultan y reservan sobre un stock común verificable en tiempo real.
 - **Aislamiento Comercial**: Los storefronts B2C y B2B consultan sus respectivos catálogos de forma aislada a través de su Publishable Key, manteniendo la partición visual y de precios.
 - **Idempotencia Garantizada**: El seed puede ejecutarse reiteradas veces en staging sin duplicar productos, canales, ubicaciones ni claves.
+- **Protección Fail-Closed**: Imposibilidad de ejecutar el seed accidentalmente o borrar entidades ajenas a la whitelist del starter.
 - **Preparación para Pruebas**: Queda disponible el SKU `SKU-CRI-001` con existencia exacta = 1 para la ejecución de pruebas de concurrencia y sobreventa (INV-01).
+

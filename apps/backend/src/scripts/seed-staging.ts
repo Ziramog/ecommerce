@@ -9,8 +9,15 @@
  * - 10 SKU determinísticos con inventario digital conocido (incluyendo SKU con stock = 1 para concurrencia)
  * - Price List para precios mayoristas diferenciados B2B
  *
+ * Guardas de Seguridad Fail-Closed:
+ * - Exige MERCADAL_SEED_ENV=staging y ALLOW_DESTRUCTIVE_SEED=true para ejecutar.
+ * - Clasificación estricta pre-flight: sólo se permite sanear artefactos exactos conocidos del starter
+ *   (handles t-shirt/sweatshirt/sweatpants/shorts, Default Sales Channel, European Warehouse, Default Publishable API Key).
+ * - Si se detecta cualquier entidad ajena/desconocida, aborta inmediatamente sin mutaciones.
+ * - Umbrales máximos de saneamiento para evitar borrados masivos imprevistos.
+ *
  * Ejecución dentro del contenedor:
- *   npx medusa exec ./src/scripts/seed-staging.ts
+ *   MERCADAL_SEED_ENV=staging ALLOW_DESTRUCTIVE_SEED=true npx medusa exec ./src/scripts/seed-staging.ts
  */
 import {
   createSalesChannelsWorkflow,
@@ -37,12 +44,25 @@ import {
 } from '@medusajs/framework/utils'
 import type { ExecArgs } from '@medusajs/framework/types'
 
+// Entidades de Dominio Mercadal Digital 360
 const CHANNEL_B2C = 'sc_pampa_novus_b2c'
 const CHANNEL_B2B = 'sc_talabarteria_b2b'
 const STOCK_LOCATION_NAME = 'loc_digital_warehouse'
 const KEY_TITLE_B2C = 'pk_pampa_novus_b2c'
 const KEY_TITLE_B2B = 'pk_talabarteria_b2b'
 const B2B_PRICE_LIST_TITLE = 'Lista Mayorista Talabarteria B2B'
+
+// Whitelist Estricta de Artefactos Conocidos del Starter de Medusa
+const KNOWN_STARTER_CHANNELS = new Set(['Default Sales Channel'])
+const KNOWN_STARTER_LOCATIONS = new Set(['European Warehouse'])
+const KNOWN_STARTER_KEYS = new Set(['Default Publishable API Key'])
+const KNOWN_STARTER_PRODUCTS = new Set(['t-shirt', 'sweatshirt', 'sweatpants', 'shorts'])
+
+// Umbrales Fail-Closed de Seguridad para Saneamiento
+const MAX_STARTER_CHANNELS_TO_DELETE = 1
+const MAX_STARTER_LOCATIONS_TO_DELETE = 1
+const MAX_STARTER_KEYS_TO_DELETE = 1
+const MAX_STARTER_PRODUCTS_TO_DELETE = 4
 
 interface SeedProductSpec {
   sku: string
@@ -183,7 +203,29 @@ export default async function seedStaging({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
-  logger.info('Iniciando seed de staging para Mercadal Digital 360...')
+  // =========================================================================
+  // GUARDA 1: CONTROL DE ENTORNO FAIL-CLOSED OBLIGATORIO
+  // =========================================================================
+  const isStagingEnv = process.env.MERCADAL_SEED_ENV === 'staging'
+  const allowDestructive = process.env.ALLOW_DESTRUCTIVE_SEED === 'true'
+
+  if (!isStagingEnv || !allowDestructive) {
+    const missingFlags: string[] = []
+    if (!isStagingEnv) missingFlags.push('MERCADAL_SEED_ENV=staging')
+    if (!allowDestructive) missingFlags.push('ALLOW_DESTRUCTIVE_SEED=true')
+
+    logger.error(
+      `[FAIL-CLOSED GUARD] Abortando ejecucion de seed antes de cualquier mutacion. ` +
+      `Se requieren ambas banderas explicitas: ${missingFlags.join(', ')}. ` +
+      `Nota: el contenedor corre en NODE_ENV=production, por lo que se exige confirmacion de entorno deliberada.`
+    )
+    throw new Error(
+      `[FAIL-CLOSED GUARD] Ejecucion abortada por falta de banderas requeridas: ${missingFlags.join(', ')}`
+    )
+  }
+
+  logger.info('[FAIL-CLOSED GUARD] Banderas de entorno validadas: MERCADAL_SEED_ENV=staging, ALLOW_DESTRUCTIVE_SEED=true.')
+  logger.info('Iniciando pre-flight audit y clasificacion de entidades...')
 
   // Obtener usuario administrador existente para created_by en API Keys
   const { data: users } = await query.graph({
@@ -191,6 +233,103 @@ export default async function seedStaging({ container }: ExecArgs) {
     fields: ['id', 'email'],
   })
   const adminUserId = users[0]?.id ?? 'admin'
+
+  // Conjuntos de validación de Mercadal
+  const mercadalProductHandles = new Set(SEED_PRODUCTS.map((p) => p.handle))
+  const mercadalChannels = new Set([CHANNEL_B2C, CHANNEL_B2B])
+  const mercadalLocations = new Set([STOCK_LOCATION_NAME])
+  const mercadalKeys = new Set([KEY_TITLE_B2C, KEY_TITLE_B2B])
+
+  // =========================================================================
+  // GUARDA 2: PRE-FLIGHT AUDIT — DETECCIÓN DE ENTIDADES DESCONOCIDAS
+  // =========================================================================
+  const { data: preflightChannels } = await query.graph({
+    entity: 'sales_channel',
+    fields: ['id', 'name'],
+  })
+  const { data: preflightLocations } = await query.graph({
+    entity: 'stock_location',
+    fields: ['id', 'name'],
+  })
+  const { data: preflightKeys } = await query.graph({
+    entity: 'api_key',
+    fields: ['id', 'title'],
+    filters: { type: 'publishable' },
+  })
+  const { data: preflightProducts } = await query.graph({
+    entity: 'product',
+    fields: ['id', 'handle', 'title'],
+  })
+
+  // Clasificación de Sales Channels
+  const channelsToDelete = preflightChannels.filter((c) => KNOWN_STARTER_CHANNELS.has(c.name))
+  const unknownChannels = preflightChannels.filter(
+    (c) => !mercadalChannels.has(c.name) && !KNOWN_STARTER_CHANNELS.has(c.name)
+  )
+
+  // Clasificación de Stock Locations
+  const locationsToDelete = preflightLocations.filter((l) => KNOWN_STARTER_LOCATIONS.has(l.name))
+  const unknownLocations = preflightLocations.filter(
+    (l) => !mercadalLocations.has(l.name) && !KNOWN_STARTER_LOCATIONS.has(l.name)
+  )
+
+  // Clasificación de Publishable API Keys
+  const keysToDelete = preflightKeys.filter((k) => KNOWN_STARTER_KEYS.has(k.title))
+  const unknownKeys = preflightKeys.filter(
+    (k) => !mercadalKeys.has(k.title) && !KNOWN_STARTER_KEYS.has(k.title)
+  )
+
+  // Clasificación de Productos
+  const productsToDelete = preflightProducts.filter(
+    (p) => p.handle && KNOWN_STARTER_PRODUCTS.has(p.handle)
+  )
+  const unknownProducts = preflightProducts.filter(
+    (p) => p.handle && !mercadalProductHandles.has(p.handle) && !KNOWN_STARTER_PRODUCTS.has(p.handle)
+  )
+
+  // Si existen entidades desconocidas no autorizadas, abortar de inmediato (cero mutaciones)
+  if (
+    unknownChannels.length > 0 ||
+    unknownLocations.length > 0 ||
+    unknownKeys.length > 0 ||
+    unknownProducts.length > 0
+  ) {
+    logger.error(
+      `[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas en base de datos. Abortando sin mutaciones:\n` +
+      `  - Canales desconocidos (${unknownChannels.length}): ${unknownChannels.map((c) => c.name).join(', ') || 'ninguno'}\n` +
+      `  - Ubicaciones desconocidas (${unknownLocations.length}): ${unknownLocations.map((l) => l.name).join(', ') || 'ninguno'}\n` +
+      `  - API keys desconocidas (${unknownKeys.length}): ${unknownKeys.map((k) => k.title).join(', ') || 'ninguno'}\n` +
+      `  - Productos desconocidos (${unknownProducts.length}): ${unknownProducts.map((p) => p.handle).join(', ') || 'ninguno'}`
+    )
+    throw new Error('[FAIL-CLOSED PRE-FLIGHT] Entidades desconocidas detectadas fuera de whitelist. Abortado.')
+  }
+
+  // =========================================================================
+  // GUARDA 3: CONTROL DE UMBRALES DE SANEAMIENTO FAIL-CLOSED
+  // =========================================================================
+  if (
+    channelsToDelete.length > MAX_STARTER_CHANNELS_TO_DELETE ||
+    locationsToDelete.length > MAX_STARTER_LOCATIONS_TO_DELETE ||
+    keysToDelete.length > MAX_STARTER_KEYS_TO_DELETE ||
+    productsToDelete.length > MAX_STARTER_PRODUCTS_TO_DELETE
+  ) {
+    logger.error(
+      `[FAIL-CLOSED THRESHOLD] Cantidad de eliminaciones excede los umbrales de seguridad autorizados:\n` +
+      `  - Canales a eliminar: ${channelsToDelete.length} (Max: ${MAX_STARTER_CHANNELS_TO_DELETE})\n` +
+      `  - Ubicaciones a eliminar: ${locationsToDelete.length} (Max: ${MAX_STARTER_LOCATIONS_TO_DELETE})\n` +
+      `  - Claves a eliminar: ${keysToDelete.length} (Max: ${MAX_STARTER_KEYS_TO_DELETE})\n` +
+      `  - Productos a eliminar: ${productsToDelete.length} (Max: ${MAX_STARTER_PRODUCTS_TO_DELETE})`
+    )
+    throw new Error('[FAIL-CLOSED THRESHOLD] Umbrales de eliminacion excedidos. Abortado sin mutaciones.')
+  }
+
+  logger.info(
+    `[PLAN DE SANEAMIENTO STARTER AUTORIZADO]\n` +
+    `  - Canales de starter a purgar (${channelsToDelete.length}): ${channelsToDelete.map((c) => c.name).join(', ') || 'ninguno'}\n` +
+    `  - Ubicaciones de starter a purgar (${locationsToDelete.length}): ${locationsToDelete.map((l) => l.name).join(', ') || 'ninguno'}\n` +
+    `  - Claves de starter a purgar (${keysToDelete.length}): ${keysToDelete.map((k) => k.title).join(', ') || 'ninguno'}\n` +
+    `  - Productos de starter a purgar (${productsToDelete.length}): ${productsToDelete.map((p) => p.handle).join(', ') || 'ninguno'}`
+  )
 
   // =========================================================================
   // 1. SALES CHANNELS (sc_pampa_novus_b2c y sc_talabarteria_b2b)
@@ -247,19 +386,12 @@ export default async function seedStaging({ container }: ExecArgs) {
     })
   }
 
-  // Eliminar canales remanentes si existieran (ej. 'Default Sales Channel')
-  const { data: refreshedChannels } = await query.graph({
-    entity: 'sales_channel',
-    fields: ['id', 'name'],
-  })
-  const channelsToRemove = refreshedChannels.filter(
-    (sc) => sc.name !== CHANNEL_B2C && sc.name !== CHANNEL_B2B
-  )
-  if (channelsToRemove.length > 0) {
+  // Purgar únicamente canales de starter clasificados en pre-flight
+  if (channelsToDelete.length > 0) {
     await deleteSalesChannelsWorkflow(container).run({
-      input: { ids: channelsToRemove.map((c) => c.id) },
+      input: { ids: channelsToDelete.map((c) => c.id) },
     })
-    logger.info(`Eliminados canales remanentes: ${channelsToRemove.map((c) => c.name).join(', ')}`)
+    logger.info(`Saneados canales de starter: ${channelsToDelete.map((c) => c.name).join(', ')}`)
   }
 
   // =========================================================================
@@ -308,17 +440,12 @@ export default async function seedStaging({ container }: ExecArgs) {
     logger.info(`Vinculados canales [${channelsToLink.join(', ')}] a la ubicacion ${STOCK_LOCATION_NAME}`)
   }
 
-  // Eliminar ubicaciones de stock remanentes (ej. 'European Warehouse')
-  const { data: allLocations } = await query.graph({
-    entity: 'stock_location',
-    fields: ['id', 'name'],
-  })
-  const unwantedLocations = allLocations.filter((loc) => loc.name !== STOCK_LOCATION_NAME)
-  if (unwantedLocations.length > 0) {
+  // Purgar únicamente ubicaciones de starter clasificadas en pre-flight
+  if (locationsToDelete.length > 0) {
     await deleteStockLocationsWorkflow(container).run({
-      input: { ids: unwantedLocations.map((l) => l.id) },
+      input: { ids: locationsToDelete.map((l) => l.id) },
     })
-    logger.info(`Eliminadas ubicaciones remanentes: ${unwantedLocations.map((l) => l.name).join(', ')}`)
+    logger.info(`Saneadas ubicaciones de starter: ${locationsToDelete.map((l) => l.name).join(', ')}`)
   }
 
   // =========================================================================
@@ -405,27 +532,19 @@ export default async function seedStaging({ container }: ExecArgs) {
     })
   }
 
-  // Eliminar API keys remanentes (ej. 'Default Publishable API Key')
-  const { data: allApiKeys } = await query.graph({
-    entity: 'api_key',
-    fields: ['id', 'title'],
-    filters: { type: 'publishable' },
-  })
-  const unwantedKeys = allApiKeys.filter(
-    (k) => k.title !== KEY_TITLE_B2C && k.title !== KEY_TITLE_B2B
-  )
-  if (unwantedKeys.length > 0) {
-    const unwantedKeyIds = unwantedKeys.map((k) => k.id)
+  // Purgar únicamente publishable keys de starter clasificadas en pre-flight
+  if (keysToDelete.length > 0) {
+    const keysToDeleteIds = keysToDelete.map((k) => k.id)
     await revokeApiKeysWorkflow(container).run({
       input: {
-        selector: { id: unwantedKeyIds },
+        selector: { id: keysToDeleteIds },
         revoke: { revoked_by: adminUserId },
       },
     })
     await deleteApiKeysWorkflow(container).run({
-      input: { ids: unwantedKeyIds },
+      input: { ids: keysToDeleteIds },
     })
-    logger.info(`Revocadas y eliminadas API keys remanentes: ${unwantedKeys.map((k) => k.title).join(', ')}`)
+    logger.info(`Saneadas API keys de starter: ${keysToDelete.map((k) => k.title).join(', ')}`)
   }
 
   // =========================================================================
@@ -513,24 +632,21 @@ export default async function seedStaging({ container }: ExecArgs) {
   // =========================================================================
   // 5. 10 PRODUCTOS Y VARIANTES (Catalogo Maestro Unificado)
   // =========================================================================
+  // Purgar únicamente productos de starter clasificados en pre-flight
+  if (productsToDelete.length > 0) {
+    await deleteProductsWorkflow(container).run({
+      input: { ids: productsToDelete.map((p) => p.id) },
+    })
+    logger.info(`Saneados productos de starter: ${productsToDelete.map((p) => p.handle).join(', ')}`)
+  }
+
   const { data: existingProducts } = await query.graph({
     entity: 'product',
     fields: ['id', 'handle', 'variants.id', 'variants.sku'],
   })
-  const seedHandles = new Set(SEED_PRODUCTS.map((p) => p.handle))
-  const unwantedProducts = existingProducts.filter(
-    (p) => p.handle && !seedHandles.has(p.handle)
-  )
-  if (unwantedProducts.length > 0) {
-    await deleteProductsWorkflow(container).run({
-      input: { ids: unwantedProducts.map((p) => p.id) },
-    })
-    logger.info(`Eliminados ${unwantedProducts.length} productos remanentes ajenos al seed`)
-  }
-
   const existingProductHandles = new Set(
     existingProducts
-      .filter((p) => seedHandles.has(p.handle))
+      .filter((p) => mercadalProductHandles.has(p.handle))
       .map((p) => p.handle)
       .filter((h): h is string => Boolean(h))
   )
@@ -586,7 +702,7 @@ export default async function seedStaging({ container }: ExecArgs) {
     })
     logger.info(`Creados ${productsToCreate.length} productos nuevos`)
   } else {
-    logger.info('Todos los 10 productos ya existian. Omitiendo creacion.')
+    logger.info('Todos los 10 productos de Mercadal ya existian. Omitiendo creacion.')
   }
 
   // =========================================================================
