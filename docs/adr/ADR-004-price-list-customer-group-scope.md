@@ -1,7 +1,7 @@
 # ADR-004: Aislamiento de Precios por Customer Group, Catálogo por Canal y Política de Identidades
 
 ## Estado
-Aceptado (con diferimiento formal de SEC-03 aprobado por Juan el 2026-10-18)
+Aceptado (con SEC-02 BLOCKED pendiente de pedidos reales de M360-012 y SEC-03 diferido formalmente por Juan el 2026-10-18)
 
 ---
 

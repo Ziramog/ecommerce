@@ -133,7 +133,7 @@ docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.sta
 ### 3.9. Ejecución de Probes de Precios (PRICE) y Seguridad (SEC)
 Los probes de validación arquitectónica permiten medir en vivo el aislamiento de precios por customer group y la seguridad de las sesiones de clientes sin exponer secretos:
 
-1. **Variables de entorno para probes**:
+1. **Variables de entorno para probes (Credenciales y Procedencia Criptográfica Obligatoria)**:
    Se configuran en `~/mercadal-staging/staging-test-tokens.env` con permisos `chmod 600`:
    ```bash
    BASE_URL="http://100.124.132.48:9000"
@@ -141,29 +141,39 @@ Los probes de validación arquitectónica permiten medir en vivo el aislamiento 
    PK_B2B="<pk_talabarteria_b2b>"
    TOKEN_B2C="<jwt_bearer_token_cliente_b2c>"
    TOKEN_B2B="<jwt_bearer_token_cliente_b2b>"
-   # Opcionales para SEC-02 (si faltan pedidos reales en la DB, SEC-02 reporta BLOCKED / NO EJECUTADO):
+   # Metadatos de procedencia fail-closed (obligatorios):
+   export IMAGE_TAG=$(docker inspect --format '{{.Config.Image}}' mercadal-staging-medusa)
+   export IMAGE_REVISION_LABEL=$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' mercadal-staging-medusa)
+   export IMAGE_DIGEST=$(docker inspect --format '{{.Image}}' mercadal-staging-medusa)
+   export REPO_HEAD=$(git rev-parse HEAD)
+   # Opcionales para SEC-02 (suministrados por M360-012; sin ellos, SEC-02 reporta BLOCKED / NO EJECUTADO y exit code 1):
    # ORDER_ID_B2C="<order_id_b2c_existente>"
    # ORDER_ID_B2B="<order_id_b2b_existente>"
    ```
-   *Nota fail-closed*: Si `PK_*` o `TOKEN_*` faltan, ambos probes abortan inmediatamente con exit code 1 sin recurrir a tokens falsos.
+   *Nota fail-closed*: Si falta cualquiera de las claves, tokens o metadatos de procedencia, ambos probes abortan inmediatamente con exit code 1.
 
 2. **Ejecución del probe de precios (PRICE-01, PRICE-02, PRICE-03, PRICE-LEAK)**:
    ```bash
    cd ~/mercadal-staging
-   source staging-test-tokens.env && cd build-context && node tests/price/probe-price.mjs
+   source staging-test-tokens.env && cd build-context && node tests/price/probe-price.mjs > ~/mercadal-staging/evidence/71-probe-price-provenance.log 2>&1
    ```
 
-3. **Ejecución del probe de seguridad (SEC-01, SEC-02, SEC-03 [NO EJECUTADO], SEC-04)**:
+3. **Ejecución del probe de seguridad (SEC-01, SEC-02, SEC-03, SEC-04)**:
    ```bash
    cd ~/mercadal-staging
-   source staging-test-tokens.env && cd build-context && node tests/security/probe-security.mjs
+   source staging-test-tokens.env && cd build-context && node tests/security/probe-security.mjs > ~/mercadal-staging/evidence/81-probe-security-provenance.log 2>&1
    ```
-   *Criterio de auditoría*:
-   - `SEC-02`: Exige pedidos reales; si la DB tiene 0 pedidos reporta honestamente `BLOCKED / NO EJECUTADO` para evitar 404s triviales no representativos.
-   - `SEC-03`: Registrado formalmente como `NO EJECUTADO` (diferido por decisión de Juan, 2026-10-18) sin ejecutar registros redundantes.
+   *Criterio de auditoría y Gate F2*:
+   - `SEC-01` y `SEC-04`: PASS.
+   - `SEC-02`: Cuenta con validador recursivo de allowlist estricta (`type`, `message`, `code`) y harness GET-only. Permanece como `BLOCKED / NO EJECUTADO` y la suite aborta con código 1 hasta que M360-012 provea órdenes reales.
+   - `SEC-03`: Registrado como `NO EJECUTADO` (diferido por decisión de Juan, 2026-10-18), única excepción no-bloqueante aprobada.
+   - **Gate F2 permanece ABIERTO** y ticket M360-011 en estado **REVIEW-BLOCKED** hasta que se ejecute SEC-02 con datos reales.
 
 4. **Registro de evidencias**:
-   Las salidas se almacenan para auditoría en `~/mercadal-staging/evidence/70-probe-price.log` y `~/mercadal-staging/evidence/80-probe-security.log`.
+   Las salidas auditables con procedencia se almacenan en:
+   - `~/mercadal-staging/evidence/71-probe-price-provenance.log`
+   - `~/mercadal-staging/evidence/81-probe-security-provenance.log`
+   *(Los logs históricos `70-probe-price.log` y `80-probe-security.log` se conservan sin sobreescribir).*
 
 ---
 
