@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 /**
- * Mercadal Digital 360 — Probe de Seguridad e Identidades (SEC-01, SEC-02, SEC-03, SEC-04)
+ * Mercadal Digital 360 — Probe de Seguridad e Identidades con Procedencia Criptografica
+ * SEC-01, SEC-02, SEC-03, SEC-04
+ *
+ * CRITERIO DE PROCEDENCIA OBLIGATORIO (FAIL-CLOSED):
+ * - REPO_HEAD: Commit SHA del repositorio (git rev-parse HEAD)
+ * - PROBE_BLOB: SHA del blob de git o SHA-256 del archivo ejecutado
+ * - IMAGE_TAG: Tag de la imagen viva en Docker (e.g. mercadal-staging-medusa:2.21.2-f8eb4d7)
+ * - IMAGE_REVISION_LABEL: Label org.opencontainers.image.revision del contenedor
+ * - IMAGE_DIGEST: Digest sha256 inmutable de la imagen viva
+ * Si falta cualquiera de estos metadatos, el probe aborta inmediatamente (exit code 1).
  *
  * Parametrizado estrictamente por variables de entorno (CERO secretos en el archivo):
  * - BASE_URL: URL base del backend Medusa (default: http://100.124.132.48:9000)
@@ -8,10 +17,178 @@
  * - PK_B2B: Publishable API Key del canal B2B (sc_talabarteria_b2b)
  * - TOKEN_B2C: JWT Bearer Token de cliente B2C autenticado
  * - TOKEN_B2B: JWT Bearer Token de cliente B2B autenticado
- * - ORDER_ID_B2C: ID de pedido B2C existente para prueba de acceso cruzado (requerido para SEC-02 no-bloqueado)
- * - ORDER_ID_B2B: ID de pedido B2B propio para prueba de acceso cruzado (requerido para SEC-02 no-bloqueado)
+ * - ORDER_ID_B2C: ID de pedido B2C existente para prueba de acceso cruzado (requerido para desbloquear SEC-02)
+ * - ORDER_ID_B2B: ID de pedido B2B propio para prueba de acceso cruzado (requerido para desbloquear SEC-02)
  * - REGION_ID: ID de la region ARS (opcional)
  */
+
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
+
+function resolveProvenance() {
+  const currentFilePath = fileURLToPath(import.meta.url)
+
+  let repoHead = process.env.REPO_HEAD
+  if (!repoHead) {
+    try {
+      repoHead = execSync('git rev-parse HEAD', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim()
+    } catch {}
+  }
+
+  let probeBlob = process.env.PROBE_BLOB
+  if (!probeBlob) {
+    try {
+      const gitBlob = execSync(`git hash-object "${currentFilePath}"`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim()
+      if (gitBlob) probeBlob = `git:${gitBlob}`
+    } catch {}
+    if (!probeBlob) {
+      try {
+        const fileContent = fs.readFileSync(currentFilePath)
+        const sha256 = crypto.createHash('sha256').update(fileContent).digest('hex')
+        probeBlob = `sha256:${sha256}`
+      } catch {}
+    }
+  }
+
+  const imageTag = process.env.IMAGE_TAG
+  const imageRevisionLabel = process.env.IMAGE_REVISION_LABEL
+  const imageDigest = process.env.IMAGE_DIGEST
+
+  const missing = []
+  if (!repoHead) missing.push('REPO_HEAD')
+  if (!probeBlob) missing.push('PROBE_BLOB')
+  if (!imageTag) missing.push('IMAGE_TAG')
+  if (!imageRevisionLabel) missing.push('IMAGE_REVISION_LABEL')
+  if (!imageDigest) missing.push('IMAGE_DIGEST')
+
+  if (missing.length > 0) {
+    console.error('============================================================')
+    console.error('[PROVENANCE FAIL-CLOSED] Faltan metadatos de procedencia obligatorios:')
+    for (const m of missing) {
+      console.error(`  - ${m}`)
+    }
+    console.error('El probe aborta inmediatamente. No es posible emitir veredicto sin procedencia.')
+    console.error('Inyectar via entorno: REPO_HEAD, PROBE_BLOB, IMAGE_TAG, IMAGE_REVISION_LABEL, IMAGE_DIGEST.')
+    console.error('============================================================')
+    process.exit(1)
+  }
+
+  return {
+    repoHead,
+    probeBlob,
+    imageTag,
+    imageRevisionLabel,
+    imageDigest,
+  }
+}
+
+// =========================================================================
+// ALLOWLIST ESTRICTA Y HARNESS DE DETECCION DE FUGAS (GET-ONLY)
+// =========================================================================
+
+// Allowlist estricta de campos permitidos en un cuerpo de error autenticado de la Store API (HTTP 403 / 404)
+const ALLOWED_ERROR_KEYS = new Set(['message', 'type', 'code'])
+
+// Campos prohibidos asociados a entidades de orden, cliente, totales, items, direcciones o metadata
+const FORBIDDEN_LEAK_KEYS = new Set([
+  'order', 'id', 'total', 'totals', 'subtotal', 'tax_total', 'discount_total', 'original_total',
+  'items', 'line_items', 'shipping_address', 'billing_address', 'address', 'addresses',
+  'customer', 'customer_id', 'email', 'phone', 'metadata', 'payments', 'payment_collections',
+  'shipping_methods', 'fulfillments', 'sales_channel_id', 'region_id', 'currency_code'
+])
+
+export function validateNoLeakStrictAllowlist(node, path = '') {
+  if (node === null || typeof node !== 'object') {
+    return { valid: true }
+  }
+
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) {
+      const res = validateNoLeakStrictAllowlist(node[i], `${path}[${i}]`)
+      if (!res.valid) return res
+    }
+    return { valid: true }
+  }
+
+  for (const [key, val] of Object.entries(node)) {
+    const fullPath = path ? `${path}.${key}` : key
+    const lowerKey = key.toLowerCase()
+
+    if (FORBIDDEN_LEAK_KEYS.has(lowerKey)) {
+      return {
+        valid: false,
+        reason: `Campo prohibido de orden/cliente detectado en cuerpo de error: '${fullPath}'`,
+      }
+    }
+
+    if (!ALLOWED_ERROR_KEYS.has(lowerKey)) {
+      return {
+        valid: false,
+        reason: `Campo no admitido en allowlist estricta de error: '${fullPath}'`,
+      }
+    }
+
+    if (typeof val === 'object' && val !== null) {
+      const sub = validateNoLeakStrictAllowlist(val, fullPath)
+      if (!sub.valid) return sub
+    }
+  }
+
+  return { valid: true }
+}
+
+function runSecurityLeakHarness() {
+  console.log('[SECURITY HARNESS] Ejecutando autoverificacion del validador de allowlist estricta...')
+
+  // Caso 1: Error limpio estándar de Medusa -> DEBE ser aceptado
+  const cleanBody = { type: 'not_found', message: 'Order id not found: order_01M5...' }
+  const resClean = validateNoLeakStrictAllowlist(cleanBody)
+  if (!resClean.valid) {
+    throw new Error(`[SECURITY HARNESS FAILURE] Error limpio fue rechazado indebidamente: ${resClean.reason}`)
+  }
+
+  // Caso 2: Fugas sintéticas simuladas en respuesta HTTP GET (403 con datos de orden o cliente) -> DEBEN ser detectadas
+  const leakPayloads = [
+    { type: 'not_allowed', message: 'Forbidden', order: { id: 'order_123', total: 450000 } },
+    { message: 'Denied', email: 'victima@mercadal-staging.internal' },
+    { type: 'not_found', message: 'Not found', items: [{ id: 'item_1', title: 'Montura' }] },
+    { code: 'unauthorized', shipping_address: { city: 'Buenos Aires' } },
+    { type: 'not_allowed', message: 'Denied', metadata: { internal_notes: 'vip' } },
+    { type: 'not_allowed', message: 'Denied', custom_unknown_field: 'leak' },
+  ]
+
+  for (const leak of leakPayloads) {
+    const resLeak = validateNoLeakStrictAllowlist(leak)
+    if (resLeak.valid) {
+      throw new Error(`[SECURITY HARNESS FAILURE] Fuga inyectada no fue detectada: ${JSON.stringify(leak)}`)
+    }
+  }
+
+  console.log('[SECURITY HARNESS] PASS: El validador recursivo rechazo el 100% de las fugas inyectadas.')
+}
+
+// Ejecutar autoverificacion de harness inmediatamente
+runSecurityLeakHarness()
+
+// Si se invoco con bandera de prueba de harness negativo, forzar salida exit 1 comprobada
+if (process.argv.includes('--test-leak-harness')) {
+  console.log('[HARNESS TEST MODE] Simulando recepcion de cuerpo con fuga en peticion GET...')
+  const simulatedLeakedBody = {
+    type: 'not_allowed',
+    message: 'Access denied',
+    order: { id: 'order_victim_01M5', total: 450000 },
+  }
+  const check = validateNoLeakStrictAllowlist(simulatedLeakedBody)
+  if (!check.valid) {
+    console.error(`[HARNESS TEST SUCCESS] Fuga detectada y bloqueada exitosamente: ${check.reason}`)
+    console.error('[HARNESS TEST] Saliendo con exit code 1 conforme a la especificacion.')
+    process.exit(1)
+  }
+}
+
+const provenance = resolveProvenance()
 
 const BASE_URL = process.env.BASE_URL || 'http://100.124.132.48:9000'
 const PK_B2C = process.env.PK_B2C
@@ -21,13 +198,13 @@ const TOKEN_B2B = process.env.TOKEN_B2B
 let REGION_ID = process.env.REGION_ID
 
 // Validacion fail-closed de credenciales: cero fallbacks a tokens falsos
-const missing = []
-if (!PK_B2C) missing.push('PK_B2C')
-if (!PK_B2B) missing.push('PK_B2B')
-if (!TOKEN_B2C) missing.push('TOKEN_B2C')
-if (!TOKEN_B2B) missing.push('TOKEN_B2B')
-if (missing.length > 0) {
-  console.error(`[ERROR] Variables de entorno requeridas faltantes: ${missing.join(', ')}`)
+const missingVars = []
+if (!PK_B2C) missingVars.push('PK_B2C')
+if (!PK_B2B) missingVars.push('PK_B2B')
+if (!TOKEN_B2C) missingVars.push('TOKEN_B2C')
+if (!TOKEN_B2B) missingVars.push('TOKEN_B2B')
+if (missingVars.length > 0) {
+  console.error(`[ERROR] Variables de entorno requeridas faltantes: ${missingVars.join(', ')}`)
   console.error('Uso: PK_B2C=... PK_B2B=... TOKEN_B2C=... TOKEN_B2B=... node tests/security/probe-security.mjs')
   process.exit(1)
 }
@@ -102,16 +279,16 @@ async function runSec02() {
   // Gate fail-closed: Si no se proveen pedidos reales existentes, reportar BLOCKED / NO EJECUTADO
   if (!ORDER_ID_B2C || !ORDER_ID_B2B) {
     console.log('[BLOCKED / NO EJECUTADO] Se requiere ORDER_ID_B2C y ORDER_ID_B2B para validar aislamiento real de pedidos.')
-    console.log('  La base de datos de Staging contiene 0 pedidos; probar un ID sintético arrojaría un 404 trivial no representativo.')
-    console.log('  Criterio de auditoría: Si faltan pedidos reales en staging -> BLOCKED/NO EJECUTADO, jamás reportar PASS.')
+    console.log('  La base de datos de Staging contiene 0 pedidos; probar un ID sintetico arrojaria un 404 trivial no representativo.')
+    console.log('  Criterio autoritativo: Bloqueado hasta recibir pedidos reales generados en M360-012. Jamas envolver en PASS.')
     results.push({
       test: 'SEC-02',
       description: 'Sesion B2B no puede acceder a pedidos de otro cliente; 0 fuga de metadatos',
       pass: false,
       statusOverride: 'BLOCKED / NO EJECUTADO',
-      detail: 'Bloqueado: La base de datos tiene 0 pedidos. Se requieren variables de entorno ORDER_ID_B2C y ORDER_ID_B2B con pedidos reales existentes para probar pertenencia sin 404 trivial.',
+      detail: 'Bloqueado: La base de datos tiene 0 pedidos. Requiere ORDER_ID_B2C y ORDER_ID_B2B con pedidos reales de M360-012 para probar pertenencia sin 404 trivial. Gate F2 permanece abierto.',
     })
-    console.log('[RESULT] SEC-02: BLOCKED / NO EJECUTADO (Registrado formalmente)')
+    console.log('[RESULT] SEC-02: BLOCKED / NO EJECUTADO (Registrado formalmente; Gate F2 abierto)')
     return
   }
 
@@ -144,14 +321,19 @@ async function runSec02() {
   console.log(`[SNIPPET] Body ajeno: ${JSON.stringify(bodyForeign)}`)
 
   const foreignDenied = statusForeign === 404 || statusForeign === 403
-  const noMetadataLeak = !bodyForeign.order?.email && !bodyForeign.order?.billing_address && !bodyForeign.order?.customer_id
 
-  const pass = ownOrderOk && foreignDenied && noMetadataLeak
+  // Aplicar validacion de allowlist estricta recursiva al cuerpo de error recibido
+  const allowlistCheck = validateNoLeakStrictAllowlist(bodyForeign)
+  if (!allowlistCheck.valid) {
+    console.error(`[LEAK DETECTED] ${allowlistCheck.reason}`)
+  }
+
+  const pass = ownOrderOk && foreignDenied && allowlistCheck.valid
   results.push({
     test: 'SEC-02',
     description: 'Sesion B2B no puede acceder a pedidos de otro cliente; 0 fuga de metadatos',
     pass,
-    detail: `Pedido propio HTTP ${statusOwn} (Esp: 200), Pedido ajeno HTTP ${statusForeign} (Esp: 404/403), Fuga de metadata sensible: ${!noMetadataLeak}`,
+    detail: `Pedido propio HTTP ${statusOwn} (Esp: 200), Pedido ajeno HTTP ${statusForeign} (Esp: 404/403), Allowlist estricta valida: ${allowlistCheck.valid}`,
   })
   console.log(`[RESULT] SEC-02: ${pass ? 'PASS' : 'FAIL'}`)
 }
@@ -170,7 +352,7 @@ async function runSec03() {
 
   results.push({
     test: 'SEC-03',
-    description: 'Mismo email en dos marcas (diferido formalmente, nunca reportar PASS)',
+    description: 'Mismo email en dos marcas (diferido formalmente, unica excepcion no-bloqueante aprobada)',
     pass: false,
     statusOverride: 'NO EJECUTADO',
     detail: 'DIFERIDO POR DECISIÓN DE JUAN (2026-10-18): Medusa 2.21.2 mantiene auth_identity unica por (email, provider). No se ejecutan registros en staging. Cuentas separadas con mismo email diferidas a fase de auth modular.',
@@ -259,6 +441,13 @@ async function main() {
   console.log('============================================================')
   console.log(' MERCADAL DIGITAL 360 — SUITE DE PROBES DE SEGURIDAD (SEC)  ')
   console.log('============================================================')
+  console.log('CRITERIO DE PROCEDENCIA Y TRAZABILIDAD (GATE F2):')
+  console.log(`  - REPO_HEAD:            ${provenance.repoHead}`)
+  console.log(`  - PROBE_BLOB:           ${provenance.probeBlob}`)
+  console.log(`  - IMAGE_TAG:            ${provenance.imageTag}`)
+  console.log(`  - IMAGE_REVISION_LABEL: ${provenance.imageRevisionLabel}`)
+  console.log(`  - IMAGE_DIGEST:         ${provenance.imageDigest}`)
+  console.log('------------------------------------------------------------')
   console.log(`Target: ${BASE_URL}`)
   console.log(`PK_B2C: [CONFIGURADA - LONGITUD ${PK_B2C.length}]`)
   console.log(`PK_B2B: [CONFIGURADA - LONGITUD ${PK_B2B.length}]`)
@@ -276,20 +465,37 @@ async function main() {
   console.log('\n============================================================')
   console.log('                    RESUMEN DE PRUEBAS SEC                  ')
   console.log('============================================================')
-  let overallPass = true
+  let executedPass = true
+  let hasBlocked = false
+
   for (const r of results) {
-    const isNoExec = r.statusOverride && r.statusOverride.includes('NO EJECUTADO')
-    if (!r.pass && !isNoExec) overallPass = false
+    const isSec03 = r.test === 'SEC-03' // Unica excepcion no-bloqueante aprobada
+    const isBlocked = r.statusOverride && r.statusOverride.includes('BLOCKED')
+
+    if (isBlocked) {
+      hasBlocked = true
+      executedPass = false
+    } else if (!r.pass && !isSec03) {
+      executedPass = false
+    }
+
     const label = r.statusOverride || (r.pass ? 'PASS' : 'FAIL')
     console.log(`[${label.padEnd(24)}] ${r.test.padEnd(8)} - ${r.description}`)
     console.log(`                         Detalle: ${r.detail}`)
   }
   console.log('============================================================')
-  console.log(`Resultado General (SEC-01, SEC-04): ${overallPass ? 'TODO PASS' : 'HAY FALLOS'}`)
-  console.log(`SEC-02: Registrado formalmente como BLOCKED / NO EJECUTADO (sin ordenes en Staging)`)
-  console.log(`SEC-03: Registrado formalmente como NO EJECUTADO (diferido)\n`)
+  console.log(`Procedencia Certificada: REPO_HEAD=${provenance.repoHead} | IMAGE=${provenance.imageTag}`)
+  console.log(`Superficie Ejecutada: SEC-01=${results.find(r => r.test==='SEC-01')?.pass ? 'PASS' : 'FAIL'} | SEC-04=${results.find(r => r.test==='SEC-04')?.pass ? 'PASS' : 'FAIL'}`)
+  console.log(`SEC-02: BLOCKED / NO EJECUTADO (Bloqueante para cierre de ticket; requiere ordenes reales de M360-012)`)
+  console.log(`SEC-03: NO EJECUTADO (Diferido formalmente por decision de Juan, unica excepcion no-bloqueante)`)
+  console.log(`ESTADO TICKET M360-011 / GATE F2: REVIEW-BLOCKED (Abierto hasta ejecucion de SEC-02 real)\n`)
 
-  process.exit(overallPass ? 0 : 1)
+  if (hasBlocked || !executedPass) {
+    console.log('[FAIL-CLOSED] Saliendo con codigo 1: SEC-02 se encuentra BLOCKED / NO EJECUTADO.')
+    process.exit(1)
+  }
+
+  process.exit(0)
 }
 
 main().catch((err) => {

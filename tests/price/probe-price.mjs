@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 /**
- * Mercadal Digital 360 — Probe de Precios B2B/B2C (PRICE-01, PRICE-02, PRICE-03, PRICE-LEAK)
+ * Mercadal Digital 360 — Probe de Precios B2B/B2C con Procedencia Criptografica
+ * PRICE-01, PRICE-02, PRICE-03, PRICE-LEAK
+ *
+ * CRITERIO DE PROCEDENCIA OBLIGATORIO (FAIL-CLOSED):
+ * - REPO_HEAD: Commit SHA del repositorio (git rev-parse HEAD)
+ * - PROBE_BLOB: SHA del blob de git o SHA-256 del archivo ejecutado
+ * - IMAGE_TAG: Tag de la imagen viva en Docker (e.g. mercadal-staging-medusa:2.21.2-f8eb4d7)
+ * - IMAGE_REVISION_LABEL: Label org.opencontainers.image.revision del contenedor
+ * - IMAGE_DIGEST: Digest sha256 inmutable de la imagen viva
+ * Si falta cualquiera de estos metadatos, el probe aborta inmediatamente (exit code 1).
  *
  * Parametrizado estrictamente por variables de entorno (CERO secretos en el archivo):
  * - BASE_URL: URL base del backend Medusa (default: http://100.124.132.48:9000)
@@ -8,11 +17,71 @@
  * - PK_B2B: Publishable API Key del canal B2B (sc_talabarteria_b2b)
  * - TOKEN_B2B: JWT Bearer Token de cliente B2B autenticado perteneciente a cg_talabarteria_b2b
  * - REGION_ID: ID de la region ARS (opcional; si se omite, se resuelve dinamicamente)
- *
- * Salida:
- * Imprime por prueba: endpoint, status HTTP, fragmento sanitizado del cuerpo y estado PASS/FAIL.
- * Termina con resumen estructurado y exit code 0 (PASS) o 1 (FAIL).
  */
+
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
+
+function resolveProvenance() {
+  const currentFilePath = fileURLToPath(import.meta.url)
+
+  let repoHead = process.env.REPO_HEAD
+  if (!repoHead) {
+    try {
+      repoHead = execSync('git rev-parse HEAD', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim()
+    } catch {}
+  }
+
+  let probeBlob = process.env.PROBE_BLOB
+  if (!probeBlob) {
+    try {
+      const gitBlob = execSync(`git hash-object "${currentFilePath}"`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim()
+      if (gitBlob) probeBlob = `git:${gitBlob}`
+    } catch {}
+    if (!probeBlob) {
+      try {
+        const fileContent = fs.readFileSync(currentFilePath)
+        const sha256 = crypto.createHash('sha256').update(fileContent).digest('hex')
+        probeBlob = `sha256:${sha256}`
+      } catch {}
+    }
+  }
+
+  const imageTag = process.env.IMAGE_TAG
+  const imageRevisionLabel = process.env.IMAGE_REVISION_LABEL
+  const imageDigest = process.env.IMAGE_DIGEST
+
+  const missing = []
+  if (!repoHead) missing.push('REPO_HEAD')
+  if (!probeBlob) missing.push('PROBE_BLOB')
+  if (!imageTag) missing.push('IMAGE_TAG')
+  if (!imageRevisionLabel) missing.push('IMAGE_REVISION_LABEL')
+  if (!imageDigest) missing.push('IMAGE_DIGEST')
+
+  if (missing.length > 0) {
+    console.error('============================================================')
+    console.error('[PROVENANCE FAIL-CLOSED] Faltan metadatos de procedencia obligatorios:')
+    for (const m of missing) {
+      console.error(`  - ${m}`)
+    }
+    console.error('El probe aborta inmediatamente. No es posible certificar PASS sin procedencia.')
+    console.error('Inyectar via entorno: REPO_HEAD, PROBE_BLOB, IMAGE_TAG, IMAGE_REVISION_LABEL, IMAGE_DIGEST.')
+    console.error('============================================================')
+    process.exit(1)
+  }
+
+  return {
+    repoHead,
+    probeBlob,
+    imageTag,
+    imageRevisionLabel,
+    imageDigest,
+  }
+}
+
+const provenance = resolveProvenance()
 
 const BASE_URL = process.env.BASE_URL || 'http://100.124.132.48:9000'
 const PK_B2C = process.env.PK_B2C
@@ -21,12 +90,12 @@ const TOKEN_B2B = process.env.TOKEN_B2B
 let REGION_ID = process.env.REGION_ID
 
 // Validacion fail-closed de variables requeridas: no se permiten fallbacks ni ejecuciones sin credenciales
-const missing = []
-if (!PK_B2C) missing.push('PK_B2C')
-if (!PK_B2B) missing.push('PK_B2B')
-if (!TOKEN_B2B) missing.push('TOKEN_B2B')
-if (missing.length > 0) {
-  console.error(`[ERROR] Variables de entorno requeridas faltantes: ${missing.join(', ')}`)
+const missingVars = []
+if (!PK_B2C) missingVars.push('PK_B2C')
+if (!PK_B2B) missingVars.push('PK_B2B')
+if (!TOKEN_B2B) missingVars.push('TOKEN_B2B')
+if (missingVars.length > 0) {
+  console.error(`[ERROR] Variables de entorno requeridas faltantes: ${missingVars.join(', ')}`)
   console.error('Uso: PK_B2C=... PK_B2B=... TOKEN_B2B=... node tests/price/probe-price.mjs')
   process.exit(1)
 }
@@ -230,16 +299,18 @@ async function runPrice03() {
   console.log('3. PROBE PRICE-03: Prevencion de Inyeccion de Precios desde Cliente')
   console.log('============================================================')
 
-  // Obtener variantId de SKU-CRI-001
+  // Obtener variantId de SKU-DUAL-002 (bozal-cuero-crudo-trenzado, stock=25, retail=85000)
+  const targetHandle = 'bozal-cuero-crudo-trenzado'
+  const targetRetail = 85000
   const prodRes = await fetch(
-    `${BASE_URL}/store/products?handle=montura-criolla-de-trabajo&region_id=${REGION_ID}&fields=*variants`,
+    `${BASE_URL}/store/products?handle=${targetHandle}&region_id=${REGION_ID}&fields=*variants`,
     { headers: { 'x-publishable-api-key': PK_B2C } }
   )
   const prodBody = await prodRes.json()
   const variantId = prodBody.products?.[0]?.variants?.[0]?.id
 
   if (!variantId) {
-    throw new Error('No se pudo resolver variant_id para SKU-CRI-001')
+    throw new Error(`No se pudo resolver variant_id para ${targetHandle}`)
   }
 
   // 3.1 Crear un carrito anonimo B2C
@@ -258,7 +329,7 @@ async function runPrice03() {
   const cartId = cartBody.cart?.id
   console.log(`[REQUEST] POST ${BASE_URL}/store/carts -> Created Cart: ${cartId}`)
 
-  // 3.2 Inyectar linea de pedido con unit_price manipulado (1 ARS en vez de 450000)
+  // 3.2 Inyectar linea de pedido con unit_price manipulado (1 ARS en vez de targetRetail)
   const injectionPayload = {
     variant_id: variantId,
     quantity: 1,
@@ -301,7 +372,7 @@ async function runPrice03() {
   console.log(`[STATUS] HTTP ${stdStatus}`)
   console.log(`[SNIPPET] Line Item ID: ${lineItem?.id} | Unit Price en servidor: ${lineItem?.unit_price} ARS`)
 
-  const priceCalculatedByServer = stdStatus === 200 && lineItem?.unit_price === 450000
+  const priceCalculatedByServer = stdStatus === 200 && lineItem?.unit_price === targetRetail
 
   // 3.4 Intentar forzar price list B2B por header o query parameter
   console.log('\n[REQUEST] Intentando forzar price list B2B via publishable key ajena con cart minorista...')
@@ -310,14 +381,14 @@ async function runPrice03() {
   })
   const crossBody = await crossRes.json()
   const crossLineItem = crossBody.cart?.items?.find((i) => i.variant_id === variantId)
-  const crossTamperResistant = crossLineItem?.unit_price === 450000
+  const crossTamperResistant = crossLineItem?.unit_price === targetRetail
 
   const pass = injectionRejected && priceCalculatedByServer && crossTamperResistant
   results.push({
     test: 'PRICE-03',
     description: 'Inyeccion de precios en carrito rechazada (HTTP 400); servidor calcula precio soberano',
     pass,
-    detail: `Inyeccion rechazada=${injectionRejected} (HTTP ${lineStatus}), Unit price calculado=${lineItem?.unit_price} (Esp: 450000), Cross-key tamper resistant=${crossTamperResistant}`,
+    detail: `Inyeccion rechazada=${injectionRejected} (HTTP ${lineStatus}), Unit price calculado=${lineItem?.unit_price} (Esp: ${targetRetail}), Cross-key tamper resistant=${crossTamperResistant}`,
   })
   console.log(`[RESULT] PRICE-03: ${pass ? 'PASS' : 'FAIL'}`)
 }
@@ -393,6 +464,13 @@ async function main() {
   console.log('============================================================')
   console.log('  MERCADAL DIGITAL 360 — SUITE DE PROBES DE PRECIO (PRICE)  ')
   console.log('============================================================')
+  console.log('CRITERIO DE PROCEDENCIA Y TRAZABILIDAD (GATE F2):')
+  console.log(`  - REPO_HEAD:            ${provenance.repoHead}`)
+  console.log(`  - PROBE_BLOB:           ${provenance.probeBlob}`)
+  console.log(`  - IMAGE_TAG:            ${provenance.imageTag}`)
+  console.log(`  - IMAGE_REVISION_LABEL: ${provenance.imageRevisionLabel}`)
+  console.log(`  - IMAGE_DIGEST:         ${provenance.imageDigest}`)
+  console.log('------------------------------------------------------------')
   console.log(`Target: ${BASE_URL}`)
   console.log(`PK_B2C: [CONFIGURADA - LONGITUD ${PK_B2C.length}]`)
   console.log(`PK_B2B: [CONFIGURADA - LONGITUD ${PK_B2B.length}]`)
@@ -417,7 +495,8 @@ async function main() {
     console.log(`       Detalle: ${r.detail}`)
   }
   console.log('============================================================')
-  console.log(`Resultado General: ${overallPass ? 'TODO PASS' : 'HAY FALLOS'}\n`)
+  console.log(`Procedencia Certificada: REPO_HEAD=${provenance.repoHead} | IMAGE=${provenance.imageTag}`)
+  console.log(`Resultado General PRICE: ${overallPass ? 'TODO PASS' : 'HAY FALLOS'}\n`)
 
   process.exit(overallPass ? 0 : 1)
 }
