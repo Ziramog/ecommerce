@@ -32,15 +32,15 @@ if (missing.length > 0) {
 
 const SEED_CATALOG_EXPECTED = [
   { sku: 'SKU-CRI-001', handle: 'montura-criolla-de-trabajo', retail: 450000, wholesale: 320000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-002', handle: 'bozal-cuero-crudo-trenzado', retail: 110000, wholesale: 85000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-002', handle: 'bozal-cuero-crudo-trenzado', retail: 85000, wholesale: 55000, channels: ['b2c', 'b2b'] },
   { sku: 'SKU-B2C-003', handle: 'cinturon-carpincho-alpaca', retail: 120000, wholesale: null, channels: ['b2c'] },
   { sku: 'SKU-B2B-004', handle: 'rollo-lonja-vacuna-pack-x10', retail: 190000, wholesale: 190000, channels: ['b2b'] },
-  { sku: 'SKU-DUAL-005', handle: 'estribos-chaquenos-acero-inoxidable', retail: 95000, wholesale: 68000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-006', handle: 'cinchon-lona-reforzado-cuero-suela', retail: 58000, wholesale: 42000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-007', handle: 'freno-criollo-cabeza-de-moro', retail: 72000, wholesale: 52000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-008', handle: 'manta-sudadero-lana-pura', retail: 85000, wholesale: 62000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-009', handle: 'cuchillo-criollo-vaina-repujada', retail: 115000, wholesale: 78000, channels: ['b2c', 'b2b'] },
-  { sku: 'SKU-DUAL-010', handle: 'grasa-de-potro-cuero-500g', retail: 22000, wholesale: 16000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-005', handle: 'estribos-chaquenos-acero-inoxidable', retail: 65000, wholesale: 42000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-006', handle: 'cinchon-lona-reforzado-cuero-suela', retail: 38000, wholesale: 24000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-007', handle: 'freno-criollo-cabeza-de-moro', retail: 95000, wholesale: 68000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-008', handle: 'manta-sudadero-lana-pura', retail: 52000, wholesale: 35000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-009', handle: 'cuchillo-criollo-vaina-repujada', retail: 110000, wholesale: 75000, channels: ['b2c', 'b2b'] },
+  { sku: 'SKU-DUAL-010', handle: 'grasa-de-potro-cuero-500g', retail: 12000, wholesale: 7500, channels: ['b2c', 'b2b'] },
 ]
 
 const results = []
