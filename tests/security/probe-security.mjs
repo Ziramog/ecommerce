@@ -8,7 +8,8 @@
  * - PK_B2B: Publishable API Key del canal B2B (sc_talabarteria_b2b)
  * - TOKEN_B2C: JWT Bearer Token de cliente B2C autenticado
  * - TOKEN_B2B: JWT Bearer Token de cliente B2B autenticado
- * - ORDER_ID_B2C: ID de pedido B2C existente para prueba de acceso cruzado (opcional)
+ * - ORDER_ID_B2C: ID de pedido B2C existente para prueba de acceso cruzado (requerido para SEC-02 no-bloqueado)
+ * - ORDER_ID_B2B: ID de pedido B2B propio para prueba de acceso cruzado (requerido para SEC-02 no-bloqueado)
  * - REGION_ID: ID de la region ARS (opcional)
  */
 
@@ -17,15 +18,17 @@ const PK_B2C = process.env.PK_B2C
 const PK_B2B = process.env.PK_B2B
 const TOKEN_B2C = process.env.TOKEN_B2C
 const TOKEN_B2B = process.env.TOKEN_B2B
-let ORDER_ID_B2C = process.env.ORDER_ID_B2C
 let REGION_ID = process.env.REGION_ID
 
+// Validacion fail-closed de credenciales: cero fallbacks a tokens falsos
 const missing = []
 if (!PK_B2C) missing.push('PK_B2C')
 if (!PK_B2B) missing.push('PK_B2B')
+if (!TOKEN_B2C) missing.push('TOKEN_B2C')
+if (!TOKEN_B2B) missing.push('TOKEN_B2B')
 if (missing.length > 0) {
-  console.error(`[ERROR] Variables de entorno faltantes: ${missing.join(', ')}`)
-  console.error('Uso: PK_B2C=... PK_B2B=... [TOKEN_B2C=...] [TOKEN_B2B=...] node tests/security/probe-security.mjs')
+  console.error(`[ERROR] Variables de entorno requeridas faltantes: ${missing.join(', ')}`)
+  console.error('Uso: PK_B2C=... PK_B2B=... TOKEN_B2C=... TOKEN_B2B=... node tests/security/probe-security.mjs')
   process.exit(1)
 }
 
@@ -53,14 +56,14 @@ async function runSec01() {
   console.log('1. PROBE SEC-01: Control de Acceso y Aislamiento de Privilegios B2C vs B2B')
   console.log('============================================================')
 
-  // 1.1 Intentar acceder a endpoint administrativo protegido con token de cliente B2C
+  // 1.1 Intentar acceder a endpoint administrativo protegido con token real de cliente B2C
   const adminUrl = `${BASE_URL}/admin/customer-groups`
   console.log(`[REQUEST] GET ${adminUrl}`)
   console.log(`[HEADERS] Authorization: Bearer [REDACTED_TOKEN_B2C]`)
 
   const resAdmin = await fetch(adminUrl, {
     headers: {
-      Authorization: TOKEN_B2C ? `Bearer ${TOKEN_B2C}` : 'Bearer fake_customer_token_b2c',
+      Authorization: `Bearer ${TOKEN_B2C}`,
     },
   })
   const statusAdmin = resAdmin.status
@@ -93,34 +96,62 @@ async function runSec02() {
   console.log('2. PROBE SEC-02: Aislamiento Estricto de Pedidos entre Clientes')
   console.log('============================================================')
 
-  // Probar acceso con sesion B2B a un pedido ajeno
-  const targetOrderId = ORDER_ID_B2C || 'order_01M5TESTB2CORDER0000000'
-  const url = `${BASE_URL}/store/orders/${targetOrderId}`
-  console.log(`[REQUEST] GET ${url}`)
-  console.log(`[HEADERS] x-publishable-api-key: [REDACTED_PK_B2B] | Authorization: Bearer [REDACTED_TOKEN_B2B]`)
+  const ORDER_ID_B2C = process.env.ORDER_ID_B2C
+  const ORDER_ID_B2B = process.env.ORDER_ID_B2B
 
-  const res = await fetch(url, {
+  // Gate fail-closed: Si no se proveen pedidos reales existentes, reportar BLOCKED / NO EJECUTADO
+  if (!ORDER_ID_B2C || !ORDER_ID_B2B) {
+    console.log('[BLOCKED / NO EJECUTADO] Se requiere ORDER_ID_B2C y ORDER_ID_B2B para validar aislamiento real de pedidos.')
+    console.log('  La base de datos de Staging contiene 0 pedidos; probar un ID sintético arrojaría un 404 trivial no representativo.')
+    console.log('  Criterio de auditoría: Si faltan pedidos reales en staging -> BLOCKED/NO EJECUTADO, jamás reportar PASS.')
+    results.push({
+      test: 'SEC-02',
+      description: 'Sesion B2B no puede acceder a pedidos de otro cliente; 0 fuga de metadatos',
+      pass: false,
+      statusOverride: 'BLOCKED / NO EJECUTADO',
+      detail: 'Bloqueado: La base de datos tiene 0 pedidos. Se requieren variables de entorno ORDER_ID_B2C y ORDER_ID_B2B con pedidos reales existentes para probar pertenencia sin 404 trivial.',
+    })
+    console.log('[RESULT] SEC-02: BLOCKED / NO EJECUTADO (Registrado formalmente)')
+    return
+  }
+
+  // 2.1 Consultar pedido PROPIO con token B2B -> Debe responder 200 OK
+  const urlOwn = `${BASE_URL}/store/orders/${ORDER_ID_B2B}`
+  console.log(`[REQUEST] GET ${urlOwn} (Pedido PROPIO B2B)`)
+  const resOwn = await fetch(urlOwn, {
     headers: {
       'x-publishable-api-key': PK_B2B,
-      Authorization: TOKEN_B2B ? `Bearer ${TOKEN_B2B}` : 'Bearer fake_customer_token_b2b',
+      Authorization: `Bearer ${TOKEN_B2B}`,
     },
   })
-  const status = res.status
-  const body = await res.json().catch(() => ({}))
+  const statusOwn = resOwn.status
+  const bodyOwn = await resOwn.json().catch(() => ({}))
+  console.log(`[STATUS] HTTP ${statusOwn}`)
+  const ownOrderOk = statusOwn === 200 && bodyOwn.order?.id === ORDER_ID_B2B
 
-  console.log(`[STATUS] HTTP ${status}`)
-  console.log(`[SNIPPET] Body: ${JSON.stringify(body)}`)
+  // 2.2 Consultar pedido AJENO (B2C) con token B2B -> Debe responder 404 o 403 y NO fugar metadata
+  const urlForeign = `${BASE_URL}/store/orders/${ORDER_ID_B2C}`
+  console.log(`\n[REQUEST] GET ${urlForeign} (Pedido AJENO B2C consultado con sesion B2B)`)
+  const resForeign = await fetch(urlForeign, {
+    headers: {
+      'x-publishable-api-key': PK_B2B,
+      Authorization: `Bearer ${TOKEN_B2B}`,
+    },
+  })
+  const statusForeign = resForeign.status
+  const bodyForeign = await resForeign.json().catch(() => ({}))
+  console.log(`[STATUS] HTTP ${statusForeign}`)
+  console.log(`[SNIPPET] Body ajeno: ${JSON.stringify(bodyForeign)}`)
 
-  // El acceso debe ser denegado (401 o 404 de no pertenencia) sin fugar metadatos sensibles ni datos de cliente
-  const accessDenied = status === 401 || status === 404
-  const noMetadataLeak = !body.order?.email && !body.order?.billing_address && !body.order?.customer_id
+  const foreignDenied = statusForeign === 404 || statusForeign === 403
+  const noMetadataLeak = !bodyForeign.order?.email && !bodyForeign.order?.billing_address && !bodyForeign.order?.customer_id
 
-  const pass = accessDenied && noMetadataLeak
+  const pass = ownOrderOk && foreignDenied && noMetadataLeak
   results.push({
     test: 'SEC-02',
     description: 'Sesion B2B no puede acceder a pedidos de otro cliente; 0 fuga de metadatos',
     pass,
-    detail: `HTTP ${status} (Esp: 401/404), Fuga de metadata sensible: ${!noMetadataLeak}`,
+    detail: `Pedido propio HTTP ${statusOwn} (Esp: 200), Pedido ajeno HTTP ${statusForeign} (Esp: 404/403), Fuga de metadata sensible: ${!noMetadataLeak}`,
   })
   console.log(`[RESULT] SEC-02: ${pass ? 'PASS' : 'FAIL'}`)
 }
@@ -130,42 +161,21 @@ async function runSec03() {
   console.log('3. PROBE SEC-03: Mismo Email en Dos Marcas (DECISION JUAN: NO EJECUTADO)')
   console.log('============================================================')
   console.log('Estado Formal: NO EJECUTADO (DIFERIDO POR DECISIÓN DE JUAN, 2026-10-18)')
-  console.log('Justificacion de ADR-004: En Medusa v2 la identidad auth (auth_identity) es única')
-  console.log('por tuple (email, provider). El aislamiento de cuentas con mismo email exige módulos')
-  console.log('personalizados de identidad por marca (diferido a fase posterior).')
-
-  // Medición empírica del comportamiento real de Medusa 2:
-  // Intentar registrar dos veces el mismo email en el provider emailpass
-  const testEmail = `probe-sec03-duplicate-${Date.now()}@mercadal-staging.internal`
-  console.log(`\n[EXPERIMENTO EMPÍRICO] Registrando email por primera vez: ${testEmail}`)
-  const res1 = await fetch(`${BASE_URL}/auth/customer/emailpass/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: testEmail, password: 'StagingSecretPassword123!' }),
-  })
-  const status1 = res1.status
-  const body1 = await res1.json().catch(() => ({}))
-  console.log(`[STATUS 1] HTTP ${status1}`)
-
-  console.log(`\n[EXPERIMENTO EMPÍRICO] Intentando registrar el MISMO email por segunda vez:`)
-  const res2 = await fetch(`${BASE_URL}/auth/customer/emailpass/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: testEmail, password: 'StagingSecretPassword123!' }),
-  })
-  const status2 = res2.status
-  const body2 = await res2.json().catch(() => ({}))
-  console.log(`[STATUS 2] HTTP ${status2}`)
-  console.log(`[SNIPPET 2] Mensaje Medusa ante duplicado: ${JSON.stringify(body2)}`)
+  console.log('Fundamento Arquitectonico (ADR-004):')
+  console.log('  En Medusa 2.21.2 la entidad de autenticacion (auth_identity) es unica por la tupla (email, provider).')
+  console.log('  Registrar un mismo email en ambas marcas no genera cuentas ni historiales aislados, sino que')
+  console.log('  reutiliza la misma auth_identity global devolviendo el mismo token JWT.')
+  console.log('  La separacion de cuentas para un mismo email requiere modulos de auth modular multi-marca (diferido a fase posterior).')
+  console.log('  Conforme a la directiva de auditoria, no se ejecutan registros redundantes en Staging.')
 
   results.push({
     test: 'SEC-03',
     description: 'Mismo email en dos marcas (diferido formalmente, nunca reportar PASS)',
-    pass: false, // Formalmente registrado como NO EJECUTADO / NO APROBADO en esta fase
+    pass: false,
     statusOverride: 'NO EJECUTADO',
-    detail: `Decision aprobada: diferido a fase de auth modular por marca. Comportamiento nativo Medusa: HTTP ${status2} (${body2.message || 'Identity already exists'}).`,
+    detail: 'DIFERIDO POR DECISIÓN DE JUAN (2026-10-18): Medusa 2.21.2 mantiene auth_identity unica por (email, provider). No se ejecutan registros en staging. Cuentas separadas con mismo email diferidas a fase de auth modular.',
   })
-  console.log(`[RESULT] SEC-03: NO EJECUTADO (Registrado formalmente en ADR)`)
+  console.log('[RESULT] SEC-03: NO EJECUTADO (Registrado formalmente en ADR-004)')
 }
 
 async function runSec04() {
@@ -192,24 +202,55 @@ async function runSec04() {
   // DEBE SER el precio base (450000), NUNCA el mayorista (320000), y is_calculated_price_price_list debe ser FALSE
   const wholesaleBlocked = calcPrice?.calculated_amount === 450000 && calcPrice?.is_calculated_price_price_list === false
 
-  // 4.2 Intento de inyeccion de headers administrativos o de tenant
-  console.log('\n[REQUEST] Intentando inyeccion de header x-sales-channel-id arbitrario...')
-  const tamperRes = await fetch(`${BASE_URL}/store/products?limit=1`, {
+  // 4.2 Intento de inyeccion de headers administrativos, de tenant o de grupo de cliente
+  console.log('\n[REQUEST] Intentando inyeccion de headers arbitrarios (x-sales-channel-id, x-medusa-role, x-customer-group)...')
+  const tamperUrl = `${BASE_URL}/store/products?region_id=${REGION_ID}&fields=id,handle,*variants.calculated_price`
+  const tamperRes = await fetch(tamperUrl, {
     headers: {
       'x-publishable-api-key': PK_B2C,
       'x-sales-channel-id': 'sc_talabarteria_b2b',
       'x-medusa-role': 'admin',
+      'x-customer-group': 'cg_talabarteria_b2b',
     },
   })
-  console.log(`[STATUS] HTTP ${tamperRes.status} (Headers de elevacion ignorados de forma segura)`)
-  const headersTamperSafe = tamperRes.status === 200
+  const tamperStatus = tamperRes.status
+  const tamperBody = await tamperRes.json()
+  const tamperProducts = tamperBody.products || []
+
+  console.log(`[STATUS] HTTP ${tamperStatus}`)
+  console.log(`[SNIPPET] Total productos retornados en peticion manipulada: ${tamperProducts.length}`)
+
+  // Verificar que el cuerpo no contenga precios mayoristas ni datos protegidos:
+  // 1. SKU B2B exclusivo (rollo-lonja-vacuna-pack-x10) NO debe estar presente (prueba que el sales channel no cambio)
+  const b2bProductLeaked = tamperProducts.some((p) => p.handle === 'rollo-lonja-vacuna-pack-x10')
+
+  // 2. Para cada producto devuelto, ningun calculated_amount debe ser precio mayorista ni tener is_calculated_price_price_list = true
+  let wholesalePricesFoundInTamper = 0
+  for (const p of tamperProducts) {
+    for (const v of p.variants || []) {
+      if (v.calculated_price?.is_calculated_price_price_list === true) {
+        wholesalePricesFoundInTamper++
+      }
+      if (p.handle === 'montura-criolla-de-trabajo' && v.calculated_price?.calculated_amount === 320000) {
+        wholesalePricesFoundInTamper++
+      }
+    }
+  }
+
+  console.log(`[SNIPPET] B2B-only producto filtrado por headers: ${b2bProductLeaked ? 'SI (FUGA)' : 'NO (PROTEGIDO)'}`)
+  console.log(`[SNIPPET] Precios de price list mayorista en cuerpo: ${wholesalePricesFoundInTamper} (Esperado: 0)`)
+
+  const headersTamperSafe =
+    tamperStatus === 200 &&
+    !b2bProductLeaked &&
+    wholesalePricesFoundInTamper === 0
 
   const pass = status === 200 && wholesaleBlocked && headersTamperSafe
   results.push({
     test: 'SEC-04',
     description: 'Cambio de publishable key o headers no eleva privilegios ni expone precios protegidos',
     pass,
-    detail: `Key B2B en anonimo calculated_amount=${calcPrice?.calculated_amount} (Esp: 450000, Mayorista 320000 bloqueado: ${wholesaleBlocked}), Tamper headers seguros=${headersTamperSafe}`,
+    detail: `Key B2B en anonimo calculated_amount=${calcPrice?.calculated_amount} (Esp: 450000, Mayorista 320000 bloqueado: ${wholesaleBlocked}), Tamper headers seguros: no B2B leaks=${!b2bProductLeaked}, wholesale in body=${wholesalePricesFoundInTamper}`,
   })
   console.log(`[RESULT] SEC-04: ${pass ? 'PASS' : 'FAIL'}`)
 }
@@ -221,8 +262,8 @@ async function main() {
   console.log(`Target: ${BASE_URL}`)
   console.log(`PK_B2C: [CONFIGURADA - LONGITUD ${PK_B2C.length}]`)
   console.log(`PK_B2B: [CONFIGURADA - LONGITUD ${PK_B2B.length}]`)
-  console.log(`TOKEN_B2C: ${TOKEN_B2C ? `[CONFIGURADO - LONGITUD ${TOKEN_B2C.length}]` : '[NO CONFIGURADO]'}`)
-  console.log(`TOKEN_B2B: ${TOKEN_B2B ? `[CONFIGURADO - LONGITUD ${TOKEN_B2B.length}]` : '[NO CONFIGURADO]'}`)
+  console.log(`TOKEN_B2C: [CONFIGURADO - LONGITUD ${TOKEN_B2C.length}]`)
+  console.log(`TOKEN_B2B: [CONFIGURADO - LONGITUD ${TOKEN_B2B.length}]`)
 
   await resolveRegionId()
   console.log(`Region ARS ID: ${REGION_ID}`)
@@ -237,13 +278,15 @@ async function main() {
   console.log('============================================================')
   let overallPass = true
   for (const r of results) {
+    const isNoExec = r.statusOverride && r.statusOverride.includes('NO EJECUTADO')
+    if (!r.pass && !isNoExec) overallPass = false
     const label = r.statusOverride || (r.pass ? 'PASS' : 'FAIL')
-    if (!r.pass && r.statusOverride !== 'NO EJECUTADO') overallPass = false
-    console.log(`[${label.padEnd(12)}] ${r.test.padEnd(8)} - ${r.description}`)
-    console.log(`             Detalle: ${r.detail}`)
+    console.log(`[${label.padEnd(24)}] ${r.test.padEnd(8)} - ${r.description}`)
+    console.log(`                         Detalle: ${r.detail}`)
   }
   console.log('============================================================')
-  console.log(`Resultado General (SEC-01, 02, 04): ${overallPass ? 'TODO PASS' : 'HAY FALLOS'}`)
+  console.log(`Resultado General (SEC-01, SEC-04): ${overallPass ? 'TODO PASS' : 'HAY FALLOS'}`)
+  console.log(`SEC-02: Registrado formalmente como BLOCKED / NO EJECUTADO (sin ordenes en Staging)`)
   console.log(`SEC-03: Registrado formalmente como NO EJECUTADO (diferido)\n`)
 
   process.exit(overallPass ? 0 : 1)
