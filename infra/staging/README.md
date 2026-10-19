@@ -141,7 +141,11 @@ Los probes de validación arquitectónica permiten medir en vivo el aislamiento 
    PK_B2B="<pk_talabarteria_b2b>"
    TOKEN_B2C="<jwt_bearer_token_cliente_b2c>"
    TOKEN_B2B="<jwt_bearer_token_cliente_b2b>"
+   # Opcionales para SEC-02 (si faltan pedidos reales en la DB, SEC-02 reporta BLOCKED / NO EJECUTADO):
+   # ORDER_ID_B2C="<order_id_b2c_existente>"
+   # ORDER_ID_B2B="<order_id_b2b_existente>"
    ```
+   *Nota fail-closed*: Si `PK_*` o `TOKEN_*` faltan, ambos probes abortan inmediatamente con exit code 1 sin recurrir a tokens falsos.
 
 2. **Ejecución del probe de precios (PRICE-01, PRICE-02, PRICE-03, PRICE-LEAK)**:
    ```bash
@@ -154,6 +158,9 @@ Los probes de validación arquitectónica permiten medir en vivo el aislamiento 
    cd ~/mercadal-staging
    source staging-test-tokens.env && cd build-context && node tests/security/probe-security.mjs
    ```
+   *Criterio de auditoría*:
+   - `SEC-02`: Exige pedidos reales; si la DB tiene 0 pedidos reporta honestamente `BLOCKED / NO EJECUTADO` para evitar 404s triviales no representativos.
+   - `SEC-03`: Registrado formalmente como `NO EJECUTADO` (diferido por decisión de Juan, 2026-10-18) sin ejecutar registros redundantes.
 
 4. **Registro de evidencias**:
    Las salidas se almacenan para auditoría en `~/mercadal-staging/evidence/70-probe-price.log` y `~/mercadal-staging/evidence/80-probe-security.log`.

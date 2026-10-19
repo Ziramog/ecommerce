@@ -49,11 +49,11 @@ Dado que `sales_channel_id` no participa en el contexto de precios:
 - La Publishable API Key vinculada a cada canal (`pk_pampa_novus_b2c` y `pk_talabarteria_b2b`) delimita **únicamente la visibilidad de catálogo** (productos y variantes publicados en cada canal).
 - La exclusión de productos B2B del canal B2C (ej. `SKU-B2B-004` `rollo-lonja-vacuna-pack-x10`) y de productos B2C del canal B2B (ej. `SKU-B2C-003` `cinturon-carpincho-alpaca`) se gestiona a través de la asignación de canales comerciales (`product_sales_channel`), no por reglas de precio.
 
-### 3. Doble Representación de Reglas y Mutación Vía Workflows Oficiales
-La persistencia de reglas en Medusa 2 convive entre dos representaciones: la tabla relacional `price_list_rule` / `price_list_rule_value` y la capa DML que expone `attribute: text` y `value: json`.
+### 3. Persistencia de Reglas y Mutación Vía Workflows Oficiales
+En el esquema de Medusa 2.21.2, la tabla `price_list_rule` almacena directamente el atributo y su valor asociado en formato JSON (`attribute: text`, `value: json`, e.g. `customer.groups.id` con `["cusgroup_..."]`).
 - **Decisión**: Queda estrictamente prohibido insertar o mutar reglas de precios y grupos mediante sentencias `INSERT` directas en PostgreSQL.
-- Toda mutación se ejecuta a través de los workflows oficiales del framework (`createCustomerGroupsWorkflow` y `updatePriceListsWorkflow`) o endpoints autenticados de la Admin API.
-- Toda regla debe ser verificada leyendo de vuelta la representación que consume el motor y contrastada con probes end-to-end (rojo → verde).
+- Toda mutación se ejecuta a través de los workflows oficiales del framework (`createCustomerGroupsWorkflow` y `updatePriceListsWorkflow`) o endpoints autenticados de la Admin API para garantizar la correcta validación, tipado y serialización DML.
+- Toda regla debe ser verificada leyendo de vuelta la representación persistida y contrastada con probes end-to-end (rojo → verde).
 
 ### 4. Diferimiento Formal de SEC-03 (Mismo Email en Dos Marcas)
 - **Comportamiento Nativo de Medusa 2**: La entidad de autenticación (`auth_identity`) en el proveedor `emailpass` es única por la tupla `(email, provider)`. Intentar registrar el mismo email en ambos storefronts no crea cuentas independientes con historiales aislados, sino que reutiliza la identidad global y retorna el mismo token JWT.
