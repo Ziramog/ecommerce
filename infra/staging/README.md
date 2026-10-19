@@ -130,6 +130,34 @@ cd ~/mercadal-staging
 docker compose -p mercadal-staging --env-file .env.staging -f docker-compose.staging.yml down
 ```
 
+### 3.9. Ejecución de Probes de Precios (PRICE) y Seguridad (SEC)
+Los probes de validación arquitectónica permiten medir en vivo el aislamiento de precios por customer group y la seguridad de las sesiones de clientes sin exponer secretos:
+
+1. **Variables de entorno para probes**:
+   Se configuran en `~/mercadal-staging/staging-test-tokens.env` con permisos `chmod 600`:
+   ```bash
+   BASE_URL="http://100.124.132.48:9000"
+   PK_B2C="<pk_pampa_novus_b2c>"
+   PK_B2B="<pk_talabarteria_b2b>"
+   TOKEN_B2C="<jwt_bearer_token_cliente_b2c>"
+   TOKEN_B2B="<jwt_bearer_token_cliente_b2b>"
+   ```
+
+2. **Ejecución del probe de precios (PRICE-01, PRICE-02, PRICE-03, PRICE-LEAK)**:
+   ```bash
+   cd ~/mercadal-staging
+   source staging-test-tokens.env && cd build-context && node tests/price/probe-price.mjs
+   ```
+
+3. **Ejecución del probe de seguridad (SEC-01, SEC-02, SEC-03 [NO EJECUTADO], SEC-04)**:
+   ```bash
+   cd ~/mercadal-staging
+   source staging-test-tokens.env && cd build-context && node tests/security/probe-security.mjs
+   ```
+
+4. **Registro de evidencias**:
+   Las salidas se almacenan para auditoría en `~/mercadal-staging/evidence/70-probe-price.log` y `~/mercadal-staging/evidence/80-probe-security.log`.
+
 ---
 
 ## 4. Diagnóstico y Resolución de Problemas
