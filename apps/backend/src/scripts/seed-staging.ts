@@ -39,6 +39,8 @@ import {
   createInventoryLevelsWorkflow,
   updateInventoryLevelsWorkflow,
   createPriceListsWorkflow,
+  updatePriceListsWorkflow,
+  createCustomerGroupsWorkflow,
   updateStoresWorkflow,
 } from '@medusajs/medusa/core-flows'
 import {
@@ -98,6 +100,8 @@ const CHANNEL_B2B = 'sc_talabarteria_b2b'
 const STOCK_LOCATION_NAME = 'loc_digital_warehouse'
 const KEY_TITLE_B2C = 'pk_pampa_novus_b2c'
 const KEY_TITLE_B2B = 'pk_talabarteria_b2b'
+const CUSTOMER_GROUP_B2C = 'cg_pampa_novus_b2c'
+const CUSTOMER_GROUP_B2B = 'cg_talabarteria_b2b'
 const B2B_PRICE_LIST_TITLE = 'Lista Mayorista Talabarteria B2B'
 
 interface SeedProductSpec {
@@ -767,7 +771,43 @@ export default async function seedStaging({ container }: ExecArgs) {
   }
 
   // =========================================================================
-  // 7. PRECIOS MAYORISTAS B2B (Price List)
+  // 7. GRUPOS DE CLIENTES (Customer Groups B2C y B2B)
+  // =========================================================================
+  const { data: existingCustomerGroups } = await query.graph({
+    entity: 'customer_group',
+    fields: ['id', 'name'],
+  })
+  let groupB2C = existingCustomerGroups.find((g) => g.name === CUSTOMER_GROUP_B2C)
+  let groupB2B = existingCustomerGroups.find((g) => g.name === CUSTOMER_GROUP_B2B)
+
+  const groupsToCreate: { name: string }[] = []
+  if (!groupB2C) groupsToCreate.push({ name: CUSTOMER_GROUP_B2C })
+  if (!groupB2B) groupsToCreate.push({ name: CUSTOMER_GROUP_B2B })
+
+  if (groupsToCreate.length > 0) {
+    await createCustomerGroupsWorkflow(container).run({
+      input: {
+        customersData: groupsToCreate,
+      },
+    })
+    logger.info(`Creados ${groupsToCreate.length} Customer Groups: ${groupsToCreate.map((g) => g.name).join(', ')}`)
+    const { data: freshCustomerGroups } = await query.graph({
+      entity: 'customer_group',
+      fields: ['id', 'name'],
+    })
+    groupB2C = freshCustomerGroups.find((g) => g.name === CUSTOMER_GROUP_B2C)
+    groupB2B = freshCustomerGroups.find((g) => g.name === CUSTOMER_GROUP_B2B)
+  }
+
+  if (!groupB2C || !groupB2B) {
+    throw new Error(
+      `[CUSTOMER GROUP FAILURE] No se pudieron inicializar ambos Customer Groups requeridos: ` +
+      `B2C=${groupB2C?.id ?? 'FALTANTE'}, B2B=${groupB2B?.id ?? 'FALTANTE'}`
+    )
+  }
+
+  // =========================================================================
+  // 8. PRECIOS MAYORISTAS B2B (Price List con Regla Scoped de Customer Group)
   // =========================================================================
   const { data: allFreshProducts } = await query.graph({
     entity: 'product',
@@ -782,27 +822,35 @@ export default async function seedStaging({ container }: ExecArgs) {
     }
   }
 
+  const b2bPrices: any[] = []
+  for (const spec of SEED_PRODUCTS) {
+    if (spec.wholesalePrice !== undefined) {
+      const variantId = variantBySku.get(spec.sku)
+      if (variantId) {
+        b2bPrices.push({
+          amount: spec.wholesalePrice,
+          currency_code: 'ars',
+          variant_id: variantId,
+        })
+      }
+    }
+  }
+
   const { data: priceLists } = await query.graph({
     entity: 'price_list',
-    fields: ['id', 'title'],
+    fields: [
+      'id',
+      'title',
+      'status',
+      'type',
+      'price_list_rules.id',
+      'price_list_rules.attribute',
+      'price_list_rules.value',
+    ],
   })
   let b2bPriceList = priceLists.find((pl) => pl.title === B2B_PRICE_LIST_TITLE)
 
   if (!b2bPriceList) {
-    const b2bPrices: any[] = []
-    for (const spec of SEED_PRODUCTS) {
-      if (spec.wholesalePrice !== undefined) {
-        const variantId = variantBySku.get(spec.sku)
-        if (variantId) {
-          b2bPrices.push({
-            amount: spec.wholesalePrice,
-            currency_code: 'ars',
-            variant_id: variantId,
-          })
-        }
-      }
-    }
-
     if (b2bPrices.length > 0) {
       await createPriceListsWorkflow(container).run({
         input: {
@@ -811,17 +859,55 @@ export default async function seedStaging({ container }: ExecArgs) {
               title: B2B_PRICE_LIST_TITLE,
               description: 'Lista de precios mayoristas diferenciales para Talabarteria Mercadal B2B',
               status: 'active' as never,
+              rules: {
+                'customer.groups.id': [groupB2B.id],
+              },
               prices: b2bPrices,
             },
           ],
         },
       })
-      logger.info(`Creada Price List '${B2B_PRICE_LIST_TITLE}' con ${b2bPrices.length} precios`)
+      logger.info(
+        `Creada Price List '${B2B_PRICE_LIST_TITLE}' con ${b2bPrices.length} precios y regla customer.groups.id=[${groupB2B.id}]`
+      )
+    }
+  } else {
+    const existingRules = (b2bPriceList as any).price_list_rules ?? []
+    const groupRule = existingRules.find(
+      (r: any) =>
+        r.attribute === 'customer.groups.id' &&
+        Array.isArray(r.value) &&
+        r.value.includes(groupB2B!.id)
+    )
+
+    if (!groupRule) {
+      logger.info(
+        `Price List '${B2B_PRICE_LIST_TITLE}' existente sin regla customer.groups.id. Aplicando regla scoped por workflow...`
+      )
+      await updatePriceListsWorkflow(container).run({
+        input: {
+          price_lists_data: [
+            {
+              id: b2bPriceList.id,
+              rules: {
+                'customer.groups.id': [groupB2B.id],
+              },
+            },
+          ],
+        },
+      })
+      logger.info(
+        `Price List '${B2B_PRICE_LIST_TITLE}' actualizada con regla customer.groups.id=[${groupB2B.id}]`
+      )
+    } else {
+      logger.info(
+        `Price List '${B2B_PRICE_LIST_TITLE}' ya posee la regla customer.groups.id=[${groupB2B.id}]`
+      )
     }
   }
 
   // =========================================================================
-  // 8. RESUMEN VERIFICABLE DE ESTADO FINAL
+  // 9. RESUMEN VERIFICABLE DE ESTADO FINAL
   // =========================================================================
   const { data: finalChannels } = await query.graph({
     entity: 'sales_channel',
@@ -868,6 +954,23 @@ export default async function seedStaging({ container }: ExecArgs) {
     )
   }
 
+  const { data: finalGroups } = await query.graph({
+    entity: 'customer_group',
+    fields: ['id', 'name'],
+  })
+  const { data: finalPriceLists } = await query.graph({
+    entity: 'price_list',
+    fields: [
+      'id',
+      'title',
+      'status',
+      'type',
+      'price_list_rules.id',
+      'price_list_rules.attribute',
+      'price_list_rules.value',
+    ],
+  })
+
   if (finalChannels.length !== 2 || finalLocations.length !== 1 || finalKeys.length !== 2) {
     logger.error(
       `[INTEGRITY GATE FAILURE] Discrepancia en configuracion comercial:\n` +
@@ -877,6 +980,34 @@ export default async function seedStaging({ container }: ExecArgs) {
     )
     throw new Error(
       `[INTEGRITY GATE FAILURE] Abortando por violacion de entidades base: canales=${finalChannels.length}, ubicaciones=${finalLocations.length}, keys=${finalKeys.length}`
+    )
+  }
+
+  if (finalGroups.length !== 2) {
+    logger.error(
+      `[INTEGRITY GATE FAILURE] Discrepancia en Customer Groups: ${finalGroups.length} (Esperado: 2)`
+    )
+    throw new Error(
+      `[INTEGRITY GATE FAILURE] Abortando por violacion de Customer Groups: ${finalGroups.length} != 2`
+    )
+  }
+
+  const finalB2BPriceList = finalPriceLists.find((pl) => pl.title === B2B_PRICE_LIST_TITLE)
+  const b2bGroupRule = ((finalB2BPriceList as any)?.price_list_rules ?? []).find(
+    (r: any) =>
+      r.attribute === 'customer.groups.id' &&
+      Array.isArray(r.value) &&
+      r.value.includes(groupB2B.id)
+  )
+
+  if (!finalB2BPriceList || !b2bGroupRule) {
+    logger.error(
+      `[INTEGRITY GATE FAILURE] Price List B2B o su regla de grupo faltante en BD:\n` +
+      `  - Price List existente: ${Boolean(finalB2BPriceList)}\n` +
+      `  - Regla customer.groups.id=[${groupB2B.id}]: ${Boolean(b2bGroupRule)}`
+    )
+    throw new Error(
+      `[INTEGRITY GATE FAILURE] Price list B2B '${B2B_PRICE_LIST_TITLE}' no tiene la regla requerida customer.groups.id=[${groupB2B.id}]`
     )
   }
 
@@ -899,6 +1030,11 @@ export default async function seedStaging({ container }: ExecArgs) {
     console.log(`  - [${sc.name}] (ID: ${sc.id})`)
   }
 
+  console.log(`\nCustomer Groups (${finalGroups.length} / 2 requeridos):`)
+  for (const cg of finalGroups) {
+    console.log(`  - [${cg.name}] (ID: ${cg.id})`)
+  }
+
   console.log(`\nStock Locations (${finalLocations.length} / 1 requerida):`)
   for (const sl of finalLocations) {
     const linked = (sl.sales_channels ?? [])
@@ -915,6 +1051,14 @@ export default async function seedStaging({ container }: ExecArgs) {
       .filter(Boolean)
       .join(', ')
     console.log(`  - Key: ${k.title} (ID: ${k.id}) -> Canal: ${linked || 'NINGUNO'}`)
+  }
+
+  console.log(`\nPrice Lists (${finalPriceLists.length} / 1 requerida):`)
+  for (const pl of finalPriceLists) {
+    const rulesStr = ((pl as any).price_list_rules ?? [])
+      .map((r: any) => `${r.attribute}=${JSON.stringify(r.value)}`)
+      .join(', ') || 'SIN_REGLAS'
+    console.log(`  - [${pl.title}] (ID: ${pl.id} | Status: ${pl.status} | Type: ${(pl as any).type}) -> Reglas: [${rulesStr}]`)
   }
 
   console.log(

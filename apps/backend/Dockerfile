@@ -1,6 +1,9 @@
 # Stage 1: Build Medusa 2 server
 FROM node:22.23.3-bookworm-slim AS builder
 
+ARG GIT_SHA="unknown"
+RUN [ "$GIT_SHA" != "unknown" ] || { echo "GIT_SHA requerido"; exit 1; }
+
 WORKDIR /app
 
 # Copy root manifests and workspace manifests required by npm ci
@@ -21,6 +24,7 @@ RUN npm run build --workspace apps/backend
 FROM node:22.23.3-bookworm-slim AS runtime
 
 ARG GIT_SHA="unknown"
+RUN [ "$GIT_SHA" != "unknown" ] || { echo "GIT_SHA requerido"; exit 1; }
 LABEL org.opencontainers.image.revision=$GIT_SHA
 
 WORKDIR /app
