@@ -47,8 +47,8 @@ export function HeaderB2B() {
   return (
     <header className="sticky top-0 z-50 shadow-sm font-sans">
       {/* 1. Top Bar Superior (Canal mayorista, Cuentas aprobadas, Envíos) */}
-      <div className="bg-[#18261E] text-[#D1DBD4] px-4 sm:px-6 lg:px-8 xl:px-12 py-2 text-xs border-b border-[#23382C]">
-        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-2">
+      <div className="bg-[#18261E] text-[#D1DBD4] px-4 sm:px-6 lg:px-8 xl:px-12 py-1 sm:py-1.5 text-xs border-b border-[#23382C]">
+        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-1.5 sm:gap-2">
           {/* Badges izquierda */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] sm:text-xs">
             <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#E4EDE6]">
@@ -86,10 +86,10 @@ export function HeaderB2B() {
 
       {/* 2. Main Navbar Oficial José Mercadal */}
       <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="w-full h-20 flex items-center justify-between gap-3 lg:gap-6">
+        <div className="w-full h-16 flex items-center justify-between gap-3 lg:gap-6">
           {/* A. Logo oficial José Mercadal con Isologo JM */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group py-1">
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 transition-transform group-hover:scale-105">
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group py-1">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform group-hover:scale-105">
               <Image
                 src="/images/brand/isologo-jm-transparent.png"
                 alt="Isologo JM"
@@ -99,7 +99,7 @@ export function HeaderB2B() {
               />
             </div>
             <div className="flex flex-col">
-              <div className="relative h-6 sm:h-7 w-40 sm:w-48">
+              <div className="relative h-5 sm:h-6 w-36 sm:w-44">
                 <Image
                   src="/images/brand/logo-jose-mercadal-transparent.png"
                   alt="José Mercadal"
