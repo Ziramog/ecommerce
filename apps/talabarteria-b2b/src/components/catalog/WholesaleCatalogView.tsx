@@ -51,7 +51,7 @@ export function WholesaleCatalogView({ products }: WholesaleCatalogViewProps) {
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen py-6 sm:py-8 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* 1. Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs text-[#78716C] mb-6 font-medium">
           <Link href="/" className="hover:text-[#1F1E1D] flex items-center gap-1">
@@ -248,7 +248,7 @@ export function WholesaleCatalogView({ products }: WholesaleCatalogViewProps) {
           <div
             className={
               viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6'
                 : 'flex flex-col gap-4'
             }
           >

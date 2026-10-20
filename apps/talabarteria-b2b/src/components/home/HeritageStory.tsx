@@ -2,12 +2,11 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { HorseSilhouette } from '@/components/common/HeaderB2B'
 
 export function HeritageStory() {
   return (
     <section id="historia" className="bg-[#FAF8F5] py-16 sm:py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="bg-white border border-[#E8E2D8] rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 lg:grid-cols-12 items-stretch">
           {/* Imagen Izquierda: Taller / Cuero Artesanal */}
           <div className="relative h-64 sm:h-80 lg:h-auto lg:col-span-4 min-h-[260px]">

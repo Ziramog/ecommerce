@@ -47,8 +47,8 @@ export function HeaderB2B() {
   return (
     <header className="sticky top-0 z-50 shadow-sm font-sans">
       {/* 1. Top Bar Superior (Canal mayorista, Cuentas aprobadas, Envíos) */}
-      <div className="bg-[#18261E] text-[#D1DBD4] px-4 sm:px-6 lg:px-8 py-2 text-xs border-b border-[#23382C]">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+      <div className="bg-[#18261E] text-[#D1DBD4] px-4 sm:px-6 lg:px-8 xl:px-12 py-2 text-xs border-b border-[#23382C]">
+        <div className="w-full flex flex-col md:flex-row justify-between items-center gap-2">
           {/* Badges izquierda */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] sm:text-xs">
             <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#E4EDE6]">
@@ -85,8 +85,8 @@ export function HeaderB2B() {
       </div>
 
       {/* 2. Main Navbar Oficial José Mercadal */}
-      <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto h-20 flex items-center justify-between gap-3 lg:gap-4">
+      <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8 xl:px-12">
+        <div className="w-full h-20 flex items-center justify-between gap-3 lg:gap-6">
           {/* A. Logo oficial José Mercadal con Isologo JM */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group py-1">
             <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 transition-transform group-hover:scale-105">
@@ -141,7 +141,7 @@ export function HeaderB2B() {
                 placeholder="Buscar productos, SKU o categoría..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 lg:w-56 xl:w-64 bg-white/90 border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all"
+                className="w-48 lg:w-56 xl:w-64 2xl:w-80 bg-white/90 border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all"
               />
             </form>
 

@@ -249,7 +249,7 @@ export function FeaturedWholesaleProducts({ products }: FeaturedWholesaleProps) 
 
   return (
     <section className="bg-[#FAF8F5] py-14 sm:py-16 border-b border-[#E8E2D8]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>

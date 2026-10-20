@@ -18,7 +18,7 @@ export function EquestrianHero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/85 to-transparent" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-12 sm:py-16 lg:py-20 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Columna Izquierda: Mensaje y llamadas a la acción */}
           <div className="lg:col-span-7 xl:col-span-8">

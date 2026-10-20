@@ -8,7 +8,7 @@ export function FooterB2B() {
     <footer className="bg-[#18261E] text-[#D1DBD4] border-t border-[#23382C] text-xs font-sans">
       {/* Guarantees Bar */}
       <div className="border-b border-[#23382C] py-8 bg-[#142019]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="flex items-start gap-3">
             <ShieldCheck className="w-5 h-5 text-[#9AB3A1] shrink-0 mt-0.5" />
             <div>
@@ -52,7 +52,7 @@ export function FooterB2B() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="relative w-10 h-10 flex-shrink-0">
@@ -128,7 +128,7 @@ export function FooterB2B() {
 
       {/* Copyright */}
       <div className="border-t border-[#23382C] py-4 bg-[#111A14] text-center text-[11px] text-[#7A9382]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>
             © {new Date().getFullYear()} Talabartería Mercadal S.A. Todos los derechos reservados.
           </span>

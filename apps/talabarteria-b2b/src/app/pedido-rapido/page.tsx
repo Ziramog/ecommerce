@@ -8,7 +8,7 @@ export default async function PedidoRapidoPage() {
   const products = await getB2BProducts()
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 xl:px-12 w-full">
       <BulkOrderMatrix products={products} />
     </div>
   )

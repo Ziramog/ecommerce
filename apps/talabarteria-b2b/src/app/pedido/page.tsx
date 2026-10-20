@@ -123,7 +123,7 @@ export default function PedidoPage() {
   }
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 xl:px-12 w-full">
       <div className="mb-6">
         <span className="text-xs uppercase font-bold text-saddle tracking-widest block mb-1">
           Consolidación de Compra Mayorista

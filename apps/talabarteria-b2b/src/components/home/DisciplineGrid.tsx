@@ -52,7 +52,7 @@ const DISCIPLINES_DATA: DisciplineItem[] = [
 export function DisciplineGrid() {
   return (
     <section className="bg-[#FAF8F5] py-8 sm:py-10 border-b border-[#E8E2D8]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {DISCIPLINES_DATA.map((item) => (
             <Link
