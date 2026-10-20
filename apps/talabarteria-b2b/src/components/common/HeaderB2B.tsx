@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuthB2B } from '@/context/AuthB2BContext'
 import { useB2BCart } from '@/context/B2BCartContext'
@@ -99,17 +100,29 @@ export function HeaderB2B() {
       {/* 2. Main Navbar (Logo ecuestre, Menú disciplinas, Buscador, Acceso, Carrito) */}
       <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto h-20 flex items-center justify-between gap-4">
-          {/* Logo con silueta de caballo y tradición */}
-          <Link href="/" className="flex items-center gap-3.5 flex-shrink-0 group">
-            <div className="text-[#1F1E1D] group-hover:text-[#6B3A2A] transition-colors">
-              <HorseSilhouette className="w-10 h-8 sm:w-12 sm:h-9" />
+          {/* Logo oficial José Mercadal con Isologo JM */}
+          <Link href="/" className="flex items-center gap-3.5 flex-shrink-0 group py-1">
+            <div className="relative w-12 h-12 flex-shrink-0 transition-transform group-hover:scale-105">
+              <Image
+                src="/images/brand/isologo-jm-transparent.png"
+                alt="Isologo JM"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             <div className="flex flex-col">
-              <span className="font-serif text-lg sm:text-xl font-bold tracking-[0.08em] text-[#1F1E1D] uppercase leading-tight">
-                Talabartería Mercadal
-              </span>
-              <span className="text-[8px] sm:text-[9px] tracking-[0.25em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5">
-                Tradición que acompaña nuevos caminos.
+              <div className="relative h-6 sm:h-7 w-44 sm:w-52">
+                <Image
+                  src="/images/brand/logo-jose-mercadal-transparent.png"
+                  alt="José Mercadal"
+                  fill
+                  className="object-contain object-left"
+                  priority
+                />
+              </div>
+              <span className="text-[7.5px] sm:text-[8.5px] tracking-[0.24em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5">
+                Talabartería & Artículos Ecuestres
               </span>
             </div>
           </Link>

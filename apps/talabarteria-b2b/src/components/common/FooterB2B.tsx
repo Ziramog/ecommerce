@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShieldCheck, Truck, FileCheck2, Phone } from 'lucide-react'
-import { HorseSilhouette } from './HeaderB2B'
 
 export function FooterB2B() {
   return (
@@ -55,10 +55,22 @@ export function FooterB2B() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-5">
           <div className="flex items-center gap-3 mb-3">
-            <HorseSilhouette className="w-8 h-6 text-white" />
-            <span className="font-serif text-lg font-bold text-white uppercase tracking-wider">
-              Talabartería Mercadal S.A.
-            </span>
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <Image
+                src="/images/brand/isologo-jm-transparent.png"
+                alt="Isologo JM"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-lg font-bold text-white uppercase tracking-wider leading-tight">
+                Talabartería José Mercadal S.A.
+              </span>
+              <span className="text-[9px] tracking-[0.2em] text-[#9AB3A1] uppercase font-semibold">
+                Tradición & Artículos Ecuestres
+              </span>
+            </div>
           </div>
           <p className="text-[#A2B5A7] leading-relaxed mb-4 max-w-sm">
             Fabricación tradicional y distribución mayorista de aperos criollos, monturas de trabajo, cueros curtidos, lonjas para sogueo y equipamiento para polo, salto y turf.

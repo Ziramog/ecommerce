@@ -57,10 +57,22 @@ export function HeritageStory() {
               sizes="(max-width: 1024px) 100vw, 25vw"
             />
             <div className="relative z-10 flex flex-col items-center">
-              <HorseSilhouette className="w-14 h-11 text-[#1F1E1D] mb-3" />
-              <span className="font-serif text-base font-bold tracking-[0.1em] text-[#1F1E1D] uppercase leading-tight">
-                Talabartería Mercadal
-              </span>
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-2">
+                <Image
+                  src="/images/brand/isologo-jm-transparent.png"
+                  alt="Isologo JM José Mercadal"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="relative h-6 w-44 mb-1">
+                <Image
+                  src="/images/brand/logo-jose-mercadal-transparent.png"
+                  alt="José Mercadal"
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <span className="text-[7.5px] tracking-[0.25em] text-[#78716C] font-semibold uppercase leading-tight mt-1 max-w-[180px]">
                 Tradición que acompaña nuevos caminos.
               </span>

@@ -23,7 +23,7 @@ export function EquestrianHero() {
           {/* Columna Izquierda: Mensaje y llamadas a la acción */}
           <div className="lg:col-span-7 xl:col-span-8">
             <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-[#8C7355] font-bold block mb-3">
-              Talabartería Mercadal
+              Talabartería José Mercadal
             </span>
 
             <h1 className="font-serif text-3xl sm:text-5xl lg:text-[54px] font-bold text-[#1F1E1D] leading-[1.12] tracking-tight mb-5">
