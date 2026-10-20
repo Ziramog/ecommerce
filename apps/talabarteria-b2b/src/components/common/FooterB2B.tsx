@@ -1,82 +1,86 @@
 import React from 'react'
 import Link from 'next/link'
-import { Shield, Truck, FileCheck, Phone } from 'lucide-react'
+import { ShieldCheck, Truck, FileCheck2, Phone } from 'lucide-react'
+import { HorseSilhouette } from './HeaderB2B'
 
 export function FooterB2B() {
   return (
-    <footer className="bg-navy-dark text-b2b-300 border-t border-navy-light text-xs">
-      {/* Wholesale Guarantees Bar */}
-      <div className="border-b border-navy-light/40 py-8 bg-navy/40">
+    <footer className="bg-[#18261E] text-[#D1DBD4] border-t border-[#23382C] text-xs font-sans">
+      {/* Guarantees Bar */}
+      <div className="border-b border-[#23382C] py-8 bg-[#142019]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-saddle-light shrink-0 mt-0.5" />
+            <ShieldCheck className="w-5 h-5 text-[#9AB3A1] shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-white text-sm mb-1">Facturación A y B</h4>
-              <p className="text-b2b-400 leading-relaxed text-xs">
-                Emisión electrónica fiscal ARCA / AFIP automática con discriminación de IVA para Responsables Inscriptos.
+              <p className="text-[#A2B5A7] leading-relaxed text-xs">
+                Emisión electrónica fiscal ARCA automática con discriminación de IVA para Responsables Inscriptos.
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <Truck className="w-5 h-5 text-saddle-light shrink-0 mt-0.5" />
+            <Truck className="w-5 h-5 text-[#9AB3A1] shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-white text-sm mb-1">Logística Nacional</h4>
-              <p className="text-b2b-400 leading-relaxed text-xs">
-                Despachos consolidados por expreso al interior, palletizado y retiro por depósito central.
+              <p className="text-[#A2B5A7] leading-relaxed text-xs">
+                Despachos consolidados por expreso al interior, palletizado y logística puerta a puerta.
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <FileCheck className="w-5 h-5 text-saddle-light shrink-0 mt-0.5" />
+            <FileCheck2 className="w-5 h-5 text-[#9AB3A1] shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-white text-sm mb-1">Precios Escalonados</h4>
-              <p className="text-b2b-400 leading-relaxed text-xs">
-                Descuentos automáticos por volumen de compra en piezas de talabartería y paquetes de sogueo.
+              <p className="text-[#A2B5A7] leading-relaxed text-xs">
+                Descuentos automáticos por volumen de compra (-10% y -20%) en piezas de talabartería y paquetes de sogueo.
               </p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <Phone className="w-5 h-5 text-saddle-light shrink-0 mt-0.5" />
+            <Phone className="w-5 h-5 text-[#9AB3A1] shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-white text-sm mb-1">Atención Mayorista</h4>
-              <p className="text-b2b-400 leading-relaxed text-xs">
-                Ejecutivo de cuentas asignado para seguimiento de órdenes, cotizaciones y pedidos especiales.
+              <p className="text-[#A2B5A7] leading-relaxed text-xs">
+                Mesa comercial y ejecutivo asignado para seguimiento de órdenes, cotizaciones y pedidos especiales.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
-          <span className="font-heading text-lg font-bold text-white block mb-2 uppercase tracking-wider">
-            Talabartería Mercadal S.A.
-          </span>
-          <p className="text-b2b-400 leading-relaxed mb-4">
-            Fabricación tradicional y distribución mayorista de aperos criollos, monturas de trabajo, cueros curtidos, lonjas para sogueo y herrajes forjados.
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div className="md:col-span-5">
+          <div className="flex items-center gap-3 mb-3">
+            <HorseSilhouette className="w-8 h-6 text-white" />
+            <span className="font-serif text-lg font-bold text-white uppercase tracking-wider">
+              Talabartería Mercadal S.A.
+            </span>
+          </div>
+          <p className="text-[#A2B5A7] leading-relaxed mb-4 max-w-sm">
+            Fabricación tradicional y distribución mayorista de aperos criollos, monturas de trabajo, cueros curtidos, lonjas para sogueo y equipamiento para polo, salto y turf.
           </p>
-          <span className="text-[11px] text-b2b-500 block">
-            Planta Industrial & Depósito: Av. Juan B. Justo 7820, CABA, Argentina.
+          <span className="text-[11px] text-[#7A9382] block">
+            Planta Industrial & Depósito Central: Av. Juan B. Justo 7820, CABA, Argentina.
           </span>
         </div>
 
-        <div>
+        <div className="md:col-span-3">
           <h5 className="font-semibold text-white text-xs uppercase tracking-wider mb-3">
             Operaciones B2B
           </h5>
-          <ul className="space-y-2 text-b2b-400">
+          <ul className="space-y-2 text-[#A2B5A7]">
             <li>
               <Link href="/catalogo" className="hover:text-white transition-colors">
-                Lista de Precios Mayorista
+                Catálogo & Lista de Precios
               </Link>
             </li>
             <li>
               <Link href="/pedido-rapido" className="hover:text-white transition-colors">
-                Carga Masiva por SKU
+                Matriz de Pedido Rápido (SKU)
               </Link>
             </li>
             <li>
@@ -92,21 +96,34 @@ export function FooterB2B() {
           </ul>
         </div>
 
-        <div>
+        <div className="md:col-span-4">
           <h5 className="font-semibold text-white text-xs uppercase tracking-wider mb-3">
             Condiciones Comerciales
           </h5>
-          <p className="text-b2b-400 leading-relaxed mb-2">
-            Mínimo de orden mayorista: 3 unidades combinadas o $200.000 ARS base.
+          <p className="text-[#A2B5A7] leading-relaxed mb-3">
+            Venta restringida a clientes comerciales registrados y aprobados. Precios cotizados en Pesos Argentinos (ARS) sin IVA.
           </p>
-          <p className="text-b2b-400 leading-relaxed">
-            Plazos de entrega habituales: 48/72 hs en productos con stock garantizado en almacén digital.
-          </p>
+          <div className="p-3 bg-[#142019] border border-[#23382C] rounded-lg">
+            <span className="block text-[11px] font-mono text-[#D1DBD4]">
+              CUIT: 30-58291472-4 • Responsable Inscripto
+            </span>
+            <span className="block text-[11px] text-[#A2B5A7] mt-0.5">
+              Mesa Comercial: (011) 4892-1200 • consultas@talabarteriamercadal.com.ar
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-navy-light/40 py-4 text-center text-b2b-500 text-[11px]">
-        © {new Date().getFullYear()} Talabartería Mercadal — Todos los derechos reservados. Ventas exclusivas B2B bajo CUIT comercial.
+      {/* Copyright */}
+      <div className="border-t border-[#23382C] py-4 bg-[#111A14] text-center text-[11px] text-[#7A9382]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>
+            © {new Date().getFullYear()} Talabartería Mercadal S.A. Todos los derechos reservados.
+          </span>
+          <span className="text-[#A2B5A7]">
+            Canal B2B conectado a Medusa 2 • Stock unificado por SKU
+          </span>
+        </div>
       </div>
     </footer>
   )
