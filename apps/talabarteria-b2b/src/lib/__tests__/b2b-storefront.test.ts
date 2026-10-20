@@ -9,6 +9,7 @@ import {
 } from '../utils'
 import {
   FALLBACK_PRODUCT_IMAGES,
+  LOCAL_STUDIO_IMAGES,
   getB2BProducts,
   getB2BProductByHandle,
 } from '../catalog'
@@ -67,6 +68,13 @@ describe('Talabartería Mercadal B2B — Fiscal & Utility Helpers', () => {
 })
 
 describe('Talabartería Mercadal B2B — Image & Photographic Assets', () => {
+  test('LOCAL_STUDIO_IMAGES includes authentic photographic asset for freno criollo cabeza de moro', () => {
+    assert.strictEqual(
+      LOCAL_STUDIO_IMAGES['freno-criollo-cabeza-de-moro'],
+      '/images/products/freno-criollo-cabeza-de-moro.jpg'
+    )
+  })
+
   test('FALLBACK_PRODUCT_IMAGES includes photographic asset for wholesale lonja pack', () => {
     assert.ok(
       FALLBACK_PRODUCT_IMAGES['rollo-lonja-vacuna-pack-x10'],

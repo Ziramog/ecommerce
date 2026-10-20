@@ -22,6 +22,7 @@ export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
 }
 
 export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
+  'freno-criollo-cabeza-de-moro': '/images/products/freno-criollo-cabeza-de-moro.jpg',
   'rollo-lonja-vacuna-pack-x10': '/images/products/rollo-lonja-vacuna-pack-x10.jpg',
   'cuchillo-artesanal-alpaca': '/images/products/cuchillo-artesanal-alpaca.jpg',
   'cuchillo-criollo-vaina-repujada': '/images/products/cuchillo-criollo-vaina-repujada.jpg',
