@@ -6,16 +6,16 @@ import { ArrowRight, Users, FileCheck2, Truck } from 'lucide-react'
 export function EquestrianHero() {
   return (
     <section className="relative bg-[#FAF8F5] overflow-hidden border-b border-[#E8E2D8]">
-      {/* Background with subtle equestrian photography overlay */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+      {/* Background with dedicated Argentine polo equestrian photography */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=2000&q=85"
+          src="/images/home/hero-polo-action.jpg"
           alt="Talabartería ecuestre polo y salto"
           fill
           priority
-          className="object-cover object-center"
+          className="object-cover object-right md:object-center opacity-30 sm:opacity-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/90 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/85 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10">

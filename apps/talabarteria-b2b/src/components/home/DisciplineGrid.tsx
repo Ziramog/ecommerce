@@ -15,37 +15,37 @@ const DISCIPLINES_DATA: DisciplineItem[] = [
     name: 'POLO',
     subtitle: 'Equipamiento y accesorios para el juego.',
     href: '/catalogo?disciplina=polo',
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-polo.jpg',
   },
   {
     name: 'SALTO',
     subtitle: 'Monturas y accesorios de alto rendimiento.',
     href: '/catalogo?disciplina=salto',
-    image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-salto.jpg',
   },
   {
     name: 'TURF',
     subtitle: 'Artículos y accesorios para entrenamiento y competencia.',
     href: '/catalogo?disciplina=turf',
-    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-turf.jpg',
   },
   {
     name: 'MONTURAS',
     subtitle: 'Monturas completas y accesorios.',
     href: '/catalogo?disciplina=monturas',
-    image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-monturas.jpg',
   },
   {
     name: 'APEROS',
     subtitle: 'Recados, riendas y artículos de tradición.',
     href: '/catalogo?disciplina=aperos',
-    image: 'https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-aperos.jpg',
   },
   {
     name: 'ACCESORIOS',
     subtitle: 'Bastos, cinchas, estribos y más.',
     href: '/catalogo?disciplina=accesorios',
-    image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=600&q=80',
+    image: '/images/home/disciplina-accesorios.jpg',
   },
 ]
 

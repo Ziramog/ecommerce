@@ -22,6 +22,22 @@ export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
     'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80',
 }
 
+export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
+  'montura-criolla-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
+  'montura-completa-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
+  'cuchillo-criollo-vaina-repujada': '/images/products/cuchillo-criollo-vaina-repujada.jpg',
+  'cuchillo-artesanal-alpaca': '/images/products/cuchillo-artesanal-alpaca.jpg',
+  'cinturon-carpincho-alpaca': '/images/products/cinturon-carpincho-alpaca.jpg',
+  'mate-imperial-alpaca': '/images/products/mate-imperial-alpaca.jpg',
+  'estribos-chaquenos-acero-inoxidable': '/images/products/estribos-acero-cuero.jpg',
+  'estribos-de-acero-y-cuero': '/images/products/estribos-acero-cuero.jpg',
+  'bozal-cuero-crudo-trenzado': '/images/products/cabezada-cuero.jpg',
+  'cabezada-de-cuero': '/images/products/cabezada-cuero.jpg',
+  'riendas-de-cuero-vacuno': '/images/products/riendas-cuero-vacuno.jpg',
+  'cinturon-de-polo': '/images/products/cinturon-polo.jpg',
+  'pechera-tejida-artesanal': '/images/products/pechera-tejida-artesanal.jpg',
+}
+
 let cachedRegionId: string | null = null
 
 export async function getArgentinaRegionId(): Promise<string> {
@@ -73,13 +89,11 @@ export async function getB2BProducts(authToken?: string): Promise<B2BProduct[]> 
     return (res.products || []).map((p) => {
       const variant = p.variants?.[0]
       const calcPrice = variant?.calculated_price
-      // If customer has wholesale group, calculated_amount is the wholesale discounted price
       const calculatedAmount = calcPrice?.calculated_amount ?? 0
       const originalAmount = calcPrice?.original_amount ?? calculatedAmount
       const fallbackImage = FALLBACK_PRODUCT_IMAGES[p.handle || '']
+      const localImage = LOCAL_STUDIO_IMAGES[p.handle || '']
 
-      // Canonical wholesale pricing: if authenticated with wholesale group, calculatedAmount is the tier price;
-      // otherwise, default wholesale list applies a standard commercial discount
       const wholesalePrice = calculatedAmount > 0 ? calculatedAmount : originalAmount
 
       return {
@@ -87,7 +101,7 @@ export async function getB2BProducts(authToken?: string): Promise<B2BProduct[]> 
         title: p.title,
         handle: p.handle || '',
         description: p.description,
-        thumbnail: p.thumbnail || fallbackImage,
+        thumbnail: localImage || p.thumbnail || fallbackImage,
         sku: variant?.sku || '',
         variantId: variant?.id || '',
         basePrice: originalAmount,
@@ -131,13 +145,14 @@ export async function getB2BProductByHandle(
     const calculatedAmount = calcPrice?.calculated_amount ?? 0
     const originalAmount = calcPrice?.original_amount ?? calculatedAmount
     const fallbackImage = FALLBACK_PRODUCT_IMAGES[p.handle || '']
+    const localImage = LOCAL_STUDIO_IMAGES[p.handle || '']
 
     return {
       id: p.id,
       title: p.title,
       handle: p.handle || '',
       description: p.description,
-      thumbnail: p.thumbnail || fallbackImage,
+      thumbnail: localImage || p.thumbnail || fallbackImage,
       sku: variant?.sku || '',
       variantId: variant?.id || '',
       basePrice: originalAmount,

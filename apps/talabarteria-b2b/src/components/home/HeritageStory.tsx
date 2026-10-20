@@ -12,7 +12,7 @@ export function HeritageStory() {
           {/* Imagen Izquierda: Taller / Cuero Artesanal */}
           <div className="relative h-64 sm:h-80 lg:h-auto lg:col-span-4 min-h-[260px]">
             <Image
-              src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80"
+              src="/images/products/montura-completa-trabajo.jpg"
               alt="Talabartería y cuero artesanal argentino"
               fill
               className="object-cover object-center"
@@ -50,7 +50,7 @@ export function HeritageStory() {
           {/* Bloque Derecho: Polo Field & Logo Lockup */}
           <div className="relative h-64 sm:h-80 lg:h-auto lg:col-span-3 bg-[#FAF8F5] border-t lg:border-t-0 lg:border-l border-[#E8E2D8] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80"
+              src="/images/home/hero-polo-action.jpg"
               alt="Jinetes y polo argentino"
               fill
               className="object-cover object-center opacity-25"
