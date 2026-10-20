@@ -12,27 +12,14 @@ import {
   Truck,
   Search,
   User,
-  ShoppingBag,
+  ShoppingCart,
   LogOut,
   ChevronDown,
   ShieldCheck,
   Menu,
   X,
-  FileSpreadsheet,
+  FileText,
 } from 'lucide-react'
-
-export function HorseSilhouette({ className = 'w-9 h-7' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 76 56"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M72.4 15.2c-1.8-3.6-5.2-6.5-9.1-8-2-.8-4.2-.6-5.9.6-3.2 2.3-6.9 3.8-10.8 4.3-3.6.5-7.2.2-10.7-.8l-4.5-1.3c-3.1-.9-6.4-.6-9.3.9-2.3 1.2-4.2 3.1-5.4 5.4l-3.2 6.1c-2.4 1.3-4.5 3.2-6 5.5-2.2 3.3-3.3 7.2-3.3 11.2 0 1.9.3 3.8.9 5.6l-3.8 8.9c-.8 1.9-.3 4 1.1 5.3 1.4 1.3 3.5 1.7 5.4.9l8.6-3.7c1.7-.7 2.9-2.2 3.4-4l2.4-7.5c2.3.9 4.7 1.3 7.2 1.3h7.2l-2 7.7c-.5 1.9.2 3.9 1.7 5.1 1.5 1.2 3.6 1.4 5.3.5l8.7-4.4c1.7-.9 2.8-2.6 3-4.5l1.1-9.9c2.4-1.9 4.3-4.4 5.5-7.2l4.1-9.6c1.1-2.6 1.4-5.5.8-8.3l-1.1-6.1c1.4-.7 2.7-1.6 3.7-2.8 1.5-1.6 2-3.8 1.2-5.8z" />
-    </svg>
-  )
-}
 
 const DISCIPLINES = [
   { name: 'POLO', href: '/catalogo?disciplina=polo' },
@@ -60,36 +47,36 @@ export function HeaderB2B() {
   return (
     <header className="sticky top-0 z-50 shadow-sm font-sans">
       {/* 1. Top Bar Superior (Canal mayorista, Cuentas aprobadas, Envíos) */}
-      <div className="bg-[#18261e] text-[#d1dbd4] px-4 sm:px-6 lg:px-8 py-2 text-xs border-b border-[#23382c]">
+      <div className="bg-[#18261E] text-[#D1DBD4] px-4 sm:px-6 lg:px-8 py-2 text-xs border-b border-[#23382C]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
           {/* Badges izquierda */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[11px] sm:text-xs">
-            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#e4ede6]">
-              <Building2 className="w-3.5 h-3.5 text-[#9ab3a1]" />
+            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#E4EDE6]">
+              <Building2 className="w-3.5 h-3.5 text-[#9AB3A1]" />
               Canal mayorista exclusivo
             </span>
-            <span className="text-[#3b5443] hidden sm:inline">|</span>
-            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#e4ede6]">
-              <Lock className="w-3.5 h-3.5 text-[#9ab3a1]" />
+            <span className="text-[#3B5443] hidden sm:inline">|</span>
+            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#E4EDE6]">
+              <Lock className="w-3.5 h-3.5 text-[#9AB3A1]" />
               Cuenta aprobada requerida
             </span>
-            <span className="text-[#3b5443] hidden sm:inline">|</span>
-            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#e4ede6]">
-              <Truck className="w-3.5 h-3.5 text-[#9ab3a1]" />
+            <span className="text-[#3B5443] hidden sm:inline">|</span>
+            <span className="inline-flex items-center gap-1.5 font-medium tracking-wide text-[#E4EDE6]">
+              <Truck className="w-3.5 h-3.5 text-[#9AB3A1]" />
               Envíos a todo el país
             </span>
           </div>
 
           {/* Enlaces derecha */}
-          <div className="flex items-center gap-4 text-[11px] sm:text-xs text-[#a2b5a7]">
+          <div className="flex items-center gap-4 text-[11px] sm:text-xs text-[#A2B5A7]">
             <Link href="#historia" className="hover:text-white transition-colors">
               Sobre Mercadal
             </Link>
-            <span className="text-[#3b5443]">|</span>
+            <span className="text-[#3B5443]">|</span>
             <Link href="/catalogo" className="hover:text-white transition-colors">
               Novedades
             </Link>
-            <span className="text-[#3b5443]">|</span>
+            <span className="text-[#3B5443]">|</span>
             <Link href="/cotizacion" className="hover:text-white transition-colors">
               Contacto
             </Link>
@@ -97,12 +84,12 @@ export function HeaderB2B() {
         </div>
       </div>
 
-      {/* 2. Main Navbar (Logo ecuestre, Menú disciplinas, Buscador, Acceso, Carrito) */}
+      {/* 2. Main Navbar Oficial José Mercadal */}
       <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto h-20 flex items-center justify-between gap-4">
-          {/* Logo oficial José Mercadal con Isologo JM */}
-          <Link href="/" className="flex items-center gap-3.5 flex-shrink-0 group py-1">
-            <div className="relative w-12 h-12 flex-shrink-0 transition-transform group-hover:scale-105">
+        <div className="max-w-7xl mx-auto h-20 flex items-center justify-between gap-3 lg:gap-4">
+          {/* A. Logo oficial José Mercadal con Isologo JM */}
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group py-1">
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex-shrink-0 transition-transform group-hover:scale-105">
               <Image
                 src="/images/brand/isologo-jm-transparent.png"
                 alt="Isologo JM"
@@ -112,7 +99,7 @@ export function HeaderB2B() {
               />
             </div>
             <div className="flex flex-col">
-              <div className="relative h-6 sm:h-7 w-44 sm:w-52">
+              <div className="relative h-6 sm:h-7 w-40 sm:w-48">
                 <Image
                   src="/images/brand/logo-jose-mercadal-transparent.png"
                   alt="José Mercadal"
@@ -121,54 +108,48 @@ export function HeaderB2B() {
                   priority
                 />
               </div>
-              <span className="text-[7.5px] sm:text-[8.5px] tracking-[0.24em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5">
+              <span className="text-[7px] sm:text-[8px] tracking-[0.24em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5">
                 Talabartería & Artículos Ecuestres
               </span>
             </div>
           </Link>
 
-          {/* Menú de Disciplinas Desktop */}
-          <nav className="hidden xl:flex items-center gap-5 text-xs font-semibold tracking-wider text-[#1F1E1D]">
+          {/* B. Menú de Disciplinas Desktop */}
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-[11px] xl:text-xs font-bold tracking-wider text-[#292524]">
             {DISCIPLINES.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="inline-flex items-center gap-1 py-1 hover:text-[#6B3A2A] transition-colors"
+                className="inline-flex items-center gap-1 py-1 hover:text-[#8A311F] transition-colors"
               >
                 <span>{item.name}</span>
-                <ChevronDown className="w-3 h-3 text-[#A8A29E]" />
+                <ChevronDown className="w-3 h-3 text-[#A87B5B]" />
               </Link>
             ))}
           </nav>
 
-          {/* Buscador + Acceso + Carrito */}
-          <div className="flex items-center gap-3 sm:gap-4 flex-1 justify-end max-w-xl">
-            {/* Buscador */}
+          {/* C. Herramientas Derecha: Buscador, Ingresar, Pedido Rápido, Carrito */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+            {/* Buscador con lupa a la izquierda */}
             <form
               onSubmit={handleSearch}
-              className="relative hidden md:block flex-1 max-w-xs"
+              className="relative hidden md:block"
             >
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C8278]" />
               <input
                 type="text"
-                placeholder="Buscar productos, códigos..."
+                placeholder="Buscar productos"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#D6CFC4] rounded-full pl-4 pr-9 py-2 text-xs text-[#1F1E1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#1C3B2B] focus:ring-1 focus:ring-[#1C3B2B] transition-all"
+                className="w-40 lg:w-48 xl:w-56 bg-white/90 border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all"
               />
-              <button
-                type="submit"
-                aria-label="Buscar"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#78716C] hover:text-[#1F1E1D]"
-              >
-                <Search className="w-4 h-4" />
-              </button>
             </form>
 
             {/* Acceso Comercial / Cuenta */}
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <div className="hidden lg:flex flex-col text-right">
-                  <span className="text-xs font-bold text-[#1F1E1D] truncate max-w-[140px]">
+                <div className="hidden xl:flex flex-col text-right">
+                  <span className="text-xs font-bold text-[#1F1E1D] truncate max-w-[130px]">
                     {user?.companyName}
                   </span>
                   <span className="text-[10px] text-emerald-700 font-semibold flex items-center justify-end gap-1">
@@ -187,31 +168,31 @@ export function HeaderB2B() {
             ) : (
               <Link
                 href="/acceso"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-[#1F1E1D] hover:text-[#6B3A2A] hover:bg-[#EFEAE2] transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold text-[#292524] hover:text-[#8A311F] hover:bg-[#EFEAE2] transition-colors"
               >
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4 text-[#292524]" />
                 <span className="hidden sm:inline">Ingresar</span>
               </Link>
             )}
 
-            {/* Matriz Pedido Rápido (Acceso directo profesional) */}
+            {/* Botón Píldora Terracota: Pedido Rápido B2B */}
             <Link
               href="/pedido-rapido"
               title="Matriz de Pedido Rápido B2B"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1C3B2B]/10 hover:bg-[#1C3B2B]/20 text-[#1C3B2B] text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8A311F] hover:bg-[#722718] text-white text-xs font-semibold shadow-sm transition-all flex-shrink-0"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <FileText className="w-3.5 h-3.5" />
               <span>Pedido Rápido</span>
             </Link>
 
-            {/* Carrito de Pedido */}
+            {/* Carrito de Compras con Ruedas y Notificación Roja */}
             <Link
               href="/pedido"
-              className="relative p-2 rounded-full text-[#1F1E1D] hover:bg-[#EFEAE2] transition-colors flex items-center justify-center"
+              className="relative p-2 text-[#292524] hover:text-[#8A311F] transition-colors flex items-center justify-center flex-shrink-0"
               aria-label="Ver pedido mayorista"
             >
-              <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-[#1C3B2B] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <ShoppingCart className="w-5 h-5 stroke-[1.8]" />
+              <span className="absolute -top-1 -right-1 bg-[#8A311F] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                 {totalUnits}
               </span>
             </Link>
@@ -219,7 +200,7 @@ export function HeaderB2B() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded text-[#1F1E1D] hover:bg-[#EFEAE2]"
+              className="lg:hidden p-2 rounded text-[#1F1E1D] hover:bg-[#EFEAE2]"
               aria-label="Abrir menú"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -229,21 +210,16 @@ export function HeaderB2B() {
 
         {/* Mobile Disciplines Dropdown */}
         {mobileMenuOpen && (
-          <div className="xl:hidden border-t border-[#E8E2D8] py-3 space-y-2">
+          <div className="lg:hidden border-t border-[#E8E2D8] py-3 space-y-2">
             <form onSubmit={handleSearch} className="relative mb-3">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C8278]" />
               <input
                 type="text"
-                placeholder="Buscar productos, códigos..."
+                placeholder="Buscar productos"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#D6CFC4] rounded-lg pl-4 pr-9 py-2 text-xs text-[#1F1E1D]"
+                className="w-full bg-white border border-[#D6CFC4] rounded-lg pl-9 pr-4 py-2 text-xs text-[#1F1E1D]"
               />
-              <button
-                type="submit"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#78716C]"
-              >
-                <Search className="w-4 h-4" />
-              </button>
             </form>
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-[#1F1E1D]">
               {DISCIPLINES.map((d) => (
@@ -251,9 +227,10 @@ export function HeaderB2B() {
                   key={d.name}
                   href={d.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded bg-white border border-[#E8E2D8] hover:bg-[#F4EFE8]"
+                  className="p-2 rounded bg-white border border-[#E8E2D8] hover:bg-[#F4EFE8] flex items-center justify-between"
                 >
-                  {d.name}
+                  <span>{d.name}</span>
+                  <ChevronDown className="w-3 h-3 text-[#A87B5B]" />
                 </Link>
               ))}
             </div>
@@ -261,14 +238,15 @@ export function HeaderB2B() {
               <Link
                 href="/pedido-rapido"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-bold bg-[#1C3B2B] text-white rounded"
+                className="flex-1 text-center py-2 text-xs font-bold bg-[#8A311F] text-white rounded-lg flex items-center justify-center gap-1.5"
               >
-                Matriz Pedido Rápido
+                <FileText className="w-3.5 h-3.5" />
+                <span>Pedido Rápido</span>
               </Link>
               <Link
                 href="/cotizacion"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-bold border border-[#D6CFC4] text-[#1F1E1D] rounded bg-white"
+                className="flex-1 text-center py-2 text-xs font-bold border border-[#D6CFC4] text-[#1F1E1D] rounded-lg bg-white"
               >
                 Cotización (RFQ)
               </Link>
