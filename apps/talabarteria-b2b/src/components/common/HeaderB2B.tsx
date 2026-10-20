@@ -138,10 +138,10 @@ export function HeaderB2B() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C8278]" />
               <input
                 type="text"
-                placeholder="Buscar productos"
+                placeholder="Buscar productos, SKU o categoría..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-40 lg:w-48 xl:w-56 bg-white/90 border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all"
+                className="w-48 lg:w-56 xl:w-64 bg-white/90 border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all"
               />
             </form>
 

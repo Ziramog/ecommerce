@@ -3,19 +3,25 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { B2BProduct } from '@/lib/catalog'
-import { formatCurrencyARS, calculateVolumeDiscount } from '@/lib/utils'
+import { formatCurrencyARS, calculateVolumeDiscount, DEFAULT_VOLUME_TIERS } from '@/lib/utils'
 import { useB2BCart } from '@/context/B2BCartContext'
-import { ShoppingCart, Check, Layers } from 'lucide-react'
+import { ShoppingCart, Check, Tag, Package, Heart, Percent } from 'lucide-react'
 
 export function WholesaleProductCard({ product }: { product: B2BProduct }) {
   const { addItem } = useB2BCart()
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const [favorited, setFavorited] = useState(false)
+
+  const activeTiers =
+    product.volumeTiers && product.volumeTiers.length > 0
+      ? product.volumeTiers
+      : DEFAULT_VOLUME_TIERS
 
   const { unitPrice, discountPercent, totalPrice } = calculateVolumeDiscount(
     product.wholesalePrice,
     qty,
-    product.volumeTiers
+    activeTiers
   )
 
   const handleAdd = () => {
@@ -24,87 +30,135 @@ export function WholesaleProductCard({ product }: { product: B2BProduct }) {
     setTimeout(() => setAdded(false), 1500)
   }
 
+  // Calculate best discount tier price (usually 10+ un. / -20%)
+  const bestTier = activeTiers[activeTiers.length - 1]
+  const bestUnitPrice = Math.round(
+    product.wholesalePrice * (1 - (bestTier?.discountPercent || 20) / 100)
+  )
+
   return (
-    <div className="bg-white border border-b2b-200 rounded-lg overflow-hidden shadow-sm hover:shadow transition-shadow flex flex-col justify-between">
+    <div className="bg-white border border-[#E8E2D8] rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
       <div>
-        {/* Image & SKU bar */}
-        <div className="relative h-48 bg-b2b-100 overflow-hidden">
+        {/* Imagen y Badges Superiores */}
+        <div className="relative h-56 bg-[#FAF6F0] overflow-hidden">
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
               alt={product.title}
               fill
-              className="object-cover"
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="h-full flex items-center justify-center text-b2b-400 text-xs">
+            <div className="h-full flex items-center justify-center text-[#A8A29E] text-xs">
               Sin fotografía técnica
             </div>
           )}
-          <div className="absolute top-2 left-2 bg-navy/90 text-white text-[10px] font-mono px-2 py-0.5 rounded font-bold">
-            {product.sku}
+
+          {/* SKU Pill (Arriba Izquierda) */}
+          <div className="absolute top-3 left-3 bg-[#18261E] text-white text-[11px] font-mono px-2.5 py-1 rounded-md font-bold shadow-xs">
+            {product.sku || 'SKU-001'}
           </div>
-          <div className="absolute top-2 right-2 bg-white/95 text-b2b-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-b2b-200">
-            {product.packUnit}
+
+          {/* Unidad / Pack y Favorito (Arriba Derecha) */}
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <div className="bg-white/95 text-[#292524] text-[11px] font-semibold px-2.5 py-1 rounded-md border border-[#E8E2D8] flex items-center gap-1.5 shadow-xs">
+              <Package className="w-3.5 h-3.5 text-[#8A311F]" />
+              <span>{product.packUnit || 'Unidad'}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setFavorited(!favorited)}
+              className="w-7 h-7 rounded-full bg-white/95 border border-[#E8E2D8] flex items-center justify-center text-[#78716C] hover:text-[#8A311F] transition-colors shadow-xs"
+              aria-label="Agregar a favoritos"
+            >
+              <Heart
+                className={`w-3.5 h-3.5 ${favorited ? 'fill-[#8A311F] text-[#8A311F]' : ''}`}
+              />
+            </button>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="p-4">
-          <h3 className="font-heading text-base font-bold text-navy mb-1.5 line-clamp-2">
+        {/* Título y Descripción */}
+        <div className="p-5">
+          <h3 className="font-serif text-lg font-bold text-[#1F1E1D] mb-1.5 leading-snug line-clamp-2 group-hover:text-[#8A311F] transition-colors">
             {product.title}
           </h3>
-          {product.description && (
-            <p className="text-xs text-b2b-500 line-clamp-2 mb-3 leading-relaxed">
-              {product.description}
-            </p>
-          )}
 
-          {/* Price Header */}
-          <div className="bg-b2b-50 p-2.5 rounded border border-b2b-200 mb-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[11px] font-semibold text-b2b-600 uppercase tracking-wider">
-                Precio Mayorista:
-              </span>
-              <span className="font-mono text-base font-bold text-navy">
-                {formatCurrencyARS(unitPrice)}
-                <span className="text-[10px] font-normal text-b2b-500 ml-1">/un</span>
-              </span>
+          <p className="text-xs text-[#57534E] line-clamp-2 mb-4 leading-relaxed font-normal">
+            {product.description ||
+              'Pieza artesanal confeccionada en materiales nobles con especificaciones profesionales para uso ecuestre y de campo.'}
+          </p>
+
+          {/* Caja Destacada de Precio Mayorista */}
+          <div className="bg-[#FAF6F0] p-3.5 rounded-xl border border-[#E8E2D8] mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#EFEAE2] flex items-center justify-center text-[#8A311F] flex-shrink-0">
+                <Percent className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-[#78716C] uppercase tracking-wider block leading-tight">
+                  Precio Mayorista
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-serif text-2xl font-bold text-[#1F1E1D] leading-none">
+                    {formatCurrencyARS(unitPrice)}
+                  </span>
+                  <span className="text-[11px] font-medium text-[#78716C]">/un</span>
+                </div>
+              </div>
             </div>
-            {discountPercent > 0 && (
-              <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
-                Escala aplicada: -{discountPercent}% por volumen ({qty} un.)
-              </span>
-            )}
+
+            <div className="flex items-center gap-1.5 text-right flex-shrink-0">
+              <Tag className="w-4 h-4 text-[#8A311F]" />
+              <div className="text-[11px] text-[#57534E] leading-tight">
+                <span className="block font-medium">Mejor precio</span>
+                <span className="font-bold text-[#1F1E1D]">desde {bestTier?.minQty || 10} un.</span>
+              </div>
+            </div>
           </div>
 
-          {/* Volume Tiers Table */}
-          <div className="mb-4">
-            <span className="text-[10px] uppercase font-bold text-b2b-500 tracking-wider flex items-center gap-1 mb-1.5">
-              <Layers className="w-3 h-3 text-b2b-400" />
-              Escalas de Descuento por Volumen:
-            </span>
-            <div className="grid grid-cols-3 gap-1 text-[10px] text-center font-mono">
-              {product.volumeTiers.map((tier) => {
+          {/* Escalas de Descuento por Volumen */}
+          <div>
+            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-[#44403C] tracking-wider mb-2">
+              <Percent className="w-3 h-3 text-[#8A311F]" />
+              <span>Escalas de descuento por volumen:</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {activeTiers.map((tier) => {
                 const discounted = Math.round(
                   product.wholesalePrice * (1 - tier.discountPercent / 100)
                 )
-                const isActive = qty >= tier.minQty
+                const isActive =
+                  qty >= tier.minQty &&
+                  (tier === activeTiers[activeTiers.length - 1] ||
+                    qty < (activeTiers[activeTiers.indexOf(tier) + 1]?.minQty || Infinity))
+
                 return (
-                  <div
+                  <button
                     key={tier.minQty}
-                    className={`p-1.5 rounded border ${
+                    type="button"
+                    onClick={() => setQty(tier.minQty)}
+                    className={`p-2 rounded-xl border transition-all text-left flex flex-col justify-between ${
                       isActive
-                        ? 'border-saddle bg-saddle/5 font-bold text-saddle-dark'
-                        : 'border-b2b-200 bg-white text-b2b-600'
+                        ? 'border-[#D48D70] bg-[#FFF8F0] shadow-xs'
+                        : 'border-[#E8E2D8] bg-white hover:border-[#D6CFC4] text-[#57534E]'
                     }`}
                   >
-                    <div>{tier.label}</div>
-                    <div className="text-[11px] font-semibold mt-0.5">
+                    <div className="flex items-center gap-1 text-[10px] leading-tight mb-1">
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8A311F] flex-shrink-0" />
+                      )}
+                      <span className={isActive ? 'font-bold text-[#8A311F]' : 'font-medium'}>
+                        {tier.label}
+                      </span>
+                    </div>
+                    <div className="font-bold text-xs font-mono text-[#1F1E1D]">
                       {formatCurrencyARS(discounted)}
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -112,13 +166,16 @@ export function WholesaleProductCard({ product }: { product: B2BProduct }) {
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="p-4 pt-0 border-t border-b2b-100 bg-b2b-50/50">
-        <div className="flex items-center gap-2 mt-3">
-          <div className="flex items-center border border-b2b-300 rounded bg-white">
+      {/* Footer de Acción: Selector de Cantidad + Sumar al Pedido */}
+      <div className="p-5 pt-0">
+        <div className="flex items-center gap-2.5">
+          {/* Selector de cantidad */}
+          <div className="flex items-center border border-[#D6CFC4] rounded-xl bg-white h-11 flex-shrink-0">
             <button
+              type="button"
               onClick={() => setQty(Math.max(1, qty - 1))}
-              className="px-2.5 py-1.5 text-b2b-600 hover:bg-b2b-100 text-xs font-bold"
+              className="px-3 h-full text-[#57534E] hover:bg-[#FAF8F5] text-base font-bold transition-colors rounded-l-xl"
+              aria-label="Disminuir cantidad"
             >
               -
             </button>
@@ -127,33 +184,37 @@ export function WholesaleProductCard({ product }: { product: B2BProduct }) {
               min="1"
               value={qty}
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-12 text-center text-xs font-mono font-semibold focus:outline-none"
+              className="w-10 text-center text-sm font-mono font-bold text-[#1F1E1D] focus:outline-none"
             />
             <button
+              type="button"
               onClick={() => setQty(qty + 1)}
-              className="px-2.5 py-1.5 text-b2b-600 hover:bg-b2b-100 text-xs font-bold"
+              className="px-3 h-full text-[#57534E] hover:bg-[#FAF8F5] text-base font-bold transition-colors rounded-r-xl"
+              aria-label="Aumentar cantidad"
             >
               +
             </button>
           </div>
 
+          {/* Botón Sumar al Pedido */}
           <button
+            type="button"
             onClick={handleAdd}
-            className={`flex-1 py-2 px-3 rounded text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 h-11 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs ${
               added
-                ? 'bg-emerald-600 text-white'
-                : 'bg-navy hover:bg-navy-light text-white'
+                ? 'bg-emerald-700 text-white'
+                : 'bg-[#15232A] hover:bg-[#1E333F] text-white active:scale-[0.98]'
             }`}
           >
             {added ? (
               <>
-                <Check className="w-3.5 h-3.5" />
-                Agregado
+                <Check className="w-4 h-4" />
+                <span>¡Agregado al Pedido!</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="w-3.5 h-3.5" />
-                Sumar {formatCurrencyARS(totalPrice)}
+                <ShoppingCart className="w-4 h-4 stroke-[2]" />
+                <span>Sumar {formatCurrencyARS(totalPrice)}</span>
               </>
             )}
           </button>
