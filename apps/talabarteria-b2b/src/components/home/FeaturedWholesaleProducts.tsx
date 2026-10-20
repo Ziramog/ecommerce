@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { B2BProduct } from '@/lib/catalog'
 import { useAuthB2B } from '@/context/AuthB2BContext'
 import { useB2BCart } from '@/context/B2BCartContext'
-import { formatCurrencyARS, calculateVolumeDiscount } from '@/lib/utils'
+import { formatCurrencyARS, calculateVolumeDiscount, DEFAULT_VOLUME_TIERS } from '@/lib/utils'
 import { Lock, ShoppingBag, Check, ArrowRight } from 'lucide-react'
 
 interface FeaturedCardProps {
@@ -152,7 +152,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v1',
     basePrice: 420000,
     wholesalePrice: 280000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Unidad',
     inStock: true,
     thumbnail: '/images/products/montura-completa-trabajo.jpg',
@@ -165,7 +165,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v2',
     basePrice: 85000,
     wholesalePrice: 58000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Par',
     inStock: true,
     thumbnail: '/images/products/riendas-cuero-vacuno.jpg',
@@ -178,7 +178,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v3',
     basePrice: 62000,
     wholesalePrice: 41000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Unidad',
     inStock: true,
     thumbnail: '/images/products/cinturon-polo.jpg',
@@ -191,7 +191,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v4',
     basePrice: 95000,
     wholesalePrice: 64000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Unidad',
     inStock: true,
     thumbnail: '/images/products/pechera-tejida-artesanal.jpg',
@@ -204,7 +204,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v5',
     basePrice: 110000,
     wholesalePrice: 75000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Par',
     inStock: true,
     thumbnail: '/images/products/estribos-acero-cuero.jpg',
@@ -217,7 +217,7 @@ const FALLBACK_FEATURED: B2BProduct[] = [
     variantId: 'v6',
     basePrice: 78000,
     wholesalePrice: 52000,
-    volumeTiers: [],
+    volumeTiers: DEFAULT_VOLUME_TIERS,
     packUnit: 'Unidad',
     inStock: true,
     thumbnail: '/images/products/cabezada-cuero.jpg',
@@ -225,8 +225,27 @@ const FALLBACK_FEATURED: B2BProduct[] = [
 ]
 
 export function FeaturedWholesaleProducts({ products }: FeaturedWholesaleProps) {
-  // Use live Medusa products if available, with fallback to mockup reference 6 items
-  const displayItems = products.length >= 6 ? products.slice(0, 6) : FALLBACK_FEATURED
+  // Always display the 6 featured mockup items with their high-resolution studio photographs
+  // If matching live products exist in Medusa, enrich them with real prices and variants
+  const displayItems = FALLBACK_FEATURED.map((item) => {
+    const live = products.find(
+      (p) =>
+        p.handle === item.handle ||
+        p.sku === item.sku ||
+        p.title.toLowerCase().includes(item.title.toLowerCase().slice(0, 8))
+    )
+    if (live) {
+      return {
+        ...item,
+        id: live.id,
+        variantId: live.variantId,
+        basePrice: live.basePrice > 0 ? live.basePrice : item.basePrice,
+        wholesalePrice: live.wholesalePrice > 0 ? live.wholesalePrice : item.wholesalePrice,
+        volumeTiers: live.volumeTiers && live.volumeTiers.length > 0 ? live.volumeTiers : item.volumeTiers,
+      }
+    }
+    return item
+  })
 
   return (
     <section className="bg-[#FAF8F5] py-14 sm:py-16 border-b border-[#E8E2D8]">

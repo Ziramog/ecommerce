@@ -62,9 +62,10 @@ export function calculateVolumeDiscount(
   quantity: number,
   tiers: VolumeTier[] = DEFAULT_VOLUME_TIERS
 ): { unitPrice: number; discountPercent: number; totalPrice: number } {
-  let applicableTier = tiers[0]
+  const activeTiers = tiers && tiers.length > 0 ? tiers : DEFAULT_VOLUME_TIERS
+  let applicableTier = activeTiers[0]
 
-  for (const tier of tiers) {
+  for (const tier of activeTiers) {
     if (quantity >= tier.minQty) {
       applicableTier = tier
     }
