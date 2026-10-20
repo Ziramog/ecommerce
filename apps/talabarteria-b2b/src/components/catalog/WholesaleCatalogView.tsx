@@ -85,12 +85,12 @@ export function WholesaleCatalogView({ products }: WholesaleCatalogViewProps) {
                 Catálogo Comercial
               </span>
 
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1F1E1D] uppercase tracking-tight mb-3">
-                LISTA DE PRECIOS MAYORISTA B2B
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-3xl font-bold text-[#1F1E1D] uppercase tracking-tight mb-2">
+                LISTA DE PRECIOS MAYORISTA
               </h1>
 
               <p className="text-xs sm:text-sm text-[#57534E] leading-relaxed">
-                Mostrando {products.length} líneas habilitadas en el canal mayorista. Precios netos en pesos argentinos (ARS).
+                Precios netos en pesos argentinos (ARS).
               </p>
             </div>
 
