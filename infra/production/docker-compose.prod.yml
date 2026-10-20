@@ -1,0 +1,170 @@
+name: mercadal-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercadal-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mercadal_prod_db}
+      POSTGRES_USER: ${POSTGRES_USER:-mercadal_prod_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Debe definirse POSTGRES_PASSWORD en .env.production}
+    volumes:
+      - mercadal_prod_pgdata:/var/lib/postgresql/data
+    networks:
+      - mercadal_prod_net
+    # No expuesto al host ni a Internet: acceso exclusivo interno
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mercadal_prod_user} -d ${POSTGRES_DB:-mercadal_prod_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    oom_score_adj: 500
+
+  redis:
+    image: redis:7-alpine
+    container_name: mercadal-prod-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Debe definirse REDIS_PASSWORD en .env.production}"]
+    volumes:
+      - mercadal_prod_redisdata:/data
+    networks:
+      - mercadal_prod_net
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    oom_score_adj: 500
+
+  medusa-api:
+    image: mercadal-prod-medusa:${MEDUSA_IMAGE_TAG:-2.21.2-latest}
+    container_name: mercadal-prod-medusa
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    networks:
+      - mercadal_prod_net
+    ports:
+      # Publicado estrictamente a loopback privado (puerto 9001, sin colisión con staging 9000)
+      - "127.0.0.1:9001:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:9000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.50"
+          memory: 1024M
+    oom_score_adj: 500
+
+  pampa-novus:
+    image: mercadal-prod-pampa-novus:${STOREFRONT_IMAGE_TAG:-latest}
+    container_name: mercadal-prod-pampa-novus
+    restart: unless-stopped
+    depends_on:
+      medusa-api:
+        condition: service_healthy
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${PROD_API_URL:-https://api.mercadal.com.ar}
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${PROD_PK_B2C}
+      - NEXT_PUBLIC_BRAND_ID=pampa_novus
+      - NEXT_PUBLIC_STOREFRONT_NAME=Pampa Novus — Talabartería & Lujo Criollo
+    networks:
+      - mercadal_prod_net
+    expose:
+      - "3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    oom_score_adj: 500
+
+  talabarteria-b2b:
+    image: mercadal-prod-talabarteria-b2b:${STOREFRONT_IMAGE_TAG:-latest}
+    container_name: mercadal-prod-talabarteria-b2b
+    restart: unless-stopped
+    depends_on:
+      medusa-api:
+        condition: service_healthy
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${PROD_API_URL:-https://api.mercadal.com.ar}
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${PROD_PK_B2B}
+      - NEXT_PUBLIC_BRAND_ID=talabarteria_mercadal
+      - NEXT_PUBLIC_STOREFRONT_NAME=Talabartería Mercadal — Portal Mayorista B2B
+    networks:
+      - mercadal_prod_net
+    expose:
+      - "3001"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    oom_score_adj: 500
+
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: mercadal-prod-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - mercadal_prod_caddy_data:/data
+      - mercadal_prod_caddy_config:/config
+    networks:
+      - mercadal_prod_net
+    depends_on:
+      - medusa-api
+      - pampa-novus
+      - talabarteria-b2b
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+    oom_score_adj: 500
+
+networks:
+  mercadal_prod_net:
+    driver: bridge
+    name: mercadal_prod_net
+
+volumes:
+  mercadal_prod_pgdata:
+    name: mercadal_prod_pgdata
+  mercadal_prod_redisdata:
+    name: mercadal_prod_redisdata
+  mercadal_prod_caddy_data:
+    name: mercadal_prod_caddy_data
+  mercadal_prod_caddy_config:
+    name: mercadal_prod_caddy_config

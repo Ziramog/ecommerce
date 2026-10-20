@@ -1,0 +1,111 @@
+# ========================================================
+# Mercadal Digital 360 — Production Caddy Configuration
+# Auto-HTTPS (Let's Encrypt), Reverse Proxy & Hardening
+# ========================================================
+
+{
+  email admin@mercadal.com.ar
+  admin off
+  log {
+    output stderr
+    format console
+    level INFO
+  }
+}
+
+# Snippet de Seguridad & Cabeceras HTTP
+(security_headers) {
+  header {
+    # HSTS (1 año)
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # Prevenir MIME-type sniffing
+    X-Content-Type-Options "nosniff"
+    # Prevenir clickjacking
+    X-Frame-Options "SAMEORIGIN"
+    # Referrer Policy
+    Referrer-Policy "strict-origin-when-cross-origin"
+    # Prevenir que XSS filtre información en browsers viejos
+    X-XSS-Protection "1; mode=block"
+    # Remover cabeceras de servidor
+    -Server
+  }
+}
+
+# 1. Pampa Novus (Storefront B2C Retail)
+pampanovus.com.ar, www.pampanovus.com.ar {
+  import security_headers
+  encode gzip zstd
+
+  # Cache de estáticos de Next.js
+  @static {
+    path /_next/static/* /images/* /favicon.ico
+  }
+  header @static Cache-Control "public, max-age=31536000, immutable"
+
+  reverse_proxy pampa-novus:3000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+}
+
+# 2. Talabartería Mercadal (Portal B2B Mayorista)
+mayorista.talabarteriamercadal.com.ar {
+  import security_headers
+  encode gzip zstd
+
+  @static {
+    path /_next/static/* /images/* /favicon.ico
+  }
+  header @static Cache-Control "public, max-age=31536000, immutable"
+
+  reverse_proxy talabarteria-b2b:3001 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+}
+
+# 3. Medusa 2 Unified Backend API
+api.mercadal.com.ar {
+  import security_headers
+  encode gzip zstd
+
+  # Limitar tamaño de payload (10 MB para uploads de imágenes y CSVs)
+  request_body {
+    max_size 10MB
+  }
+
+  reverse_proxy medusa-api:9000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+}
+
+# 4. Panel Medusa Admin (Acceso Privado / Restringido)
+admin.mercadal.com.ar {
+  import security_headers
+  encode gzip zstd
+
+  # Restricción: solo accesible desde la red VPN Tailscale o IP de administración
+  @authorized_ips {
+    remote_ip 100.64.0.0/10 127.0.0.1 ::1
+  }
+
+  handle @authorized_ips {
+    reverse_proxy medusa-api:9000 {
+      header_up Host {host}
+      header_up X-Real-IP {remote_host}
+      header_up X-Forwarded-For {remote_host}
+      header_up X-Forwarded-Proto {scheme}
+    }
+  }
+
+  handle {
+    respond "Acceso no autorizado al panel administrativo." 403
+  }
+}
