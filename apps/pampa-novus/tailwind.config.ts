@@ -48,7 +48,7 @@ const config: Config = {
       },
       fontFamily: {
         serif: ['var(--font-serif)', 'Playfair Display', 'Georgia', 'serif'],
-        sans: ['var(--font-sans)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: ['"Proxima Nova"', 'var(--font-sans)', '-apple-system', 'Helvetica Neue', 'Helvetica', 'Roboto', 'Arial', 'sans-serif'],
       },
       boxShadow: {
         'luxury': '0 20px 40px -15px rgba(25, 17, 10, 0.08)',

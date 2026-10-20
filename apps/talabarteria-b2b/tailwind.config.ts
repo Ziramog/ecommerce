@@ -44,7 +44,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-sans)', 'sans-serif'],
+        sans: ['"Proxima Nova"', 'var(--font-sans)', '-apple-system', 'Helvetica Neue', 'Helvetica', 'Roboto', 'Arial', 'sans-serif'],
         heading: ['var(--font-heading)', 'serif'],
         serif: ['var(--font-heading)', 'serif'],
       },

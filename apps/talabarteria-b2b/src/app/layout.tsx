@@ -1,16 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthB2BProvider } from '@/context/AuthB2BContext'
 import { B2BCartProvider } from '@/context/B2BCartContext'
 import { HeaderB2B } from '@/components/common/HeaderB2B'
 import { FooterB2B } from '@/components/common/FooterB2B'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'Talabartería Mercadal — Portal Mayorista B2B',
@@ -24,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es">
       <body className="min-h-screen flex flex-col bg-b2b-50 text-b2b-900 font-sans antialiased selection:bg-navy selection:text-white">
         <AuthB2BProvider>
           <B2BCartProvider>
