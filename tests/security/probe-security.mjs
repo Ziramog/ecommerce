@@ -483,15 +483,23 @@ async function main() {
     console.log(`[${label.padEnd(24)}] ${r.test.padEnd(8)} - ${r.description}`)
     console.log(`                         Detalle: ${r.detail}`)
   }
+  const sec01 = results.find(r => r.test === 'SEC-01')
+  const sec02 = results.find(r => r.test === 'SEC-02')
+  const sec04 = results.find(r => r.test === 'SEC-04')
+  const sec02Label = sec02?.statusOverride || (sec02?.pass ? 'PASS' : 'FAIL')
+
   console.log('============================================================')
   console.log(`Procedencia Certificada: REPO_HEAD=${provenance.repoHead} | IMAGE=${provenance.imageTag}`)
-  console.log(`Superficie Ejecutada: SEC-01=${results.find(r => r.test==='SEC-01')?.pass ? 'PASS' : 'FAIL'} | SEC-04=${results.find(r => r.test==='SEC-04')?.pass ? 'PASS' : 'FAIL'}`)
-  console.log(`SEC-02: BLOCKED / NO EJECUTADO (Bloqueante para cierre de ticket; requiere ordenes reales de M360-012)`)
+  console.log(`Superficie Ejecutada: SEC-01=${sec01?.pass ? 'PASS' : 'FAIL'} | SEC-02=${sec02Label} | SEC-04=${sec04?.pass ? 'PASS' : 'FAIL'}`)
   console.log(`SEC-03: NO EJECUTADO (Diferido formalmente por decision de Juan, unica excepcion no-bloqueante)`)
-  console.log(`ESTADO TICKET M360-011 / GATE F2: REVIEW-BLOCKED (Abierto hasta ejecucion de SEC-02 real)\n`)
+  if (!hasBlocked && executedPass) {
+    console.log(`ESTADO TICKET M360-011 / GATE F2: PASS (Aprobado)\n`)
+  } else {
+    console.log(`ESTADO TICKET M360-011 / GATE F2: REVIEW-BLOCKED (Abierto hasta ejecucion de SEC-02 real)\n`)
+  }
 
   if (hasBlocked || !executedPass) {
-    console.log('[FAIL-CLOSED] Saliendo con codigo 1: SEC-02 se encuentra BLOCKED / NO EJECUTADO.')
+    console.log('[FAIL-CLOSED] Saliendo con codigo 1: Se encontraron pruebas fallidas o bloqueadas.')
     process.exit(1)
   }
 
