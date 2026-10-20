@@ -23,6 +23,7 @@ export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
 }
 
 export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
+  'rollo-lonja-vacuna-pack-x10': '/images/products/rollo-lonja-vacuna-pack-x10.jpg',
   'montura-criolla-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
   'montura-completa-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
   'cuchillo-criollo-vaina-repujada': '/images/products/cuchillo-criollo-vaina-repujada.jpg',
