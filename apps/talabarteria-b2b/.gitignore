@@ -1,0 +1,19 @@
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Environment
+.env*.local
+.env
+
+# Turbo
+.turbo/
+
+# OS Files
+.DS_Store
+Thumbs.db
