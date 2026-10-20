@@ -41,13 +41,13 @@ export function FeaturedWholesaleCard({ product, codeOverride }: FeaturedCardPro
     <div className="bg-white border border-[#E8E2D8] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
       <div>
         {/* Thumbnail */}
-        <Link href={`/catalogo`} className="block relative h-44 sm:h-48 bg-[#F4EFE8] overflow-hidden">
+        <Link href={`/productos/${product.handle}`} className="block relative h-44 sm:h-48 bg-[#F4EFE8] overflow-hidden">
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
               alt={product.title}
               fill
-              className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+              className="object-contain p-2.5 sm:p-3 group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 16vw"
             />
           ) : (
@@ -59,8 +59,10 @@ export function FeaturedWholesaleCard({ product, codeOverride }: FeaturedCardPro
 
         {/* Title & Code */}
         <div className="p-3.5 sm:p-4">
-          <h3 className="font-serif text-sm sm:text-base font-bold text-[#1F1E1D] line-clamp-1 group-hover:text-[#6B3A2A] transition-colors mb-1">
-            {product.title}
+          <h3 className="font-serif text-sm sm:text-base font-bold text-[#1F1E1D] line-clamp-1 group-hover:text-[#8A311F] transition-colors mb-1">
+            <Link href={`/productos/${product.handle}`}>
+              {product.title}
+            </Link>
           </h3>
           <span className="text-[11px] font-mono text-[#78716C] block">
             {codeDisplay}

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { B2BProduct } from '@/lib/catalog'
 import { formatCurrencyARS, calculateVolumeDiscount, DEFAULT_VOLUME_TIERS } from '@/lib/utils'
 import { useB2BCart } from '@/context/B2BCartContext'
@@ -41,35 +42,44 @@ export function WholesaleProductCard({ product }: { product: B2BProduct }) {
       <div>
         {/* Imagen y Badges Superiores */}
         <div className="relative h-40 sm:h-44 bg-[#FAF6F0] overflow-hidden">
-          {product.thumbnail ? (
-            <Image
-              src={product.thumbnail}
-              alt={product.title}
-              fill
-              className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-[#A8A29E] text-xs">
-              Sin fotografía técnica
-            </div>
-          )}
+          <Link
+            href={`/productos/${product.handle}`}
+            className="block w-full h-full relative cursor-pointer group/img"
+          >
+            {product.thumbnail ? (
+              <Image
+                src={product.thumbnail}
+                alt={product.title}
+                fill
+                className="object-contain p-2.5 sm:p-3 group-hover/img:scale-105 transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center text-[#A8A29E] text-xs">
+                Sin fotografía técnica
+              </div>
+            )}
+          </Link>
 
           {/* SKU Pill (Arriba Izquierda) */}
-          <div className="absolute top-2.5 left-2.5 bg-[#18261E] text-white text-[10px] font-mono px-2 py-0.5 rounded-md font-bold shadow-xs">
+          <div className="absolute top-2.5 left-2.5 bg-[#18261E] text-white text-[10px] font-mono px-2 py-0.5 rounded-md font-bold shadow-xs pointer-events-none">
             {product.sku || 'SKU-001'}
           </div>
 
           {/* Unidad / Pack y Favorito (Arriba Derecha) */}
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-            <div className="bg-white/95 text-[#292524] text-[10px] font-semibold px-2 py-0.5 rounded-md border border-[#E8E2D8] flex items-center gap-1 shadow-xs">
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+            <div className="bg-white/95 text-[#292524] text-[10px] font-semibold px-2 py-0.5 rounded-md border border-[#E8E2D8] flex items-center gap-1 shadow-xs pointer-events-none">
               <Package className="w-3 h-3 text-[#8A311F]" />
               <span>{product.packUnit || 'Unidad'}</span>
             </div>
 
             <button
               type="button"
-              onClick={() => setFavorited(!favorited)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setFavorited(!favorited)
+              }}
               className="w-6 h-6 rounded-full bg-white/95 border border-[#E8E2D8] flex items-center justify-center text-[#78716C] hover:text-[#8A311F] transition-colors shadow-xs"
               aria-label="Agregar a favoritos"
             >
@@ -83,7 +93,12 @@ export function WholesaleProductCard({ product }: { product: B2BProduct }) {
         {/* Título y Descripción */}
         <div className="p-3.5 sm:p-4">
           <h3 className="font-serif text-base font-bold text-[#1F1E1D] mb-1 leading-snug line-clamp-1 group-hover:text-[#8A311F] transition-colors">
-            {product.title}
+            <Link
+              href={`/productos/${product.handle}`}
+              className="hover:text-[#8A311F] transition-colors"
+            >
+              {product.title}
+            </Link>
           </h3>
 
           <p className="text-[11px] text-[#57534E] line-clamp-1 mb-2.5 leading-tight font-normal">
