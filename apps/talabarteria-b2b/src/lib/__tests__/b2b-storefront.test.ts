@@ -75,6 +75,20 @@ describe('Talabartería Mercadal B2B — Image & Photographic Assets', () => {
     )
   })
 
+  test('LOCAL_STUDIO_IMAGES includes authentic commercial asset for grasa de potro cuero', () => {
+    assert.strictEqual(
+      LOCAL_STUDIO_IMAGES['grasa-de-potro-cuero-500g'],
+      '/images/products/grasa-de-potro-cuero-500g.png'
+    )
+  })
+
+  test('LOCAL_STUDIO_IMAGES includes authentic photographic asset for manta sudadero lana pura', () => {
+    assert.strictEqual(
+      LOCAL_STUDIO_IMAGES['manta-sudadero-lana-pura'],
+      '/images/products/manta-sudadero-lana-pura.png'
+    )
+  })
+
   test('FALLBACK_PRODUCT_IMAGES includes photographic asset for wholesale lonja pack', () => {
     assert.ok(
       FALLBACK_PRODUCT_IMAGES['rollo-lonja-vacuna-pack-x10'],

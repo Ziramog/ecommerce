@@ -13,12 +13,10 @@ export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
     'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80',
   'freno-criollo-cabeza-de-moro':
     'https://images.unsplash.com/photo-1535295972055-1c762f4483e5?auto=format&fit=crop&w=1200&q=80',
-  'manta-sudadero-lana-pura':
-    'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=1200&q=80',
+  'manta-sudadero-lana-pura': '/images/products/manta-sudadero-lana-pura.png',
   'cuchillo-criollo-vaina-repujada':
     'https://images.unsplash.com/photo-1589256469067-ea99122bbdc4?auto=format&fit=crop&w=1200&q=80',
-  'grasa-de-potro-cuero-500g':
-    'https://images.unsplash.com/photo-1608248597359-598d1a117b07?auto=format&fit=crop&w=1200&q=80',
+  'grasa-de-potro-cuero-500g': '/images/products/grasa-de-potro-cuero-500g.png',
 }
 
 export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
@@ -36,6 +34,8 @@ export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
   'riendas-de-cuero-vacuno': '/images/products/riendas-cuero-vacuno.jpg',
   'cinturon-de-polo': '/images/products/cinturon-polo.jpg',
   'pechera-tejida-artesanal': '/images/products/pechera-tejida-artesanal.jpg',
+  'grasa-de-potro-cuero-500g': '/images/products/grasa-de-potro-cuero-500g.png',
+  'manta-sudadero-lana-pura': '/images/products/manta-sudadero-lana-pura.png',
 }
 
 let cachedRegionId: string | null = null
@@ -69,6 +69,126 @@ export interface StorefrontProduct {
   inStock: boolean
 }
 
+export const STATIC_B2C_FALLBACK_PRODUCTS: StorefrontProduct[] = [
+  {
+    id: 'prod_01M56B4Z33F0MGB1JFK9VDE9KJ',
+    title: 'Montura Criolla de Trabajo en Suela',
+    handle: 'montura-criolla-de-trabajo',
+    description:
+      'Montura criolla artesanal confeccionada en cuero vacuno curtido al tanino con bastos rellenos de cerda natural.',
+    thumbnail: '/images/products/montura-completa-trabajo.jpg',
+    price: 450000,
+    originalPrice: 450000,
+    sku: 'SKU-CRI-001',
+    variantId: 'variant_01M56B4ZCJSQGYBCYZBSK4ZD0V',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z33RPG0ZFRX8MQWR7SR',
+    title: 'Bozal de Cuero Crudo Trenzado 8 Cabos',
+    handle: 'bozal-cuero-crudo-trenzado',
+    description:
+      'Bozal criollo tradicional tejido a mano en tiento de cuero crudo seleccionado con testera y ahogador reforzados.',
+    thumbnail: '/images/products/cabezada-cuero.jpg',
+    price: 85000,
+    originalPrice: 85000,
+    sku: 'SKU-DUAL-002',
+    variantId: 'variant_01M56B4ZCJD6M4Q9QT1A24YGNH',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z33Z43C7J2GE2B0Y1HW',
+    title: 'Cinturon de Carpincho con Pasador de Alpaca',
+    handle: 'cinturon-carpincho-alpaca',
+    description:
+      'Cinturon de cuero de carpincho legitimo con forreria de badana y pasador artesanal cincelado en alpaca.',
+    thumbnail: '/images/products/cinturon-carpincho-alpaca.jpg',
+    price: 120000,
+    originalPrice: 120000,
+    sku: 'SKU-B2C-003',
+    variantId: 'variant_01M56B4ZCKEPWC5CPNBA9Q161Q',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z340QVNE05R9FH9QZNY',
+    title: 'Freno Criollo Cabeza de Moro Forjado',
+    handle: 'freno-criollo-cabeza-de-moro',
+    description:
+      'Freno tradicional pata curva forjado en hierro dulce con coscojas sonoras y barbada de cadena calibrada.',
+    thumbnail: '/images/products/freno-criollo-cabeza-de-moro.jpg',
+    price: 95000,
+    originalPrice: 95000,
+    sku: 'SKU-DUAL-007',
+    variantId: 'variant_01M56B4ZCM8P52346G8B5TXDGC',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z341M84FD6KRHMTBVFF',
+    title: 'Estribos Chaquenos de Acero Inoxidable',
+    handle: 'estribos-chaquenos-acero-inoxidable',
+    description:
+      'Par de estribos campana forjados en acero inoxidable 304 pulido espejo, pisada antideslizante estriada.',
+    thumbnail: '/images/products/estribos-acero-cuero.jpg',
+    price: 65000,
+    originalPrice: 65000,
+    sku: 'SKU-DUAL-005',
+    variantId: 'variant_01M56B4ZCKWYCTNGQ1G53A09X0',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z3458F1KJ60DSZ8AP1E',
+    title: 'Manta Sudadero de Lana Pura de Oveja',
+    handle: 'manta-sudadero-lana-pura',
+    description:
+      'Manta telar de lana virgen de oveja hilada a mano, alta capacidad de absorcion y proteccion del lomo equino.',
+    thumbnail: '/images/products/manta-sudadero-lana-pura.png',
+    price: 52000,
+    originalPrice: 52000,
+    sku: 'SKU-DUAL-008',
+    variantId: 'variant_01M56B4ZCN4SF6Y5RA640CHR9F',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z34BSWKQQ69524HGQBY',
+    title: 'Cuchillo Criollo con Vaina Repujada Artesanal',
+    handle: 'cuchillo-criollo-vaina-repujada',
+    description:
+      'Cuchillo de campo hoja de 16cm en acero al carbono 1070 con cabo de guampa de ciervo y vaina repujada a mano.',
+    thumbnail: '/images/products/cuchillo-criollo-vaina-repujada.jpg',
+    price: 110000,
+    originalPrice: 110000,
+    sku: 'SKU-DUAL-009',
+    variantId: 'variant_01M56B4ZCN5ZFRQ0TRMG2PT6EG',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z34PR02GKQW7GE4Q4DD',
+    title: 'Grasa de Potro Filtrada para Cuidado de Cuero (500g)',
+    handle: 'grasa-de-potro-cuero-500g',
+    description:
+      'Compuesto acondicionador e impermeabilizante a base de grasa de potro purificada, cera de abejas y aceites naturales.',
+    thumbnail: '/images/products/grasa-de-potro-cuero-500g.png',
+    price: 12000,
+    originalPrice: 12000,
+    sku: 'SKU-DUAL-010',
+    variantId: 'variant_01M56B4ZCPBVRJ4SR8RCVBPT05',
+    inStock: true,
+  },
+  {
+    id: 'prod_01M56B4Z34X7W28NAK9VKJNP76',
+    title: 'Cinchon de Lona Reforzado y Traba Cuero Suela',
+    handle: 'cinchon-lona-reforzado-cuero-suela',
+    description:
+      'Cinchon ancho de lona pesada de 12cm con pasadores y lengueta en cuero suela de 4mm, hebilla doble rodillo.',
+    thumbnail: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80',
+    price: 38000,
+    originalPrice: 38000,
+    sku: 'SKU-DUAL-006',
+    variantId: 'variant_01M56B4ZCMZHHQZBBBKFGNJ9XA',
+    inStock: true,
+  },
+]
+
 export async function getB2CProducts(): Promise<StorefrontProduct[]> {
   try {
     const regionId = await getArgentinaRegionId()
@@ -77,7 +197,11 @@ export async function getB2CProducts(): Promise<StorefrontProduct[]> {
       fields: 'id,title,handle,description,thumbnail,*variants,*variants.calculated_price',
     })
 
-    return (res.products || []).map((p) => {
+    if (!res.products || res.products.length === 0) {
+      return STATIC_B2C_FALLBACK_PRODUCTS
+    }
+
+    return res.products.map((p) => {
       const variant = p.variants?.[0]
       const calcPrice = variant?.calculated_price
       const price = calcPrice?.calculated_amount ?? 0
@@ -99,8 +223,11 @@ export async function getB2CProducts(): Promise<StorefrontProduct[]> {
       }
     })
   } catch (error) {
-    console.error('Error fetching B2C catalog from Medusa:', error)
-    return []
+    console.warn(
+      '[B2C Catalog] No se pudo conectar con el backend Medusa en vivo. Usando catálogo estático de resiliencia.',
+      error instanceof Error ? error.message : error
+    )
+    return STATIC_B2C_FALLBACK_PRODUCTS
   }
 }
 
@@ -114,7 +241,9 @@ export async function getProductByHandle(handle: string): Promise<StorefrontProd
     })
 
     const p = res.products?.[0]
-    if (!p) return null
+    if (!p) {
+      return STATIC_B2C_FALLBACK_PRODUCTS.find((prod) => prod.handle === handle) || null
+    }
 
     const variant = p.variants?.[0]
     const calcPrice = variant?.calculated_price
@@ -136,7 +265,10 @@ export async function getProductByHandle(handle: string): Promise<StorefrontProd
       inStock: true,
     }
   } catch (error) {
-    console.error(`Error fetching product handle ${handle}:`, error)
-    return null
+    console.warn(
+      `[B2C Catalog] No se pudo obtener producto ${handle} desde Medusa. Usando fallback estático.`,
+      error instanceof Error ? error.message : error
+    )
+    return STATIC_B2C_FALLBACK_PRODUCTS.find((p) => p.handle === handle) || null
   }
 }
