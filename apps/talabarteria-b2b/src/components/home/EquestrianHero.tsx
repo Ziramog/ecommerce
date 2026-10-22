@@ -1,26 +1,27 @@
 import React from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
 export function EquestrianHero() {
   return (
     <section className="relative w-full overflow-hidden bg-[#18261E] border-b border-[#E5E5E5]">
-      {/* Background Photography Full Width con polo argentino */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/home/hero-polo-action.jpg"
-          alt="Talabartería Mercadal - Equipamiento Ecuestre de Tradición y Calidad"
-          fill
-          priority
-          className="object-cover object-right lg:object-center"
-          sizes="100vw"
-        />
-        {/* Degradado lateral sutil: oscuro a la izquierda para contraste tipográfico, transparente a la derecha */}
+      {/* Background Video Full Width con video ecuestre oficial */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/images/home/hero-polo-action.jpg"
+          className="w-full h-full object-cover object-right lg:object-center"
+        >
+          <source src="/videos/hero_video.mp4" type="video/mp4" />
+        </video>
+        {/* Degradado lateral sutil: oscuro a la izquierda para contraste tipográfico, transparente a la derecha para ver el video */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 via-45% to-transparent pointer-events-none" />
       </div>
 
-      {/* Contenido Principal sobre la Imagen */}
+      {/* Contenido Principal sobre el Video */}
       <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-14 sm:py-20 lg:py-24 xl:py-28 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] flex items-center">
         <div className="max-w-2xl">
           {/* Eyebrow */}
