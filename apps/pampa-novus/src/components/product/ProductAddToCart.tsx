@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import type { StorefrontProduct } from '@/lib/catalog'
 import { useCart } from '@/context/CartContext'
-import { Plus, Minus, ShoppingBag, Check } from 'lucide-react'
+import { Plus, Minus, ShoppingCart, Check } from 'lucide-react'
 
 interface ProductAddToCartProps {
   product: StorefrontProduct
@@ -22,22 +22,22 @@ export function ProductAddToCart({ product }: ProductAddToCartProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3">
         {/* Quantity selector */}
-        <div className="flex items-center border border-pampa-300 rounded bg-white">
+        <div className="flex items-center border border-[#D9C9A8] rounded-[2px] bg-white">
           <button
             type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="p-3 text-pampa-600 hover:text-pampa-950 transition-colors"
+            className="p-2.5 text-pn-espresso/70 hover:text-pn-espresso transition-colors"
             aria-label="Disminuir cantidad"
           >
             <Minus size={14} />
           </button>
-          <span className="w-10 text-center font-semibold text-sm">{quantity}</span>
+          <span className="w-9 text-center font-semibold text-xs font-sans">{quantity}</span>
           <button
             type="button"
             onClick={() => setQuantity(quantity + 1)}
-            className="p-3 text-pampa-600 hover:text-pampa-950 transition-colors"
+            className="p-2.5 text-pn-espresso/70 hover:text-pn-espresso transition-colors"
             aria-label="Aumentar cantidad"
           >
             <Plus size={14} />
@@ -48,20 +48,20 @@ export function ProductAddToCart({ product }: ProductAddToCartProps) {
         <button
           type="button"
           onClick={handleAdd}
-          className={`flex-1 py-3.5 px-6 rounded flex items-center justify-center space-x-2 text-xs uppercase tracking-[0.2em] font-semibold transition-all shadow-md ${
+          className={`flex-1 h-11 px-6 rounded-[2px] flex items-center justify-center space-x-2 text-xs uppercase tracking-[0.18em] font-sans font-medium transition-all shadow-sm ${
             added
               ? 'bg-green-800 text-white'
-              : 'bg-leather hover:bg-leather-dark text-white'
+              : 'bg-pn-marron hover:bg-pn-espresso text-white'
           }`}
         >
           {added ? (
             <>
-              <Check size={16} />
+              <Check size={15} />
               <span>¡Agregado al Carrito!</span>
             </>
           ) : (
             <>
-              <ShoppingBag size={16} />
+              <ShoppingCart size={15} />
               <span>Agregar al Carrito</span>
             </>
           )}
@@ -70,3 +70,5 @@ export function ProductAddToCart({ product }: ProductAddToCartProps) {
     </div>
   )
 }
+
+export default ProductAddToCart

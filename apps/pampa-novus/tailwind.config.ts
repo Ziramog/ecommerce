@@ -9,50 +9,59 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        pampa: {
-          50: '#FAF8F5',
-          100: '#F4EFE6',
-          200: '#E6DCCF',
-          300: '#D5C4B0',
-          400: '#B89F82',
-          500: '#947758',
-          600: '#795D40',
-          700: '#5C442D',
-          800: '#412F1F',
-          900: '#2A1D13',
-          950: '#19110A',
+        // Official Pampa Novus Brand Identity Palette V3
+        pn: {
+          marron: '#5A2F1F',    // Marrón Cuero — Fuerza y tradición (#5A2F1F oficial)
+          cognac: '#8B4E2F',    // Cognac — Autenticidad
+          terracota: '#B65A3C', // Terracota — Tierra y movimiento
+          arena: '#D9C9A8',    // Arena — Naturaleza y equilibrio
+          espresso: '#2E1C12', // Espresso — Solidez y elegancia
+          crema: '#F5EBDD',    // Versión Clara / Reversa — Fondo cálido
+          marfil: '#FAF7F2',   // Fondo de página ultra premium / blanco cálido
+          borde: '#EFE8DE',    // Bordes sutiles para tarjetas y separadores
+          borderDark: '#D9C9A8',
         },
+        // Semantic aliases
         leather: {
-          light: '#C99D66',
-          DEFAULT: '#8B4513',
-          dark: '#542807',
-          black: '#1F1610',
+          light: '#8B4E2F',
+          DEFAULT: '#5A2F1F',
+          dark: '#2E1C12',
+          black: '#1A0F0A',
         },
-        alpaca: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-          400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B',
-          900: '#0F172A',
-        },
-        brass: {
-          light: '#E5C07B',
-          DEFAULT: '#C69234',
-          dark: '#93661B',
+        pampa: {
+          50: '#FAF7F2',
+          100: '#F5EBDD',
+          200: '#EFE8DE',
+          300: '#D9C9A8',
+          400: '#C4AE88',
+          500: '#B65A3C',
+          600: '#8B4E2F',
+          700: '#5A2F1F',
+          800: '#412215',
+          900: '#2E1C12',
+          950: '#1A0F0A',
         },
       },
       fontFamily: {
-        serif: ['var(--font-serif)', 'Playfair Display', 'Georgia', 'serif'],
-        sans: ['"Proxima Nova"', 'var(--font-sans)', '-apple-system', 'Helvetica Neue', 'Helvetica', 'Roboto', 'Arial', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Cormorant Garamond', 'Playfair Display', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', 'DM Sans', '-apple-system', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+      },
+      maxWidth: {
+        'site': '1360px',
+      },
+      borderRadius: {
+        'none': '0px',
+        'xs': '1px',
+        'sm': '2px',
+        'DEFAULT': '3px',
       },
       boxShadow: {
-        'luxury': '0 20px 40px -15px rgba(25, 17, 10, 0.08)',
-        'luxury-hover': '0 25px 50px -12px rgba(25, 17, 10, 0.15)',
+        'subtle': '0 1px 3px rgba(46, 28, 18, 0.04)',
+        'luxury': '0 8px 24px -6px rgba(46, 28, 18, 0.08)',
+        'luxury-hover': '0 12px 32px -8px rgba(46, 28, 18, 0.12)',
+      },
+      letterSpacing: {
+        'widest-xl': '0.24em',
       },
     },
   },

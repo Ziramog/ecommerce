@@ -1,68 +1,73 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export function Hero() {
   return (
-    <section className="relative min-h-[85vh] flex items-center bg-pampa-950 text-white overflow-hidden">
-      {/* Background with luxury leather texture / artisanal craftsman ambiance */}
+    <section className="relative h-auto min-h-[380px] sm:min-h-[390px] lg:h-[420px] flex items-center overflow-hidden bg-[#EAE2D5] border-b border-[#EFE8DE] py-10 sm:py-0">
+      {/* Panorámica ecuestre: caballo ensillado y paisano al centro/derecha */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=2000&q=85"
-          alt="Talabartería Criolla Tradicional"
+          src="/images/home/hero-equestrian-master.jpg"
+          alt="Raíces ecuestres, estilo contemporáneo — Pampa Novus"
           fill
           priority
-          className="object-cover object-center opacity-30 scale-105 transition-transform duration-1000 ease-out"
+          sizes="100vw"
+          className="object-cover object-[78%_center] sm:object-[68%_center] lg:object-center select-none"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-pampa-950 via-pampa-950/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-pampa-950 via-transparent to-black/30" />
+        {/* Degradado suave para máxima legibilidad del bloque editorial en mobile y tablet */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/95 via-[#FAF7F2]/80 to-transparent sm:via-[#FAF7F2]/30 lg:to-transparent" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center space-x-2 bg-pampa-900/80 border border-pampa-700/60 backdrop-blur-md px-3.5 py-1.5 rounded-full mb-6 text-xs tracking-[0.2em] uppercase text-pampa-200 font-medium">
-            <Sparkles size={13} className="text-brass-light" />
-            <span>Colección Minorista Exclusiva</span>
+      <div className="relative z-10 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Columna Izquierda: Bloque Editorial Titular y CTA */}
+          <div className="lg:col-span-7 xl:col-span-6">
+            <span className="text-[11px] font-sans uppercase tracking-[0.22em] text-pn-cognac font-medium block mb-2">
+              TALABARTERÍA MERCADAL
+            </span>
+
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-pn-espresso leading-[1.08] mb-3">
+              Raíces ecuestres.
+              <span className="block font-normal italic text-pn-marron">
+                Estilo contemporáneo.
+              </span>
+            </h1>
+
+            {/* Línea divisoria artesanal */}
+            <div className="w-12 h-[1.5px] bg-pn-cognac/80 mb-3.5" />
+
+            <p className="text-xs sm:text-sm text-pn-espresso/90 font-sans leading-relaxed mb-5 sm:mb-6 max-w-[280px] sm:max-w-md font-normal">
+              Accesorios, indumentaria y objetos de cuero para una vida en el campo, hoy.
+            </p>
+
+            <div>
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center space-x-2.5 bg-pn-marron hover:bg-pn-espresso text-white px-6 py-2.5 text-[11px] sm:text-xs uppercase tracking-[0.2em] font-sans font-medium transition-all duration-200 rounded-[2px] shadow-sm group"
+              >
+                <span>COMPRAR AHORA</span>
+                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
 
-          <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.08] mb-6">
-            Herencia, Cuero & <span className="italic font-normal text-pampa-200">Lujo Criollo</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-pampa-300 font-sans leading-relaxed mb-10 max-w-xl font-light">
-            La máxima expresión de la talabartería argentina. Monturas de trabajo en suela seleccionada, cinturones de carpincho legítimo y platería criolla cincelada a mano para los amantes de la tradición ecuestre.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-            <Link
-              href="/catalogo"
-              className="inline-flex items-center justify-center space-x-3 bg-leather hover:bg-leather-light text-white px-8 py-4 text-xs uppercase tracking-[0.22em] font-semibold transition-all duration-200 shadow-luxury rounded-sm group"
-            >
-              <span>Explorar Catálogo</span>
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <Link
-              href="#herencia"
-              className="inline-flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-pampa-200 border border-pampa-700/80 px-8 py-4 text-xs uppercase tracking-[0.22em] font-medium transition-colors rounded-sm backdrop-blur-sm"
-            >
-              <span>Nuestra Herencia</span>
-            </Link>
-          </div>
-
-          <div className="mt-14 pt-8 border-t border-pampa-800/80 grid grid-cols-3 gap-6 text-left">
-            <div>
-              <span className="block font-serif text-xl sm:text-2xl font-bold text-white">100%</span>
-              <span className="text-[11px] text-pampa-400 uppercase tracking-wider">Cuero Seleccionado</span>
-            </div>
-            <div>
-              <span className="block font-serif text-xl sm:text-2xl font-bold text-white">Maestros</span>
-              <span className="text-[11px] text-pampa-400 uppercase tracking-wider">Talabarteros Reales</span>
-            </div>
-            <div>
-              <span className="block font-serif text-xl sm:text-2xl font-bold text-white">Argentina</span>
-              <span className="text-[11px] text-pampa-400 uppercase tracking-wider">Origen Federal</span>
+          {/* Columna Derecha: Sello Institucional */}
+          <div className="hidden lg:flex lg:col-span-5 xl:col-span-6 justify-end items-start pr-4 xl:pr-8 pointer-events-none select-none">
+            <div className="text-right text-pn-espresso/90">
+              <span className="block font-sans font-bold text-xs tracking-[0.25em] uppercase">
+                PAMPA
+              </span>
+              <span className="block font-sans font-bold text-xs tracking-[0.25em] uppercase mt-0.5">
+                NOVUS
+              </span>
+              <div className="w-8 h-[1px] bg-pn-cognac/60 ml-auto my-1.5" />
+              <span className="block text-[9px] font-sans tracking-[0.22em] uppercase text-pn-marron font-medium leading-relaxed">
+                TRADICIÓN<br />
+                QUE ACOMPAÑA<br />
+                TU CAMINO
+              </span>
             </div>
           </div>
         </div>
@@ -70,3 +75,5 @@ export function Hero() {
     </section>
   )
 }
+
+export default Hero

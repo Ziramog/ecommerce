@@ -2,64 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Proxima Nova';
-  src: url('/fonts/proximanova-light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Proxima Nova';
-  src: url('/fonts/proximanova-regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Proxima Nova';
-  src: url('/fonts/proximanova-semibold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Proxima Nova';
-  src: url('/fonts/proximanova-bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-:root {
-  --font-sans: 'Proxima Nova', -apple-system, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
-}
-
 @layer base {
   body {
-    @apply bg-pampa-50 text-pampa-950 font-sans;
-    font-family: var(--font-sans);
+    @apply bg-[#FAF7F2] text-pn-espresso font-sans;
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+    font-family: var(--font-serif), Georgia, serif;
   }
 }
 
-/* Custom scrollbar */
+/* Custom delicate scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4efe6;
+  background: #FAF7F2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #b89f82;
-  border-radius: 4px;
+  background: #D9C9A8;
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b4513;
+  background: #8B4E2F;
 }

@@ -1,97 +1,150 @@
 import React from 'react'
 import Link from 'next/link'
+import { PampaNovusLogo } from '@/components/brand/PampaNovusLogo'
 import { ShieldCheck, Truck, CreditCard, RotateCcw } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-pampa-950 text-pampa-300 pt-16 pb-12 border-t border-pampa-900 font-sans">
-      {/* Value Badges Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-8 border-y border-pampa-900">
-          <div className="flex items-center space-x-4">
-            <Truck className="w-8 h-8 text-leather-light flex-shrink-0" />
+    <footer id="contacto" className="bg-pn-espresso text-pn-crema/80 pt-10 pb-8 border-t border-pn-marron/30 font-sans">
+      {/* 4 Insignias de Valor en una fila compacta */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 py-5 border-y border-pn-marron/25">
+          <div className="flex items-center space-x-3">
+            <Truck className="w-5 h-5 text-pn-arena flex-shrink-0" strokeWidth={1.6} />
             <div>
-              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">Envío Seguro</h4>
-              <p className="text-xs text-pampa-400 mt-1">Despacho asegurado a todo el país</p>
+              <h4 className="text-white text-[11px] uppercase tracking-wider font-semibold">Envío Asegurado</h4>
+              <p className="text-[10px] text-pn-arena/70">Despacho a todo el país</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <CreditCard className="w-8 h-8 text-leather-light flex-shrink-0" />
+          <div className="flex items-center space-x-3">
+            <CreditCard className="w-5 h-5 text-pn-arena flex-shrink-0" strokeWidth={1.6} />
             <div>
-              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">Hasta 3 Cuotas</h4>
-              <p className="text-xs text-pampa-400 mt-1">Con todas las tarjetas bancarias</p>
+              <h4 className="text-white text-[11px] uppercase tracking-wider font-semibold">Hasta 3 Cuotas</h4>
+              <p className="text-[10px] text-pn-arena/70">Sin interés bancarias</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <ShieldCheck className="w-8 h-8 text-leather-light flex-shrink-0" />
+          <div className="flex items-center space-x-3">
+            <ShieldCheck className="w-5 h-5 text-pn-arena flex-shrink-0" strokeWidth={1.6} />
             <div>
-              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">Garantía de Origen</h4>
-              <p className="text-xs text-pampa-400 mt-1">Cueros y metales genuinos argentinos</p>
+              <h4 className="text-white text-[11px] uppercase tracking-wider font-semibold">Garantía de Origen</h4>
+              <p className="text-[10px] text-pn-arena/70">Cuero y plata genuinos</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <RotateCcw className="w-8 h-8 text-leather-light flex-shrink-0" />
+          <div className="flex items-center space-x-3">
+            <RotateCcw className="w-5 h-5 text-pn-arena flex-shrink-0" strokeWidth={1.6} />
             <div>
-              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">Cambios & Devolución</h4>
-              <p className="text-xs text-pampa-400 mt-1">30 días de satisfacción garantizada</p>
+              <h4 className="text-white text-[11px] uppercase tracking-wider font-semibold">30 Días de Cambio</h4>
+              <p className="text-[10px] text-pn-arena/70">Satisfacción garantizada</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Links */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="md:col-span-1">
-            <span className="font-serif text-2xl font-bold tracking-[0.25em] text-white block uppercase mb-4">
-              PAMPA NOVUS
-            </span>
-            <p className="text-xs leading-relaxed text-pampa-400 mb-6">
+      {/* Main Footer Links — Altura compacta */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-10">
+          {/* Identidad de Marca */}
+          <div className="md:col-span-5 pr-0 md:pr-6">
+            <div className="mb-3">
+              <PampaNovusLogo variant="horizontal" theme="white" height={28} />
+            </div>
+            <p className="text-xs leading-relaxed text-pn-crema/70 mb-4 font-light max-w-sm">
               La consagración contemporánea de la talabartería criolla. Cada pieza refleja la maestría de artesanos que forjan la nobleza del cuero y la plata con orgullo nacional.
             </p>
-            <div className="text-[11px] text-pampa-500 uppercase tracking-widest font-medium">
+            <div className="text-[10px] text-pn-arena/70 uppercase tracking-widest font-medium">
               Hecho con maestría en Argentina
             </div>
           </div>
 
-          <div>
-            <h4 className="text-white text-xs uppercase tracking-[0.2em] font-bold mb-5">Categorías</h4>
-            <ul className="space-y-3 text-xs">
-              <li><Link href="/catalogo" className="hover:text-leather-light transition-colors">Monturas Criollas</Link></li>
-              <li><Link href="/catalogo" className="hover:text-leather-light transition-colors">Bozales & Cabezadas</Link></li>
-              <li><Link href="/catalogo" className="hover:text-leather-light transition-colors">Cinturones de Carpincho</Link></li>
-              <li><Link href="/catalogo" className="hover:text-leather-light transition-colors">Estribos & Herrajes</Link></li>
-              <li><Link href="/catalogo" className="hover:text-leather-light transition-colors">Cuchillería & Vainas</Link></li>
+          {/* Colección */}
+          <div className="md:col-span-2 col-span-6">
+            <h4 className="text-white text-[11px] uppercase tracking-[0.18em] font-semibold mb-3">
+              Colección
+            </h4>
+            <ul className="space-y-2 text-xs text-pn-crema/70 font-light">
+              <li>
+                <Link href="/catalogo?categoria=monturas" className="hover:text-white transition-colors">
+                  Monturas Criollas
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo?categoria=accesorios" className="hover:text-white transition-colors">
+                  Bozales & Riendas
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo?categoria=marroquineria" className="hover:text-white transition-colors">
+                  Cinturones & Cuero
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo?categoria=campo" className="hover:text-white transition-colors">
+                  Aperos de Campo
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo?categoria=regalos" className="hover:text-white transition-colors">
+                  Regalos de Autor
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-white text-xs uppercase tracking-[0.2em] font-bold mb-5">Atención al Cliente</h4>
-            <ul className="space-y-3 text-xs">
-              <li><Link href="/" className="hover:text-leather-light transition-colors">Guía de Talles y Medidas</Link></li>
-              <li><Link href="/" className="hover:text-leather-light transition-colors">Cuidado y Mantenimiento del Cuero</Link></li>
-              <li><Link href="/" className="hover:text-leather-light transition-colors">Política de Envíos</Link></li>
-              <li><Link href="/" className="hover:text-leather-light transition-colors">Garantía y Devoluciones</Link></li>
-              <li><Link href="/" className="hover:text-leather-light transition-colors">Preguntas Frecuentes</Link></li>
+          {/* Atención al Cliente */}
+          <div className="md:col-span-2 col-span-6">
+            <h4 className="text-white text-[11px] uppercase tracking-[0.18em] font-semibold mb-3">
+              Atención
+            </h4>
+            <ul className="space-y-2 text-xs text-pn-crema/70 font-light">
+              <li>
+                <Link href="/catalogo" className="hover:text-white transition-colors">
+                  Guía de Medidas
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo" className="hover:text-white transition-colors">
+                  Cuidado del Cuero
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo" className="hover:text-white transition-colors">
+                  Política de Envíos
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo" className="hover:text-white transition-colors">
+                  Garantía y Devolución
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-white text-xs uppercase tracking-[0.2em] font-bold mb-5">Unidad Corporativa</h4>
-            <p className="text-xs text-pampa-400 mb-4 leading-relaxed">
-              ¿Representás a un comercio, estancia o club ecuestre? Accedé a compras mayoristas con condiciones comerciales exclusivas.
-            </p>
-            <div className="pt-2">
-              <span className="inline-block text-[11px] uppercase tracking-wider text-leather-light font-medium border border-leather/40 px-3 py-1.5 rounded">
-                Portal Mayorista: Talabartería Mercadal (B2B)
+          {/* Unidad B2B Institucional */}
+          <div className="md:col-span-3">
+            <div className="bg-pn-marron/25 border border-pn-marron/40 p-4 rounded-[2px]">
+              <span className="text-[9px] uppercase tracking-[0.2em] text-pn-arena font-semibold block mb-1">
+                Portal Mayorista Exclusivo
               </span>
+              <h5 className="font-serif text-xs font-bold text-white mb-1.5">
+                Talabartería Mercadal (B2B)
+              </h5>
+              <p className="text-[11px] text-pn-crema/70 mb-2.5 font-light leading-relaxed">
+                Escalas por volumen y cotizaciones (RFQ) para comercios y clubes ecuestres.
+              </p>
+              <a
+                href="http://localhost:3001"
+                className="inline-block text-[10px] uppercase tracking-[0.16em] text-pn-crema hover:text-white font-medium underline underline-offset-4 transition-colors"
+              >
+                Acceder al Portal B2B →
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-pampa-900 flex flex-col sm:flex-row justify-between items-center text-xs text-pampa-500">
-          <p>© {new Date().getFullYear()} Pampa Novus — Marca registrada de Mercadal Digital 360. Todos los derechos reservados.</p>
-          <div className="flex space-x-6 mt-4 sm:mt-0 text-[11px]">
+        {/* Bottom Bar */}
+        <div className="pt-6 border-t border-pn-marron/25 flex flex-col sm:flex-row justify-between items-center text-[11px] text-pn-arena/50">
+          <p>© {new Date().getFullYear()} Pampa Novus — Canal minorista de Talabartería Mercadal. Todos los derechos reservados.</p>
+          <div className="flex space-x-5 mt-3 sm:mt-0">
             <span>Términos y Condiciones</span>
             <span>Privacidad de Datos</span>
             <span>Defensa del Consumidor</span>
@@ -101,3 +154,5 @@ export function Footer() {
     </footer>
   )
 }
+
+export default Footer

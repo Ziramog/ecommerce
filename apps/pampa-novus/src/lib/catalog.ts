@@ -20,22 +20,29 @@ export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
 }
 
 export const LOCAL_STUDIO_IMAGES: Record<string, string> = {
-  'freno-criollo-cabeza-de-moro': '/images/products/freno-criollo-cabeza-de-moro.jpg',
-  'rollo-lonja-vacuna-pack-x10': '/images/products/rollo-lonja-vacuna-pack-x10.jpg',
-  'cuchillo-artesanal-alpaca': '/images/products/cuchillo-artesanal-alpaca.jpg',
-  'cuchillo-criollo-vaina-repujada': '/images/products/cuchillo-criollo-vaina-repujada.jpg',
-  'cinturon-carpincho-alpaca': '/images/products/cinturon-carpincho-alpaca.jpg',
-  'mate-imperial-alpaca': '/images/products/mate-imperial-alpaca.jpg',
   'montura-criolla-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
+  'montura-criolla-mercadal': '/images/products/montura-completa-trabajo.jpg',
   'montura-completa-de-trabajo': '/images/products/montura-completa-trabajo.jpg',
-  'estribos-chaquenos-acero-inoxidable': '/images/products/estribos-acero-cuero.jpg',
   'bozal-cuero-crudo-trenzado': '/images/products/cabezada-cuero.jpg',
+  'bozal-de-cuero-premium': '/images/products/cabezada-cuero.jpg',
   'cabezada-de-cuero': '/images/products/cabezada-cuero.jpg',
+  'cinturon-carpincho-alpaca': '/images/products/cinturon-carpincho-alpaca.jpg',
+  'freno-criollo-cabeza-de-moro': '/images/products/freno-criollo-cabeza-de-moro.jpg',
+  'estribos-chaquenos-acero-inoxidable': '/images/products/estribos-acero-cuero.jpg',
+  'estribos-de-acero-forrados': '/images/products/estribos-acero-cuero.jpg',
+  'manta-sudadero-lana-pura': '/images/products/manta-sudadero-lana-pura.png',
+  'manta-pampa-clasica': '/images/products/manta-sudadero-lana-pura.png',
+  'cinchon-lona-reforzado-cuero-suela': '/images/products/riendas-cuero-vacuno.jpg',
+  'cincha-de-lana-y-cuero': '/images/products/riendas-cuero-vacuno.jpg',
   'riendas-de-cuero-vacuno': '/images/products/riendas-cuero-vacuno.jpg',
+  'riendas-de-cuero-trenzado': '/images/products/riendas-cuero-vacuno.jpg',
+  'cuchillo-criollo-vaina-repujada': '/images/products/cuchillo-criollo-vaina-repujada.jpg',
+  'cuchillo-artesanal-alpaca': '/images/products/cuchillo-artesanal-alpaca.jpg',
+  'mate-imperial-alpaca': '/images/products/mate-imperial-alpaca.jpg',
+  'rollo-lonja-vacuna-pack-x10': '/images/products/rollo-lonja-vacuna-pack-x10.jpg',
   'cinturon-de-polo': '/images/products/cinturon-polo.jpg',
   'pechera-tejida-artesanal': '/images/products/pechera-tejida-artesanal.jpg',
   'grasa-de-potro-cuero-500g': '/images/products/grasa-de-potro-cuero-500g.png',
-  'manta-sudadero-lana-pura': '/images/products/manta-sudadero-lana-pura.png',
 }
 
 let cachedRegionId: string | null = null

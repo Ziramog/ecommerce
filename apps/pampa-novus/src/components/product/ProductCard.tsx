@@ -1,86 +1,131 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { StorefrontProduct } from '@/lib/catalog'
-import { formatCurrencyARS, formatInstallments } from '@/lib/utils'
+import { formatCurrencyARS } from '@/lib/utils'
 import { useCart } from '@/context/CartContext'
-import { ShoppingBag } from 'lucide-react'
+import { ShoppingCart, Heart } from 'lucide-react'
 
-interface ProductCardProps {
+export interface ProductCardProps {
   product: StorefrontProduct
+  badge?: 'DESTACADO' | 'NUEVO' | string
+  aspectRatioClass?: string
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+/**
+ * ProductCardPremium
+ * Reusable premium product card for Home and Catalog grids.
+ * Strictly adheres to 02_home_referencias/04_productos_destacados_layout.png
+ */
+export function ProductCard({
+  product,
+  badge,
+  aspectRatioClass = 'aspect-[4/3]',
+}: ProductCardProps) {
   const { addItem } = useCart()
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+
+  // Discretely resolve badge only when warranted
+  const displayBadge =
+    badge ||
+    (product.sku?.includes('CRI-001')
+      ? 'DESTACADO'
+      : product.sku?.includes('DUAL-002')
+      ? 'NUEVO'
+      : null)
+
+  const handleAddToCart = () => {
+    setIsAdding(true)
+    addItem(product, 1)
+    setTimeout(() => setIsAdding(false), 500)
+  }
 
   return (
-    <div className="group flex flex-col bg-white border border-pampa-200/80 rounded overflow-hidden hover:shadow-luxury-hover transition-all duration-300">
-      {/* Image container */}
-      <Link
-        href={`/productos/${product.handle}`}
-        className="relative aspect-[4/5] bg-pampa-100 overflow-hidden block"
-      >
-        {product.thumbnail ? (
-          <Image
-            src={product.thumbnail}
-            alt={product.title}
-            fill
-            className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-pampa-400 font-serif text-sm">
-            Pampa Novus
+    <div className="group flex flex-col bg-white border border-[#EFE8DE] rounded-[2px] overflow-hidden hover:shadow-subtle transition-all duration-200">
+      {/* 1. Marco Fotográfico con fondo marfil uniforme */}
+      <div className={`relative ${aspectRatioClass} bg-[#F8F5EE] overflow-hidden`}>
+        {/* Badge discreto */}
+        {displayBadge && (
+          <div className="absolute top-2 left-2 z-10 bg-pn-marron text-white text-[9px] uppercase tracking-[0.16em] px-1.5 py-0.5 font-sans font-medium rounded-[1px] shadow-sm select-none">
+            {displayBadge}
           </div>
         )}
 
-        {/* Floating badge */}
-        <div className="absolute top-3 left-3 bg-pampa-950/80 backdrop-blur-sm text-pampa-100 text-[9px] uppercase tracking-[0.2em] px-2.5 py-1 font-medium rounded-sm">
-          Artesanía Criolla
-        </div>
-      </Link>
+        {/* Botón Favorito discreto arriba a la derecha */}
+        <button
+          type="button"
+          onClick={() => setIsWishlisted(!isWishlisted)}
+          className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-colors ${
+            isWishlisted
+              ? 'text-pn-terracota bg-white shadow-sm'
+              : 'text-pn-espresso/45 hover:text-pn-espresso hover:bg-white/70'
+          }`}
+          aria-label={isWishlisted ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          title={isWishlisted ? 'En favoritos' : 'Guardar en favoritos'}
+        >
+          <Heart size={15} fill={isWishlisted ? 'currentColor' : 'none'} strokeWidth={1.75} />
+        </button>
 
-      {/* Info details */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
+        {/* Fotografía protagonista íntegra con object-contain */}
+        <Link
+          href={`/productos/${product.handle}`}
+          className="w-full h-full block relative"
+        >
+          {product.thumbnail ? (
+            <Image
+              src={product.thumbnail}
+              alt={product.title}
+              fill
+              className="object-contain p-2.5 sm:p-3 group-hover:scale-104 transition-transform duration-500 ease-out"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-pn-arena font-serif text-xs">
+              Pampa Novus
+            </div>
+          )}
+        </Link>
+      </div>
+
+      {/* 2. Información Comercial: Nombre, Precio y Acción */}
+      <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between bg-white border-t border-[#EFE8DE]/60">
         <div>
-          <span className="text-[10px] font-mono tracking-wider text-pampa-500 uppercase block mb-1">
-            {product.sku}
-          </span>
+          {/* Nombre con 2 líneas reservadas */}
           <Link
             href={`/productos/${product.handle}`}
-            className="font-serif text-base font-semibold text-pampa-950 hover:text-leather transition-colors line-clamp-2 leading-snug mb-2"
+            className="font-sans text-[12px] sm:text-[13px] font-medium text-pn-espresso hover:text-pn-cognac transition-colors line-clamp-2 leading-snug min-h-[2.2rem] block mb-1.5"
+            title={product.title}
           >
             {product.title}
           </Link>
-          {product.description && (
-            <p className="text-xs text-pampa-600 line-clamp-2 leading-relaxed mb-3">
-              {product.description}
-            </p>
-          )}
-        </div>
 
-        <div className="pt-3 border-t border-pampa-100">
-          <div className="flex items-baseline justify-between mb-1.5">
-            <span className="font-serif text-lg font-bold text-pampa-950">
+          {/* Precio ARS destacado */}
+          <div className="mb-2.5">
+            <span className="font-sans text-[13px] sm:text-[15px] font-bold text-pn-espresso tracking-tight">
               {formatCurrencyARS(product.price)}
             </span>
           </div>
-          <p className="text-[11px] text-pampa-600 font-sans">
-            {formatInstallments(product.price, 3)}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => addItem(product, 1)}
-            className="mt-4 w-full py-2.5 px-4 bg-pampa-100 hover:bg-leather text-pampa-900 hover:text-white flex items-center justify-center space-x-2 text-xs uppercase tracking-widest font-semibold transition-all rounded-sm"
-          >
-            <ShoppingBag size={14} />
-            <span>Agregar al Carrito</span>
-          </button>
         </div>
+
+        {/* 3. Botón de Compra Rectangular Limpio */}
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isAdding}
+          className="w-full h-8 sm:h-[34px] px-2 bg-pn-marron hover:bg-pn-espresso text-white flex items-center justify-center space-x-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] font-sans font-medium transition-colors rounded-[2px] shadow-sm"
+        >
+          <ShoppingCart size={13} className={isAdding ? 'animate-bounce' : ''} />
+          <span>{isAdding ? 'Agregado' : 'Agregar al carrito'}</span>
+        </button>
       </div>
     </div>
   )
 }
+
+// Named alias export for direct requirement referencing
+export const ProductCardPremium = ProductCard
+
+export default ProductCard
