@@ -47,10 +47,10 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
     product.handle.toLowerCase().includes('pack')
 
   return (
-    <div className="bg-white border border-[#E5E5E5] rounded hover:border-[#B49272] transition-colors flex flex-col justify-between group overflow-hidden">
+    <div className="w-full h-full min-w-0 bg-white border border-[#E5E5E5] rounded hover:border-[#B49272] transition-colors flex flex-col justify-between group overflow-hidden">
       <div>
-        {/* A. Fotografía 1:1, object-contain limpio y badges oficiales sin recortes */}
-        <div className="relative aspect-square bg-[#FAFAFA] border-b border-[#F0F0F0] overflow-hidden">
+        {/* A. Fotografía 1:1, object-contain limpio y escala aparente unificada */}
+        <div className="relative aspect-square bg-[#FAFAFA] border-b border-[#F0F0F0] overflow-hidden flex items-center justify-center">
           <Link
             href={`/productos/${product.handle}`}
             className="block w-full h-full relative cursor-pointer group/img"
@@ -60,7 +60,7 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
                 src={product.thumbnail}
                 alt={product.title}
                 fill
-                className="object-contain p-3 sm:p-4 group-hover/img:scale-105 transition-transform duration-300"
+                className="object-contain p-4 sm:p-5 group-hover/img:scale-105 transition-transform duration-300"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               />
             ) : (
@@ -91,48 +91,42 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
             />
           </button>
 
-          {/* Badges Inferiores: Stock y Presentación */}
+          {/* Badge Inferior Izquierdo: Estado de Disponibilidad */}
           <div className="absolute bottom-2 left-2 pointer-events-none">
-            {isPack ? (
-              <span className="bg-white/95 text-[#873427] text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border border-[#F5D5CE] flex items-center gap-1 shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#873427]" />
-                Pack cerrado
-              </span>
-            ) : (
-              <span className="bg-white/95 text-emerald-800 text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border border-emerald-200 flex items-center gap-1 shadow-2xs">
+            {product.inStock ? (
+              <span className="bg-white/95 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-xs border border-emerald-200 flex items-center gap-1 shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                 En stock
               </span>
+            ) : (
+              <span className="bg-white/95 text-[#873427] text-[10px] font-semibold px-2 py-0.5 rounded-xs border border-[#F5D5CE] flex items-center gap-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#873427]" />
+                Próximamente
+              </span>
             )}
-          </div>
-
-          <div className="absolute bottom-2 right-2 pointer-events-none">
-            <span className="bg-white/95 text-[#525252] text-[10px] font-medium px-1.5 py-0.5 rounded-xs border border-[#E5E5E5]">
-              {product.packUnit || 'Unidad'}
-            </span>
           </div>
         </div>
 
         {/* B. Información Comercial */}
         <div className="p-3 sm:p-3.5 pb-2">
-          {/* Título: Máximo 2 líneas */}
-          <h3 className="font-serif text-sm font-bold text-[#202020] leading-snug line-clamp-2 hover:text-[#873427] transition-colors mb-1 min-h-[2.5rem]">
+          {/* Título: Sans-serif comercial destacado, máximo 2 líneas */}
+          <h3 className="font-sans text-sm font-bold text-[#202020] leading-snug line-clamp-2 hover:text-[#873427] transition-colors mb-1 min-h-[2.5rem]">
             <Link href={`/productos/${product.handle}`}>
               {product.title}
             </Link>
           </h3>
 
           {/* Descripción corta discreta */}
-          <p className="text-[11px] text-[#737373] line-clamp-1 leading-relaxed font-normal mb-2">
+          <p className="text-[11px] text-[#525252] line-clamp-1 leading-relaxed font-normal mb-2">
             {product.description || 'Pieza tradicional con manufactura ecuestre certificada.'}
           </p>
 
-          {/* Precio Mayorista con Jerarquía Visual Dominante */}
+          {/* Precio Mayorista Sans-Serif Destacado (Criterio Marketplace) */}
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="font-serif text-2xl font-bold text-[#202020] leading-none tracking-tight">
+            <span className="font-sans text-2xl font-extrabold text-[#202020] leading-none tracking-tight">
               {formatCurrencyARS(unitPrice)}
             </span>
-            <span className="text-xs text-[#737373] font-normal">
+            <span className="text-xs text-[#525252] font-semibold">
               /{isPack ? 'pack' : 'un'}
             </span>
           </div>

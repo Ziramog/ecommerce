@@ -133,18 +133,12 @@ export function WholesaleCatalogView({ products }: WholesaleCatalogViewProps) {
       })
     }
 
-    // 4. Availability Filter
+    // 4. Availability Filter (En stock / Próximamente)
     if (filters.availability.length > 0) {
       result = result.filter((p) => {
-        const meta = getProductMetadata(p)
-        const isPack =
-          p.packUnit?.toLowerCase().includes('pack') ||
-          p.handle.toLowerCase().includes('pack')
-
         return filters.availability.some((av) => {
           if (av === 'En stock') return p.inStock
           if (av === 'Próximamente') return !p.inStock
-          if (av === 'Pack cerrado') return isPack
           return false
         })
       })
@@ -507,8 +501,8 @@ export function WholesaleCatalogView({ products }: WholesaleCatalogViewProps) {
                 </button>
               </div>
             ) : viewMode === 'grid' ? (
-              /* Grilla Marketplace: 4 columnas en desktop amplio (12-16px gap) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+              /* Grilla Marketplace: 4 columnas en desktop amplio, cada producto en su propia celda sin desbordes */
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4 items-stretch">
                 {filteredProducts.map((product) => (
                   <ProductCardB2B key={product.id} product={product} />
                 ))}
@@ -614,11 +608,11 @@ function WholesaleProductListItem({ product }: { product: B2BProduct }) {
             )}
           </div>
 
-          <h3 className="font-serif text-sm sm:text-base font-bold text-[#202020] hover:text-[#873427] transition-colors line-clamp-1 mb-1">
+          <h3 className="font-sans text-sm sm:text-base font-bold text-[#202020] hover:text-[#873427] transition-colors line-clamp-1 mb-1">
             <Link href={`/productos/${product.handle}`}>{product.title}</Link>
           </h3>
 
-          <p className="text-xs text-[#737373] line-clamp-1 font-normal mb-1">
+          <p className="text-xs text-[#525252] line-clamp-1 font-normal mb-1">
             {product.description || 'Artículo de talabartería tradicional.'}
           </p>
 
@@ -635,10 +629,10 @@ function WholesaleProductListItem({ product }: { product: B2BProduct }) {
             Precio mayorista
           </span>
           <div className="flex items-baseline gap-1 justify-end">
-            <span className="font-serif text-lg sm:text-xl font-bold text-[#202020] leading-none">
+            <span className="font-sans text-lg sm:text-xl font-extrabold text-[#202020] leading-none">
               {formatCurrencyARS(unitPrice)}
             </span>
-            <span className="text-xs text-[#737373]">/{isPack ? 'pack' : 'un'}</span>
+            <span className="text-xs text-[#525252] font-semibold">/{isPack ? 'pack' : 'un'}</span>
           </div>
         </div>
 

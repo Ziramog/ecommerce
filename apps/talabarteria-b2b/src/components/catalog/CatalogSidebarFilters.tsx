@@ -47,10 +47,10 @@ export function getProductMetadata(p: B2BProduct) {
 
   // Presentation
   let presentation = 'Unidad'
-  if (h.includes('pack') || p.packUnit?.toLowerCase().includes('pack')) presentation = 'Pack'
+  if (h.includes('pack') || p.packUnit?.toLowerCase().includes('pack')) presentation = 'Pack mayorista'
   else if (h.includes('caja') || p.packUnit?.toLowerCase().includes('caja')) presentation = 'Caja'
 
-  // Availability
+  // Availability (disponible para despacho o bajo pedido)
   const availability = p.inStock ? 'En stock' : 'Próximamente'
 
   return { category, material, presentation, availability }
@@ -66,9 +66,9 @@ export const CATEGORIES_LIST = [
   'Otros productos',
 ]
 
-export const AVAILABILITY_LIST = ['En stock', 'Próximamente', 'Pack cerrado']
+export const AVAILABILITY_LIST = ['En stock', 'Próximamente']
 
-export const PRESENTATION_LIST = ['Unidad', 'Pack', 'Caja']
+export const PRESENTATION_LIST = ['Unidad', 'Pack mayorista', 'Caja']
 
 export const MATERIAL_LIST = [
   'Cuero vacuno',
@@ -114,7 +114,6 @@ export function CatalogSidebarFilters({
       const meta = getProductMetadata(prod)
       if (cMap[meta.category] !== undefined) cMap[meta.category]++
       if (aMap[meta.availability] !== undefined) aMap[meta.availability]++
-      if (prod.packUnit?.toLowerCase().includes('pack')) aMap['Pack cerrado']++
       if (pMap[meta.presentation] !== undefined) pMap[meta.presentation]++
       if (mMap[meta.material] !== undefined) mMap[meta.material]++
     })
@@ -200,7 +199,7 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenCategories(!openCategories)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#172B23] uppercase tracking-wider mb-2.5"
         >
           <span>Categorías</span>
           {openCategories ? (
@@ -218,7 +217,7 @@ export function CatalogSidebarFilters({
               return (
                 <label
                   key={cat}
-                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-[13px] text-[#262626] hover:text-[#172B23] cursor-pointer py-0.5 group transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -227,11 +226,11 @@ export function CatalogSidebarFilters({
                       onChange={() => toggleCategory(cat)}
                       className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
+                    <span className={checked ? 'font-bold text-[#172B23]' : ''}>
                       {cat}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
+                  <span className="text-xs text-[#737373] font-mono group-hover:text-[#172B23]">
                     ({count})
                   </span>
                 </label>
@@ -246,7 +245,7 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenAvailability(!openAvailability)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#172B23] uppercase tracking-wider mb-2.5"
         >
           <span>Disponibilidad</span>
           {openAvailability ? (
@@ -264,7 +263,7 @@ export function CatalogSidebarFilters({
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-[13px] text-[#262626] hover:text-[#172B23] cursor-pointer py-0.5 group transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -273,11 +272,11 @@ export function CatalogSidebarFilters({
                       onChange={() => toggleAvailability(item)}
                       className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
+                    <span className={checked ? 'font-bold text-[#172B23]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
+                  <span className="text-xs text-[#737373] font-mono group-hover:text-[#172B23]">
                     ({count})
                   </span>
                 </label>
@@ -292,7 +291,7 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenPrice(!openPrice)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#172B23] uppercase tracking-wider mb-2.5"
         >
           <span>Precio (ARS)</span>
           {openPrice ? (
@@ -310,15 +309,15 @@ export function CatalogSidebarFilters({
                 placeholder="Mín."
                 value={tempMinPrice}
                 onChange={(e) => setTempMinPrice(e.target.value)}
-                className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427]"
+                className="w-full bg-white border border-[#D4D4D4] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#737373] focus:outline-none focus:border-[#873427]"
               />
-              <span className="text-[#A3A3A3] text-xs font-bold">-</span>
+              <span className="text-[#737373] text-xs font-bold">-</span>
               <input
                 type="number"
                 placeholder="Máx."
                 value={tempMaxPrice}
                 onChange={(e) => setTempMaxPrice(e.target.value)}
-                className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427]"
+                className="w-full bg-white border border-[#D4D4D4] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#737373] focus:outline-none focus:border-[#873427]"
               />
               <button
                 type="submit"
@@ -337,7 +336,7 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenPresentation(!openPresentation)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#172B23] uppercase tracking-wider mb-2.5"
         >
           <span>Tipo de presentación</span>
           {openPresentation ? (
@@ -355,7 +354,7 @@ export function CatalogSidebarFilters({
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-[13px] text-[#262626] hover:text-[#172B23] cursor-pointer py-0.5 group transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -364,11 +363,11 @@ export function CatalogSidebarFilters({
                       onChange={() => togglePresentation(item)}
                       className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
+                    <span className={checked ? 'font-bold text-[#172B23]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
+                  <span className="text-xs text-[#737373] font-mono group-hover:text-[#172B23]">
                     ({count})
                   </span>
                 </label>
@@ -383,7 +382,7 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenMaterial(!openMaterial)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#172B23] uppercase tracking-wider mb-2.5"
         >
           <span>Material</span>
           {openMaterial ? (
@@ -401,7 +400,7 @@ export function CatalogSidebarFilters({
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-[13px] text-[#262626] hover:text-[#172B23] cursor-pointer py-0.5 group transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -410,11 +409,11 @@ export function CatalogSidebarFilters({
                       onChange={() => toggleMaterial(item)}
                       className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
+                    <span className={checked ? 'font-bold text-[#172B23]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
+                  <span className="text-xs text-[#737373] font-mono group-hover:text-[#172B23]">
                     ({count})
                   </span>
                 </label>
