@@ -91,10 +91,10 @@ export function HeaderB2B() {
 
       {/* 2. Main Navbar Oficial José Mercadal: Logo + Centered Search + Actions */}
       <div className="bg-white border-b border-[#E5E5E5] px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="w-full h-16 flex items-center justify-between gap-3 lg:gap-6">
-          {/* A. Logo oficial José Mercadal con Isologo JM */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group py-1">
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform group-hover:scale-105">
+        <div className="w-full h-16 sm:h-20 flex items-center justify-between gap-3 lg:gap-6">
+          {/* A. Logo oficial José Mercadal con Isologo JM (Presencia y Escala Mejoradas) */}
+          <Link href="/" className="flex items-center gap-2.5 sm:gap-4 flex-shrink-0 group py-1.5">
+            <div className="relative h-7 w-[51px] sm:h-9 sm:w-[65px] lg:h-11 lg:w-[80px] flex-shrink-0 transition-transform group-hover:scale-105">
               <Image
                 src="/images/brand/isologo-jm-transparent.png"
                 alt="Isologo JM"
@@ -103,8 +103,8 @@ export function HeaderB2B() {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <div className="relative h-5 sm:h-6 w-28 sm:w-44">
+            <div className="flex flex-col justify-center">
+              <div className="relative h-6 w-36 sm:h-7 sm:w-52 lg:h-8 lg:w-64">
                 <Image
                   src="/images/brand/logo-jose-mercadal-transparent.png"
                   alt="José Mercadal"
@@ -113,7 +113,7 @@ export function HeaderB2B() {
                   priority
                 />
               </div>
-              <span className="text-[6.5px] sm:text-[8px] tracking-[0.2em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5">
+              <span className="text-[7px] sm:text-[8.5px] lg:text-[9.5px] tracking-[0.22em] text-[#78716C] font-semibold uppercase leading-tight mt-0.5 sm:mt-1">
                 Talabartería & Artículos Ecuestres
               </span>
             </div>
@@ -165,7 +165,7 @@ export function HeaderB2B() {
             ) : (
               <Link
                 href="/acceso"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-semibold text-[#202020] hover:text-[#873427] hover:bg-[#F5F5F5] transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-semibold text-[#202020] hover:text-[#873427] hover:bg-[#F5F5F5] transition-colors"
               >
                 <User className="w-4 h-4 text-[#202020]" />
                 <span className="hidden sm:inline">Ingresar</span>

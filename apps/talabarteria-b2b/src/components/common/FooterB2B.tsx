@@ -13,20 +13,25 @@ export function FooterB2B() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Columna 1: Marca & Reseña Institucional (lg:col-span-4) */}
           <div className="lg:col-span-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="relative w-9 h-9 flex-shrink-0">
+            <div className="flex items-center gap-3.5 mb-3.5">
+              <div className="relative h-9 w-[65px] flex-shrink-0">
                 <Image
-                  src="/images/brand/isologo-jm-transparent.png"
+                  src="/images/brand/isologo-jm-white.png"
                   alt="Isologo JM"
                   fill
                   className="object-contain"
                 />
               </div>
-              <div className="flex flex-col">
-                <span className="font-serif text-base font-bold text-white uppercase tracking-wider leading-tight">
-                  Talabartería Mercadal S.A.
-                </span>
-                <span className="text-[8.5px] tracking-[0.2em] text-[#9AB3A1] uppercase font-semibold">
+              <div className="flex flex-col justify-center">
+                <div className="relative h-6 w-44 mb-1">
+                  <Image
+                    src="/images/brand/logo-jose-mercadal-white.png"
+                    alt="José Mercadal"
+                    fill
+                    className="object-contain object-left"
+                  />
+                </div>
+                <span className="text-[8.5px] tracking-[0.22em] text-[#9AB3A1] uppercase font-semibold">
                   Tradición · Calidad · Est. 1964
                 </span>
               </div>
