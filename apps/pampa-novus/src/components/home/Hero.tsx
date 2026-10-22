@@ -1,24 +1,13 @@
 import React from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { HeroMediaBackground } from './HeroMediaBackground'
 
 export function Hero() {
   return (
-    <section className="relative h-auto min-h-[350px] sm:min-h-[370px] lg:h-[400px] xl:h-[415px] flex items-center overflow-hidden bg-[#E5DCD0] border-b border-[#EFE8DE] py-10 sm:py-0">
-      {/* Panorámica ecuestre cinematográfica — Caballo ensillado y paisano al centro/derecha */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/home/hero-equestrian-master.jpg"
-          alt="Raíces ecuestres, estilo contemporáneo — Pampa Novus"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[78%_center] sm:object-[68%_center] lg:object-center select-none"
-        />
-        {/* Gradiente progresivo suave y cálido: preserva la fotografía y el paisaje sin cortes perceptibles */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/65 via-[#FAF7F2]/25 to-transparent sm:from-[#FAF7F2]/45 sm:via-[#FAF7F2]/10 lg:to-transparent pointer-events-none" />
-      </div>
+    <section className="relative h-auto min-h-[350px] sm:min-h-[370px] lg:h-[400px] xl:h-[415px] flex items-center overflow-hidden bg-[#2E1C12] border-b border-[#EFE8DE] py-10 sm:py-0">
+      {/* Secuencia cinematográfica continua: hero_video.mp4 -> hero_video2.mp4 -> foto master (10s) -> loop */}
+      <HeroMediaBackground />
 
       <div className="relative z-10 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">

@@ -10,18 +10,18 @@ export function BrandHeritage() {
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 rounded-[2px] overflow-hidden border border-[#EFE8DE] shadow-subtle min-h-[270px] sm:min-h-[290px] lg:min-h-[310px]">
           {/* Bloque Izquierdo (4 cols): Maestría Artesanal & Manifiesto */}
-          <div className="relative lg:col-span-4 min-h-[240px] lg:min-h-full flex items-center justify-between overflow-hidden bg-pn-espresso">
-            {/* Fotografía limpia de las manos del artesano en la mitad izquierda */}
-            <div className="absolute inset-y-0 left-0 w-[55%] overflow-hidden">
+          <div className="relative lg:col-span-4 min-h-[250px] lg:min-h-full flex items-center justify-between overflow-hidden bg-pn-espresso">
+            {/* Fotografía limpia del artesano en cuero — Preservando el trabajo manual sin oscurecerlo */}
+            <div className="absolute inset-0 overflow-hidden">
               <Image
-                src="/images/home/story-artisan.jpg"
+                src="/images/home/story-artisan.webp"
                 alt="Maestros talabarteros cosiendo cuero a mano"
                 fill
-                sizes="(max-width: 1024px) 50vw, 20vw"
+                sizes="(max-width: 1024px) 100vw, 33vw"
                 className="object-cover object-left select-none"
               />
-              {/* Degradado hacia Espresso para fundir con la zona editorial */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pn-espresso/30 to-pn-espresso" />
+              {/* Degradado suave hacia la derecha para el texto sin oscurecer las manos del artesano */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pn-espresso/35 to-pn-espresso/90" />
             </div>
 
             {/* Manifiesto e Isologo en la zona derecha oscura */}
@@ -65,18 +65,18 @@ export function BrandHeritage() {
           </div>
 
           {/* Bloque Derecho (3 cols): Retrato Equino & Sello de Marca Limpio */}
-          <div className="relative lg:col-span-3 min-h-[220px] lg:min-h-full flex items-center justify-end overflow-hidden bg-[#FAF7F2] border-t lg:border-t-0 border-[#EFE8DE]">
-            {/* Fotografía limpia del caballo criollo en la mitad izquierda */}
-            <div className="absolute inset-y-0 left-0 w-[48%] overflow-hidden">
+          <div className="relative lg:col-span-3 min-h-[240px] lg:min-h-full flex items-center justify-end overflow-hidden bg-[#FAF7F2] border-t lg:border-t-0 border-[#EFE8DE]">
+            {/* Fotografía limpia del caballo criollo */}
+            <div className="absolute inset-0 overflow-hidden">
               <Image
-                src="/images/home/story-horse.jpg"
+                src="/images/home/story-horse.webp"
                 alt="Nobleza criolla y tradición ecuestre"
                 fill
-                sizes="(max-width: 1024px) 40vw, 15vw"
-                className="object-cover object-left select-none"
+                sizes="(max-width: 1024px) 100vw, 25vw"
+                className="object-cover object-[70%_center] select-none"
               />
-              {/* Degradado hacia fondo marfil para fundir con la zona editorial */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FAF7F2]/30 to-[#FAF7F2]" />
+              {/* Degradado suave hacia fondo marfil en la zona derecha donde se ubican los sellos */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FAF7F2]/40 to-[#FAF7F2]/95" />
             </div>
 
             {/* Sello y texto en la zona derecha clara */}
