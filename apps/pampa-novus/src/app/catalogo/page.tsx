@@ -48,7 +48,7 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
 
   return (
     <div className="py-8 sm:py-12 bg-[#FAF7F2] min-h-[70vh]">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         {/* Breadcrumb / Return to Home */}
         <div className="mb-4">
           <Link

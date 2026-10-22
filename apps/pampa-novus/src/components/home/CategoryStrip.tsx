@@ -45,14 +45,14 @@ const CATEGORIES: CategoryItem[] = [
 
 export function CategoryStrip() {
   return (
-    <section id="categorias" className="py-4 sm:py-5 bg-[#FAF7F2] border-b border-[#EFE8DE]">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 lg:gap-3.5">
+    <section id="categorias" className="py-5 sm:py-6 bg-[#FAF7F2] border-b border-[#EFE8DE]">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3.5 lg:gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.name}
               href={`/catalogo?categoria=${cat.slug}`}
-              className="group relative h-[105px] sm:h-[125px] lg:h-[135px] rounded-[2px] overflow-hidden shadow-sm hover:shadow-subtle transition-all duration-300 block bg-pn-espresso"
+              className="group relative h-[120px] sm:h-[135px] lg:h-[150px] xl:h-[160px] rounded-[2px] overflow-hidden shadow-sm hover:shadow-subtle transition-all duration-300 block bg-pn-espresso"
             >
               {/* Category Background Image */}
               <Image
@@ -60,22 +60,22 @@ export function CategoryStrip() {
                 alt={cat.alt}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                className="object-cover object-center group-hover:scale-104 transition-transform duration-500 ease-out"
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
               />
 
               {/* Gradient Dark Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent group-hover:from-black/90 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/85 transition-colors" />
 
               {/* Card Content: Title & Link */}
-              <div className="absolute inset-0 p-3 sm:p-3.5 flex flex-col justify-end">
-                <h3 className="font-serif text-[12px] sm:text-[13px] font-bold tracking-[0.18em] text-white uppercase leading-none mb-1">
+              <div className="absolute inset-0 p-3.5 sm:p-4 flex flex-col justify-end">
+                <h3 className="font-serif text-sm sm:text-base lg:text-[17px] font-bold tracking-wide text-white drop-shadow-sm block leading-tight mb-1">
                   {cat.name}
                 </h3>
-                <span className="inline-flex items-center text-[10px] font-sans text-pn-crema/90 group-hover:text-white transition-colors">
+                <span className="inline-flex items-center text-xs sm:text-[12.5px] font-sans text-pn-arena group-hover:text-white transition-colors">
                   <span>Ver colección</span>
                   <ArrowRight
-                    size={11}
-                    className="ml-1 group-hover:translate-x-0.5 transition-transform"
+                    size={12}
+                    className="ml-1 group-hover:translate-x-1 transition-transform"
                   />
                 </span>
               </div>

@@ -30,7 +30,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2] border-b border-[#EFE8DE] transition-all">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex items-center justify-between h-[72px]">
           {/* Mobile menu trigger */}
           <div className="flex items-center lg:hidden">
@@ -51,17 +51,17 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-7 xl:space-x-9">
+          {/* Desktop Navigation Links — Jerarquía y legibilidad mejoradas */}
+          <nav className="hidden lg:flex items-center space-x-7 xl:space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-[12px] uppercase tracking-[0.16em] font-sans font-medium text-pn-espresso hover:text-pn-cognac transition-colors relative py-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-pn-cognac hover:after:w-full after:transition-all"
+                className="text-[13px] uppercase tracking-[0.14em] font-sans font-medium text-pn-espresso hover:text-pn-cognac transition-colors relative py-1.5 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1.5px] after:bg-pn-cognac hover:after:w-full after:transition-all"
               >
                 <span>{link.name}</span>
                 {link.badge && (
-                  <span className="ml-1.5 text-[9px] bg-pn-crema text-pn-marron px-1.5 py-0.5 rounded-[2px] border border-pn-arena/60 font-semibold tracking-normal">
+                  <span className="ml-1.5 text-[9.5px] bg-pn-crema text-pn-marron px-1.5 py-0.5 rounded-[2px] border border-pn-arena/60 font-semibold tracking-normal">
                     {link.badge}
                   </span>
                 )}
@@ -78,7 +78,7 @@ export function Navbar() {
                 placeholder="Buscar productos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 lg:w-56 pl-8 pr-3 py-1.5 text-xs bg-[#F5EBDD]/40 hover:bg-[#F5EBDD]/70 focus:bg-white text-pn-espresso placeholder-pn-cognac/60 border border-[#D9C9A8]/70 focus:border-pn-cognac rounded-[3px] outline-none transition-all font-sans"
+                className="w-48 lg:w-56 pl-8 pr-3 py-1.5 text-[13px] bg-[#F5EBDD]/40 hover:bg-[#F5EBDD]/70 focus:bg-white text-pn-espresso placeholder-pn-cognac/60 border border-[#D9C9A8]/70 focus:border-pn-cognac rounded-[3px] outline-none transition-all font-sans"
               />
               <Search
                 size={14}
