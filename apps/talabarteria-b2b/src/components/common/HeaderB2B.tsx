@@ -90,7 +90,7 @@ export function HeaderB2B() {
       </div>
 
       {/* 2. Main Navbar Oficial José Mercadal: Logo + Centered Search + Actions */}
-      <div className="bg-[#FAF8F5] border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8 xl:px-12">
+      <div className="bg-white border-b border-[#E5E5E5] px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="w-full h-16 flex items-center justify-between gap-3 lg:gap-6">
           {/* A. Logo oficial José Mercadal con Isologo JM */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group py-1">
@@ -119,19 +119,25 @@ export function HeaderB2B() {
             </div>
           </Link>
 
-          {/* B. Barra de Búsqueda Prominente Central (Marketplace Style - Desktop) */}
+          {/* B. Barra de Búsqueda Prominente Central (Marketplace Style - Botón Bordó Integrado) */}
           <form
             onSubmit={handleSearch}
-            className="flex-1 max-w-xl mx-4 lg:mx-8 relative hidden lg:block"
+            className="flex-1 max-w-xl mx-4 lg:mx-8 hidden lg:flex items-stretch"
           >
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#737373]" />
             <input
               type="text"
-              placeholder="Buscar productos, SKU o categoría..."
+              placeholder="Buscar productos, SKU o categorías..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-[#D4D4D4] rounded pl-9 pr-4 py-2 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427] focus:ring-1 focus:ring-[#873427] transition-all"
+              className="w-full bg-white border border-[#D4D4D4] border-r-0 rounded-l px-3.5 py-2 text-xs text-[#202020] placeholder-[#8C8278] focus:outline-none focus:border-[#873427] transition-all"
             />
+            <button
+              type="submit"
+              aria-label="Buscar en el catálogo"
+              className="bg-[#873427] hover:bg-[#6D271D] text-white px-4 rounded-r flex items-center justify-center transition-colors flex-shrink-0"
+            >
+              <Search className="w-4 h-4 stroke-[2]" />
+            </button>
           </form>
 
           {/* C. Herramientas Derecha: Ingresar, Pedido Rápido, Carrito */}
@@ -166,7 +172,7 @@ export function HeaderB2B() {
               </Link>
             )}
 
-            {/* Botón Pedido Rápido B2B (4-6px radius) */}
+            {/* Botón Pedido Rápido B2B (4px radius) */}
             <Link
               href="/pedido-rapido"
               title="Matriz de Pedido Rápido B2B"
@@ -191,7 +197,7 @@ export function HeaderB2B() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 sm:p-2 rounded text-[#1F1E1D] hover:bg-[#EFEAE2]"
+              className="lg:hidden p-1.5 sm:p-2 rounded text-[#1F1E1D] hover:bg-[#F5F5F5]"
               aria-label="Abrir menú"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -201,27 +207,33 @@ export function HeaderB2B() {
 
         {/* Mobile Disciplines Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#E8E2D8] py-3 space-y-2">
-            <form onSubmit={handleSearch} className="relative mb-3">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C8278]" />
+          <div className="lg:hidden border-t border-[#E5E5E5] py-3 space-y-2">
+            <form onSubmit={handleSearch} className="flex items-stretch mb-3">
               <input
                 type="text"
-                placeholder="Buscar productos, SKU o categoría..."
+                placeholder="Buscar productos, SKU o categorías..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#D6CFC4] rounded-lg pl-9 pr-4 py-2 text-xs text-[#1F1E1D]"
+                className="w-full bg-white border border-[#D4D4D4] border-r-0 rounded-l px-3 py-2 text-xs text-[#202020]"
               />
+              <button
+                type="submit"
+                aria-label="Buscar"
+                className="bg-[#873427] text-white px-3.5 rounded-r flex items-center justify-center"
+              >
+                <Search className="w-4 h-4" />
+              </button>
             </form>
-            <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-[#1F1E1D]">
+            <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-[#202020]">
               {HEADER_CATEGORIES.map((cat) => (
                 <Link
                   key={cat.name}
                   href={cat.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded bg-white border border-[#E8E2D8] hover:bg-[#F4EFE8] flex items-center justify-between"
+                  className="p-2 rounded bg-white border border-[#E5E5E5] hover:bg-[#F5F5F5] flex items-center justify-between"
                 >
                   <span className="text-[11px]">{cat.name}</span>
-                  <ChevronDown className="w-3 h-3 text-[#A87B5B]" />
+                  <ChevronDown className="w-3 h-3 text-[#873427]" />
                 </Link>
               ))}
             </div>
@@ -229,7 +241,7 @@ export function HeaderB2B() {
               <Link
                 href="/pedido-rapido"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-bold bg-[#8A311F] text-white rounded-lg flex items-center justify-center gap-1.5"
+                className="flex-1 text-center py-2 text-xs font-bold bg-[#873427] text-white rounded flex items-center justify-center gap-1.5"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>Pedido Rápido</span>
@@ -237,7 +249,7 @@ export function HeaderB2B() {
               <Link
                 href="/cotizacion"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-bold border border-[#D6CFC4] text-[#1F1E1D] rounded-lg bg-white"
+                className="flex-1 text-center py-2 text-xs font-bold border border-[#D4D4D4] text-[#202020] rounded bg-white"
               >
                 Cotización (RFQ)
               </Link>
@@ -247,16 +259,16 @@ export function HeaderB2B() {
       </div>
 
       {/* 3. Sub-Navbar de Categorías (9 rubros oficiales con chevron) */}
-      <nav className="bg-white border-b border-[#E8E2D8] px-4 sm:px-6 lg:px-8 xl:px-12 py-2 hidden lg:block">
-        <div className="w-full flex items-center justify-between gap-3 text-[11px] xl:text-xs font-bold tracking-wider text-[#292524]">
+      <nav className="bg-white border-b border-[#E5E5E5] px-4 sm:px-6 lg:px-8 xl:px-12 py-2.5 hidden lg:block">
+        <div className="w-full flex items-center justify-between gap-3 text-[11px] xl:text-xs font-bold tracking-wider text-[#202020]">
           {HEADER_CATEGORIES.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="inline-flex items-center gap-1 py-1 hover:text-[#8A311F] transition-colors whitespace-nowrap group"
+              className="inline-flex items-center gap-1 py-1 hover:text-[#873427] transition-colors whitespace-nowrap group"
             >
               <span>{item.name}</span>
-              <ChevronDown className="w-3 h-3 text-[#A87B5B] group-hover:translate-y-0.5 transition-transform" />
+              <ChevronDown className="w-3 h-3 text-[#873427] group-hover:translate-y-0.5 transition-transform" />
             </Link>
           ))}
         </div>
