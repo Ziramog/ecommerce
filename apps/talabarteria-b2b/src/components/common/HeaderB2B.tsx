@@ -124,13 +124,13 @@ export function HeaderB2B() {
             onSubmit={handleSearch}
             className="flex-1 max-w-xl mx-4 lg:mx-8 relative hidden lg:block"
           >
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8C8278]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#737373]" />
             <input
               type="text"
               placeholder="Buscar productos, SKU o categoría..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-[#D6CFC4] rounded-full pl-9 pr-4 py-2 text-xs text-[#1F1E1D] placeholder-[#9E958A] focus:outline-none focus:border-[#8A311F] focus:ring-1 focus:ring-[#8A311F] transition-all shadow-2xs"
+              className="w-full bg-white border border-[#D4D4D4] rounded pl-9 pr-4 py-2 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427] focus:ring-1 focus:ring-[#873427] transition-all"
             />
           </form>
 
@@ -140,7 +140,7 @@ export function HeaderB2B() {
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <div className="hidden xl:flex flex-col text-right">
-                  <span className="text-xs font-bold text-[#1F1E1D] truncate max-w-[130px]">
+                  <span className="text-xs font-bold text-[#202020] truncate max-w-[130px]">
                     {user?.companyName}
                   </span>
                   <span className="text-[10px] text-emerald-700 font-semibold flex items-center justify-end gap-1">
@@ -151,7 +151,7 @@ export function HeaderB2B() {
                 <button
                   onClick={logout}
                   title="Cerrar sesión"
-                  className="p-1.5 sm:p-2 rounded-full text-[#78716C] hover:text-[#1F1E1D] hover:bg-[#EFEAE2] transition-colors"
+                  className="p-1.5 sm:p-2 rounded text-[#737373] hover:text-[#202020] hover:bg-[#F5F5F5] transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -159,18 +159,18 @@ export function HeaderB2B() {
             ) : (
               <Link
                 href="/acceso"
-                className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-full text-xs font-semibold text-[#292524] hover:text-[#8A311F] hover:bg-[#EFEAE2] transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-semibold text-[#202020] hover:text-[#873427] hover:bg-[#F5F5F5] transition-colors"
               >
-                <User className="w-4 h-4 text-[#292524]" />
+                <User className="w-4 h-4 text-[#202020]" />
                 <span className="hidden sm:inline">Ingresar</span>
               </Link>
             )}
 
-            {/* Botón Píldora Terracota: Pedido Rápido B2B */}
+            {/* Botón Pedido Rápido B2B (4-6px radius) */}
             <Link
               href="/pedido-rapido"
               title="Matriz de Pedido Rápido B2B"
-              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#8A311F] hover:bg-[#722718] text-white text-xs font-semibold shadow-xs transition-all flex-shrink-0"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded bg-[#873427] hover:bg-[#6D271D] text-white text-xs font-semibold transition-colors flex-shrink-0"
             >
               <FileText className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Pedido Rápido</span>
@@ -179,11 +179,11 @@ export function HeaderB2B() {
             {/* Carrito de Compras */}
             <Link
               href="/pedido"
-              className="relative p-1.5 sm:p-2 text-[#292524] hover:text-[#8A311F] transition-colors flex items-center justify-center flex-shrink-0"
+              className="relative p-1.5 sm:p-2 text-[#202020] hover:text-[#873427] transition-colors flex items-center justify-center flex-shrink-0"
               aria-label="Ver pedido mayorista"
             >
               <ShoppingCart className="w-5 h-5 stroke-[1.8]" />
-              <span className="absolute -top-1 -right-1 bg-[#8A311F] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-2xs">
+              <span className="absolute -top-1 -right-1 bg-[#873427] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-2xs">
                 {totalUnits}
               </span>
             </Link>

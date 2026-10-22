@@ -176,8 +176,8 @@ export function CatalogSidebarFilters({
       }
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#E8E2D8]">
-        <h2 className="text-sm font-bold text-[#1F1E1D] tracking-wide uppercase">
+      <div className="flex items-center justify-between pb-2.5 border-b border-[#E5E5E5]">
+        <h2 className="text-xs font-bold text-[#202020] tracking-wider uppercase">
           Filtros
         </h2>
         {hasActiveFilters && (
@@ -188,7 +188,7 @@ export function CatalogSidebarFilters({
               setTempMaxPrice('')
               onClearAll()
             }}
-            className="text-xs text-[#8A311F] hover:underline font-semibold"
+            className="text-xs text-[#873427] hover:underline font-semibold"
           >
             Limpiar todo
           </button>
@@ -196,42 +196,42 @@ export function CatalogSidebarFilters({
       </div>
 
       {/* 1. Categorías Accordion */}
-      <div className="border-b border-[#E8E2D8] pb-4">
+      <div className="border-b border-[#E5E5E5] pb-3 mb-3">
         <button
           type="button"
           onClick={() => setOpenCategories(!openCategories)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#1F1E1D] uppercase tracking-wider mb-2.5"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
         >
           <span>Categorías</span>
           {openCategories ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#737373]" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#737373]" />
           )}
         </button>
 
         {openCategories && (
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-0.5">
             {CATEGORIES_LIST.map((cat) => {
               const checked = filters.categories.includes(cat)
               const count = counts.cMap[cat] || 0
               return (
                 <label
                   key={cat}
-                  className="flex items-center justify-between text-xs text-[#57534E] hover:text-[#1F1E1D] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
                 >
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleCategory(cat)}
-                      className="w-3.5 h-3.5 rounded border-[#D6CFC4] text-[#8A311F] focus:ring-[#8A311F] cursor-pointer"
+                      className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#1F1E1D]' : ''}>
+                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
                       {cat}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A8A29E] font-mono group-hover:text-[#78716C]">
+                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
                     ({count})
                   </span>
                 </label>
@@ -242,42 +242,42 @@ export function CatalogSidebarFilters({
       </div>
 
       {/* 2. Disponibilidad Accordion */}
-      <div className="border-b border-[#E8E2D8] pb-4">
+      <div className="border-b border-[#E5E5E5] pb-3 mb-3">
         <button
           type="button"
           onClick={() => setOpenAvailability(!openAvailability)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#1F1E1D] uppercase tracking-wider mb-2.5"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
         >
           <span>Disponibilidad</span>
           {openAvailability ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#737373]" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#737373]" />
           )}
         </button>
 
         {openAvailability && (
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-0.5">
             {AVAILABILITY_LIST.map((item) => {
               const checked = filters.availability.includes(item)
               const count = counts.aMap[item] || 0
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#57534E] hover:text-[#1F1E1D] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
                 >
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleAvailability(item)}
-                      className="w-3.5 h-3.5 rounded border-[#D6CFC4] text-[#8A311F] focus:ring-[#8A311F] cursor-pointer"
+                      className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#1F1E1D]' : ''}>
+                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A8A29E] font-mono group-hover:text-[#78716C]">
+                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
                     ({count})
                   </span>
                 </label>
@@ -288,41 +288,41 @@ export function CatalogSidebarFilters({
       </div>
 
       {/* 3. Precio (ARS) Accordion */}
-      <div className="border-b border-[#E8E2D8] pb-4">
+      <div className="border-b border-[#E5E5E5] pb-3 mb-3">
         <button
           type="button"
           onClick={() => setOpenPrice(!openPrice)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#1F1E1D] uppercase tracking-wider mb-2.5"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
         >
           <span>Precio (ARS)</span>
           {openPrice ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#737373]" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#737373]" />
           )}
         </button>
 
         {openPrice && (
           <form onSubmit={handleApplyPrice} className="pt-1 space-y-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <input
                 type="number"
                 placeholder="Mín."
                 value={tempMinPrice}
                 onChange={(e) => setTempMinPrice(e.target.value)}
-                className="w-full bg-white border border-[#D6CFC4] rounded-lg px-2.5 py-1.5 text-xs text-[#1F1E1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#8A311F]"
+                className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427]"
               />
-              <span className="text-[#A8A29E] text-xs font-bold">-</span>
+              <span className="text-[#A3A3A3] text-xs font-bold">-</span>
               <input
                 type="number"
                 placeholder="Máx."
                 value={tempMaxPrice}
                 onChange={(e) => setTempMaxPrice(e.target.value)}
-                className="w-full bg-white border border-[#D6CFC4] rounded-lg px-2.5 py-1.5 text-xs text-[#1F1E1D] placeholder-[#A8A29E] focus:outline-none focus:border-[#8A311F]"
+                className="w-full bg-white border border-[#E5E5E5] rounded px-2.5 py-1.5 text-xs text-[#202020] placeholder-[#A3A3A3] focus:outline-none focus:border-[#873427]"
               />
               <button
                 type="submit"
-                className="w-8 h-8 rounded-lg bg-[#18261E] hover:bg-[#23382C] text-white flex items-center justify-center flex-shrink-0 transition-colors"
+                className="w-7 h-7 rounded bg-[#172B23] hover:bg-[#0F1D17] text-white flex items-center justify-center flex-shrink-0 transition-colors"
                 title="Aplicar rango de precio"
               >
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -333,42 +333,42 @@ export function CatalogSidebarFilters({
       </div>
 
       {/* 4. Tipo de presentación Accordion */}
-      <div className="border-b border-[#E8E2D8] pb-4">
+      <div className="border-b border-[#E5E5E5] pb-3 mb-3">
         <button
           type="button"
           onClick={() => setOpenPresentation(!openPresentation)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#1F1E1D] uppercase tracking-wider mb-2.5"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
         >
           <span>Tipo de presentación</span>
           {openPresentation ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#737373]" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#737373]" />
           )}
         </button>
 
         {openPresentation && (
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-0.5">
             {PRESENTATION_LIST.map((item) => {
               const checked = filters.presentations.includes(item)
               const count = counts.pMap[item] || 0
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#57534E] hover:text-[#1F1E1D] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
                 >
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => togglePresentation(item)}
-                      className="w-3.5 h-3.5 rounded border-[#D6CFC4] text-[#8A311F] focus:ring-[#8A311F] cursor-pointer"
+                      className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#1F1E1D]' : ''}>
+                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A8A29E] font-mono group-hover:text-[#78716C]">
+                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
                     ({count})
                   </span>
                 </label>
@@ -383,38 +383,38 @@ export function CatalogSidebarFilters({
         <button
           type="button"
           onClick={() => setOpenMaterial(!openMaterial)}
-          className="w-full flex items-center justify-between text-xs font-bold text-[#1F1E1D] uppercase tracking-wider mb-2.5"
+          className="w-full flex items-center justify-between text-xs font-bold text-[#202020] uppercase tracking-wider mb-2"
         >
           <span>Material</span>
           {openMaterial ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[#737373]" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#78716C]" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#737373]" />
           )}
         </button>
 
         {openMaterial && (
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-0.5">
             {MATERIAL_LIST.map((item) => {
               const checked = filters.materials.includes(item)
               const count = counts.mMap[item] || 0
               return (
                 <label
                   key={item}
-                  className="flex items-center justify-between text-xs text-[#57534E] hover:text-[#1F1E1D] cursor-pointer py-0.5 group"
+                  className="flex items-center justify-between text-xs text-[#525252] hover:text-[#202020] cursor-pointer py-0.5 group"
                 >
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleMaterial(item)}
-                      className="w-3.5 h-3.5 rounded border-[#D6CFC4] text-[#8A311F] focus:ring-[#8A311F] cursor-pointer"
+                      className="w-3.5 h-3.5 rounded-xs border-[#D4D4D4] text-[#873427] focus:ring-[#873427] cursor-pointer"
                     />
-                    <span className={checked ? 'font-bold text-[#1F1E1D]' : ''}>
+                    <span className={checked ? 'font-bold text-[#202020]' : ''}>
                       {item}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#A8A29E] font-mono group-hover:text-[#78716C]">
+                  <span className="text-[11px] text-[#A3A3A3] font-mono group-hover:text-[#737373]">
                     ({count})
                   </span>
                 </label>
@@ -426,11 +426,11 @@ export function CatalogSidebarFilters({
 
       {/* Mobile Drawer Action Button */}
       {isMobileDrawer && (
-        <div className="pt-4 border-t border-[#E8E2D8]">
+        <div className="pt-4 border-t border-[#E5E5E5]">
           <button
             type="button"
             onClick={onCloseMobileDrawer}
-            className="w-full py-3 rounded-xl bg-[#15232A] text-white text-xs font-bold uppercase tracking-wider shadow-sm"
+            className="w-full py-2.5 rounded bg-[#172B23] hover:bg-[#0F1D17] text-white text-xs font-bold uppercase tracking-wider"
           >
             Ver {totalFilteredCount} productos
           </button>

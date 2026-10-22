@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { B2BProduct } from '@/lib/catalog'
 import { formatCurrencyARS, calculateVolumeDiscount, DEFAULT_VOLUME_TIERS } from '@/lib/utils'
 import { useB2BCart } from '@/context/B2BCartContext'
-import { ShoppingCart, Check, Heart } from 'lucide-react'
+import { ShoppingCart, Check, Heart, ChevronDown, ChevronUp } from 'lucide-react'
 
 export interface ProductCardB2BProps {
   product: B2BProduct
@@ -17,16 +17,23 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   const [favorited, setFavorited] = useState(false)
+  const [showTiers, setShowTiers] = useState(false)
 
   const activeTiers =
     product.volumeTiers && product.volumeTiers.length > 0
       ? product.volumeTiers
       : DEFAULT_VOLUME_TIERS
 
-  const { unitPrice, discountPercent, totalPrice } = calculateVolumeDiscount(
+  const { unitPrice } = calculateVolumeDiscount(
     product.wholesalePrice,
     qty,
     activeTiers
+  )
+
+  // Find tier with maximum discount
+  const bestTier = activeTiers.reduce((max, t) =>
+    t.discountPercent > max.discountPercent ? t : max,
+    activeTiers[0]
   )
 
   const handleAdd = () => {
@@ -40,10 +47,10 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
     product.handle.toLowerCase().includes('pack')
 
   return (
-    <div className="bg-white border border-[#E8E2D8] rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+    <div className="bg-white border border-[#E5E5E5] rounded hover:border-[#B49272] transition-colors flex flex-col justify-between group overflow-hidden">
       <div>
-        {/* A. Fotografía 1:1 con object-contain limpio y badges oficiales */}
-        <div className="relative aspect-square bg-[#FAF8F5] overflow-hidden">
+        {/* A. Fotografía 1:1, object-contain limpio y badges oficiales sin recortes */}
+        <div className="relative aspect-square bg-[#FAFAFA] border-b border-[#F0F0F0] overflow-hidden">
           <Link
             href={`/productos/${product.handle}`}
             className="block w-full h-full relative cursor-pointer group/img"
@@ -53,19 +60,19 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
                 src={product.thumbnail}
                 alt={product.title}
                 fill
-                className="object-contain p-3.5 sm:p-4 group-hover/img:scale-105 transition-transform duration-500"
+                className="object-contain p-3 sm:p-4 group-hover/img:scale-105 transition-transform duration-300"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-[#A8A29E] text-xs">
-                Sin fotografía técnica
+              <div className="h-full flex items-center justify-center text-[#A3A3A3] text-xs">
+                Sin fotografía
               </div>
             )}
           </Link>
 
-          {/* Badge Superior Izquierdo: SKU oscuro discreto */}
-          <div className="absolute top-2.5 left-2.5 bg-[#18261E] text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-xs pointer-events-none">
-            {product.sku || 'SKU-001'}
+          {/* Badge Superior Izquierdo: SKU discreto */}
+          <div className="absolute top-2 left-2 bg-[#F5F5F5] text-[#525252] text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-xs border border-[#E5E5E5] pointer-events-none">
+            {product.sku || 'SKU'}
           </div>
 
           {/* Badge Superior Derecho: Favorito */}
@@ -76,107 +83,121 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
               e.stopPropagation()
               setFavorited(!favorited)
             }}
-            className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/95 border border-[#E8E2D8] flex items-center justify-center text-[#78716C] hover:text-[#8A311F] transition-colors shadow-2xs z-10"
+            className="absolute top-2 right-2 w-7 h-7 rounded-xs bg-white/90 border border-[#E5E5E5] flex items-center justify-center text-[#737373] hover:text-[#873427] transition-colors z-10"
             aria-label="Agregar a favoritos"
           >
             <Heart
-              className={`w-3.5 h-3.5 ${favorited ? 'fill-[#8A311F] text-[#8A311F]' : ''}`}
+              className={`w-3.5 h-3.5 ${favorited ? 'fill-[#873427] text-[#873427]' : ''}`}
             />
           </button>
 
-          {/* Badge Inferior Izquierdo: Estado de Stock */}
-          <div className="absolute bottom-2.5 left-2.5 pointer-events-none">
+          {/* Badges Inferiores: Stock y Presentación */}
+          <div className="absolute bottom-2 left-2 pointer-events-none">
             {isPack ? (
-              <span className="bg-white/95 text-[#8A311F] text-[10px] font-semibold px-2 py-0.5 rounded border border-[#E8E2D8] flex items-center gap-1 shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8A311F]" />
+              <span className="bg-white/95 text-[#873427] text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border border-[#F5D5CE] flex items-center gap-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#873427]" />
                 Pack cerrado
               </span>
             ) : (
-              <span className="bg-white/95 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1 shadow-2xs">
+              <span className="bg-white/95 text-emerald-800 text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border border-emerald-200 flex items-center gap-1 shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
                 En stock
               </span>
             )}
           </div>
 
-          {/* Badge Inferior Derecho: Tipo de Presentación */}
-          <div className="absolute bottom-2.5 right-2.5 pointer-events-none">
-            <span className="bg-white/95 text-[#292524] text-[10px] font-semibold px-2 py-0.5 rounded border border-[#E8E2D8] shadow-2xs">
+          <div className="absolute bottom-2 right-2 pointer-events-none">
+            <span className="bg-white/95 text-[#525252] text-[10px] font-medium px-1.5 py-0.5 rounded-xs border border-[#E5E5E5]">
               {product.packUnit || 'Unidad'}
             </span>
           </div>
         </div>
 
         {/* B. Información Comercial */}
-        <div className="p-3.5 sm:p-4 pb-2">
+        <div className="p-3 sm:p-3.5 pb-2">
           {/* Título: Máximo 2 líneas */}
-          <h3 className="font-serif text-sm sm:text-base font-bold text-[#1F1E1D] leading-snug line-clamp-2 hover:text-[#8A311F] transition-colors mb-1 min-h-[2.5rem]">
+          <h3 className="font-serif text-sm font-bold text-[#202020] leading-snug line-clamp-2 hover:text-[#873427] transition-colors mb-1 min-h-[2.5rem]">
             <Link href={`/productos/${product.handle}`}>
               {product.title}
             </Link>
           </h3>
 
-          {/* Descripción corta: 2 líneas */}
-          <p className="text-[11px] text-[#57534E] line-clamp-2 leading-relaxed font-normal mb-2.5 min-h-[2rem]">
-            {product.description ||
-              'Pieza artesanal confeccionada en materiales nobles con especificaciones profesionales para uso ecuestre y de campo.'}
+          {/* Descripción corta discreta */}
+          <p className="text-[11px] text-[#737373] line-clamp-1 leading-relaxed font-normal mb-2">
+            {product.description || 'Pieza tradicional con manufactura ecuestre certificada.'}
           </p>
 
-          {/* Precio Mayorista con Jerarquía Visual Alta */}
-          <div className="flex items-baseline gap-1 mb-2.5">
-            <span className="font-serif text-xl sm:text-2xl font-bold text-[#1F1E1D] leading-none">
+          {/* Precio Mayorista con Jerarquía Visual Dominante */}
+          <div className="flex items-baseline gap-1 mb-2">
+            <span className="font-serif text-2xl font-bold text-[#202020] leading-none tracking-tight">
               {formatCurrencyARS(unitPrice)}
             </span>
-            <span className="text-xs text-[#78716C] font-normal">
+            <span className="text-xs text-[#737373] font-normal">
               /{isPack ? 'pack' : 'un'}
             </span>
           </div>
 
-          {/* C. Escalas de Descuento por Volumen (3 cajitas compactas) */}
-          <div className="grid grid-cols-3 gap-1.5 mb-3">
-            {activeTiers.map((tier) => {
-              const discounted = Math.round(
-                product.wholesalePrice * (1 - tier.discountPercent / 100)
-              )
-              const isActive =
-                qty >= tier.minQty &&
-                (tier === activeTiers[activeTiers.length - 1] ||
-                  qty < (activeTiers[activeTiers.indexOf(tier) + 1]?.minQty || Infinity))
+          {/* C. Descuento por Volumen Resumido (Criterio Mercado Libre) */}
+          <div className="mb-2.5">
+            <div className="flex items-center justify-between gap-1">
+              {bestTier && bestTier.discountPercent > 0 ? (
+                <span className="inline-flex items-center text-[11px] font-semibold text-[#873427] bg-[#FDF4F2] border border-[#F5D5CE] px-1.5 py-0.5 rounded-xs">
+                  Desde {bestTier.minQty} un.: -{bestTier.discountPercent}%
+                </span>
+              ) : (
+                <span className="text-[11px] text-[#737373]">
+                  Precio mayorista lista
+                </span>
+              )}
 
-              return (
-                <button
-                  key={tier.minQty}
-                  type="button"
-                  onClick={() => setQty(tier.minQty)}
-                  className={`p-1.5 rounded-lg border text-center flex flex-col justify-between transition-all ${
-                    isActive
-                      ? 'border-[#D48D70] bg-[#FFF8F0] shadow-2xs ring-1 ring-[#D48D70]'
-                      : 'border-[#E8E2D8] bg-[#FAF8F5] hover:border-[#D6CFC4] text-[#57534E]'
-                  }`}
-                  title={`Aplicar escala ${tier.label}`}
-                >
-                  <span className="text-[9px] text-[#78716C] leading-tight block mb-0.5">
-                    {tier.label}
-                  </span>
-                  <span className="font-mono font-bold text-[11px] text-[#1F1E1D] leading-none">
-                    {formatCurrencyARS(discounted)}
-                  </span>
-                </button>
-              )
-            })}
+              <button
+                type="button"
+                onClick={() => setShowTiers(!showTiers)}
+                className="text-[10px] font-medium text-[#737373] hover:text-[#873427] hover:underline flex items-center gap-0.5"
+              >
+                <span>{showTiers ? 'Cerrar' : 'Ver escalas'}</span>
+                {showTiers ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
+              </button>
+            </div>
+
+            {/* Escalas desplegables */}
+            {showTiers && (
+              <div className="mt-1.5 p-2 bg-[#FAFAFA] border border-[#E5E5E5] rounded-xs space-y-1 text-[10px]">
+                {activeTiers.map((tier) => {
+                  const discounted = Math.round(
+                    product.wholesalePrice * (1 - tier.discountPercent / 100)
+                  )
+                  return (
+                    <div
+                      key={tier.minQty}
+                      className="flex items-center justify-between text-[#525252]"
+                    >
+                      <span>{tier.label}:</span>
+                      <span className="font-mono font-bold text-[#202020]">
+                        {formatCurrencyARS(discounted)}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* D. Fila de Compra: Selector de Cantidad + Agregar al Pedido */}
-      <div className="p-3.5 sm:p-4 pt-0">
+      {/* D. Fila de Compra: Stepper + Agregar al Pedido */}
+      <div className="p-3 sm:p-3.5 pt-0">
         <div className="flex items-center gap-2">
           {/* Stepper numérico */}
-          <div className="flex items-center border border-[#D6CFC4] rounded-lg bg-white h-9 flex-shrink-0">
+          <div className="flex items-center border border-[#D4D4D4] rounded bg-white h-8 flex-shrink-0">
             <button
               type="button"
               onClick={() => setQty(Math.max(1, qty - 1))}
-              className="px-2.5 h-full text-[#57534E] hover:bg-[#FAF8F5] text-sm font-bold transition-colors rounded-l-lg"
+              className="w-7 h-full text-[#525252] hover:bg-[#F5F5F5] text-xs font-bold transition-colors flex items-center justify-center"
               aria-label="Disminuir cantidad"
             >
               -
@@ -186,12 +207,12 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
               min="1"
               value={qty}
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-8 text-center text-xs font-mono font-bold text-[#1F1E1D] focus:outline-none"
+              className="w-8 text-center text-xs font-mono font-bold text-[#202020] focus:outline-none"
             />
             <button
               type="button"
               onClick={() => setQty(qty + 1)}
-              className="px-2.5 h-full text-[#57534E] hover:bg-[#FAF8F5] text-sm font-bold transition-colors rounded-r-lg"
+              className="w-7 h-full text-[#525252] hover:bg-[#F5F5F5] text-xs font-bold transition-colors flex items-center justify-center"
               aria-label="Aumentar cantidad"
             >
               +
@@ -202,10 +223,10 @@ export function ProductCardB2B({ product }: ProductCardB2BProps) {
           <button
             type="button"
             onClick={handleAdd}
-            className={`flex-1 h-9 px-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-xs ${
+            className={`flex-1 h-8 px-2.5 rounded text-[11px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow-xs ${
               added
                 ? 'bg-emerald-700 text-white'
-                : 'bg-[#15232A] hover:bg-[#1E333F] text-white active:scale-[0.98]'
+                : 'bg-[#172B23] hover:bg-[#0F1D17] text-white active:scale-[0.98]'
             }`}
           >
             {added ? (

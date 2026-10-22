@@ -6,26 +6,28 @@ import { ArrowRight, Users, Store, Truck, ChevronRight, UserPlus } from 'lucide-
 export function EquestrianHero() {
   return (
     <section className="relative bg-[#FAF8F5] overflow-hidden border-b border-[#E8E2D8]">
-      {/* Background with dedicated panoramic polo equestrian photography */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <Image
-          src="/images/home/hero.png"
-          alt="Polo en acción — Talabartería José Mercadal"
-          fill
-          priority
-          className="object-cover object-right lg:object-center"
-          sizes="100vw"
-        />
-        {/* Luminous gradient overlay: warm ivory on left behind text, transparent on right preserving horse & action */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/92 via-35% md:via-45% lg:via-42% to-transparent" />
+      {/* Background with dedicated polo equestrian video */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/images/home/hero.png"
+          className="w-full h-full object-cover object-center"
+        >
+          <source src="/videos/hero_video.mp4" type="video/mp4" />
+        </video>
+        {/* Overlay ocupando estrictamente el 50% derecho */}
+        <div className="absolute top-0 right-0 bottom-0 w-full lg:w-1/2 bg-gradient-to-l from-[#FAF8F5] via-[#FAF8F5]/90 to-transparent pointer-events-none hidden lg:block" />
         {/* Mobile overlay to ensure high readability on narrow viewports */}
-        <div className="absolute inset-0 bg-[#FAF8F5]/80 md:hidden" />
+        <div className="absolute inset-0 bg-[#FAF8F5]/80 lg:hidden pointer-events-none" />
       </div>
 
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-10 sm:py-14 lg:py-16 xl:py-20 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Columna Izquierda: Mensaje y llamadas a la acción */}
-          <div className="lg:col-span-7 xl:col-span-7 max-w-2xl">
+          <div className="lg:col-span-7 xl:col-span-7 w-full max-w-2xl bg-[#FAF8F5]/90 lg:bg-[#FAF8F5]/85 backdrop-blur-md p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-white/60 shadow-xs">
             {/* Eyebrow con línea fina sepia/cuero */}
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <span className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-[#8C7355] font-bold">
