@@ -15,10 +15,10 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'PRODUCTOS', href: '/catalogo' },
-    { name: 'CATEGORÍAS', href: '/#categorias' },
-    { name: 'NUESTRA HISTORIA', href: '/#nuestra-historia' },
+    { name: 'CATEGORÍAS', href: '/catalogo' },
+    { name: 'NUESTRA HISTORIA', href: '/historia' },
     { name: 'TALABARTERÍA MERCADAL', href: 'http://localhost:3001', badge: 'B2B' },
-    { name: 'CONTACTO', href: '/#contacto' },
+    { name: 'CONTACTO', href: '/contacto' },
   ]
 
   const handleSearchSubmit = (e: React.FormEvent) => {

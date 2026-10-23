@@ -1,12 +1,12 @@
 import React from 'react'
 import Link from 'next/link'
 import { PampaNovusLogo } from '@/components/brand/PampaNovusLogo'
-import { ShieldCheck, Truck, CreditCard, RotateCcw } from 'lucide-react'
+import { ShieldCheck, Truck, CreditCard, RotateCcw, ShieldAlert, ArrowRight } from 'lucide-react'
 
 export function Footer() {
   return (
     <footer id="contacto" className="bg-pn-espresso text-pn-crema/90 pt-10 pb-8 border-t border-pn-marron/40 font-sans">
-      {/* 4 Insignias de Valor en una fila compacta con alta legibilidad */}
+      {/* 4 Insignias de Valor */}
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 mb-9">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 py-5 border-y border-pn-marron/30">
           <div className="flex items-center space-x-3.5">
@@ -40,7 +40,34 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Main Footer Links — Altura controlada y tipografía clara */}
+      {/* Franja Regulatoria Oficial: Botón de Arrepentimiento (Res. 424/2020 SCI - Ley 24.240) */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 mb-9">
+        <div className="bg-pn-marron/40 border border-pn-arena/30 rounded-[2px] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-left">
+            <div className="p-2 bg-pn-crema/10 rounded-[2px] text-pn-arena flex-shrink-0">
+              <ShieldAlert size={20} />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase tracking-[0.18em] text-pn-arena font-semibold block">
+                Defensa del Consumidor · Res. 424/2020 SCI
+              </span>
+              <p className="text-xs text-pn-crema/90 font-light">
+                Derecho a revocar su compra dentro de los 10 días corridos de recibido el producto sin costo alguno.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/arrepentimiento"
+            className="flex-shrink-0 bg-pn-crema text-pn-espresso hover:bg-white px-5 py-2.5 rounded-[2px] text-xs uppercase tracking-[0.16em] font-semibold transition-colors flex items-center gap-2"
+          >
+            <span>Botón de Arrepentimiento</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Footer Links */}
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-9">
           {/* Identidad de Marca */}
@@ -90,30 +117,35 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Atención al Cliente */}
+          {/* Atención y Legal */}
           <div className="md:col-span-2 col-span-6">
             <h4 className="text-white text-xs uppercase tracking-[0.16em] font-semibold mb-3.5">
-              Atención
+              Atención & Legal
             </h4>
             <ul className="space-y-2.5 text-[13px] text-pn-crema/80 font-light">
               <li>
-                <Link href="/catalogo" className="hover:text-white transition-colors">
-                  Guía de Medidas
+                <Link href="/historia" className="hover:text-white transition-colors">
+                  Nuestra Historia
                 </Link>
               </li>
               <li>
-                <Link href="/catalogo" className="hover:text-white transition-colors">
-                  Cuidado del Cuero
+                <Link href="/envios-y-devoluciones" className="hover:text-white transition-colors">
+                  Envíos & Tarifas
                 </Link>
               </li>
               <li>
-                <Link href="/catalogo" className="hover:text-white transition-colors">
-                  Política de Envíos
+                <Link href="/envios-y-devoluciones" className="hover:text-white transition-colors">
+                  Garantía & Cambios
                 </Link>
               </li>
               <li>
-                <Link href="/catalogo" className="hover:text-white transition-colors">
-                  Garantía y Devolución
+                <Link href="/contacto" className="hover:text-white transition-colors">
+                  Showroom & Contacto
+                </Link>
+              </li>
+              <li>
+                <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+                  Bases de Contratación
                 </Link>
               </li>
             </ul>
@@ -143,11 +175,25 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-pn-marron/30 flex flex-col sm:flex-row justify-between items-center text-xs text-pn-arena/70">
-          <p>© {new Date().getFullYear()} Pampa Novus — Canal minorista de Talabartería Mercadal. Todos los derechos reservados.</p>
-          <div className="flex space-x-5 mt-3 sm:mt-0">
-            <span className="hover:text-white transition-colors cursor-pointer">Términos y Condiciones</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Privacidad de Datos</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Defensa del Consumidor</span>
+          <p>© {new Date().getFullYear()} Pampa Novus — Canal minorista de Talabartería Mercadal S.A. CUIT 30-71234567-8.</p>
+          <div className="flex flex-wrap gap-4 mt-3 sm:mt-0">
+            <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+              Términos y Condiciones
+            </Link>
+            <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+              Privacidad de Datos
+            </Link>
+            <Link href="/arrepentimiento" className="hover:text-white transition-colors font-medium text-pn-arena">
+              Botón de Arrepentimiento
+            </Link>
+            <a
+              href="https://www.argentina.gob.ar/defensadelconsumidor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Defensa del Consumidor
+            </a>
           </div>
         </div>
       </div>
