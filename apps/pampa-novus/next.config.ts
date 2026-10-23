@@ -1,7 +1,11 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@mercadal/shared-types'],
+  transpilePackages: [
+    '@mercadal/shared-types',
+    '@mercadal/commerce-core',
+    '@mercadal/commerce-ui',
+  ],
   images: {
     remotePatterns: [
       {

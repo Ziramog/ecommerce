@@ -1,0 +1,20 @@
+{
+  "name": "@mercadal/commerce-core",
+  "version": "0.1.0",
+  "description": "WOLFIM Commerce Core — Generic typed facades and contracts for Medusa 2",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/__tests__/*.test.ts"
+  },
+  "dependencies": {
+    "@medusajs/js-sdk": "2.21.2"
+  },
+  "devDependencies": {
+    "@mercadal/typescript-config": "*",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0"
+  }
+}

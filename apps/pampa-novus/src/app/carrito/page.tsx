@@ -236,15 +236,13 @@ export default function CarritoPage() {
               </div>
 
               {/* Checkout Trigger */}
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={isCheckingOut}
-                className="w-full py-4 bg-leather hover:bg-leather-dark text-white rounded text-xs uppercase tracking-[0.2em] font-semibold flex items-center justify-center space-x-2 transition-colors shadow-md disabled:opacity-50"
+              <Link
+                href="/checkout"
+                className="w-full py-4 bg-leather hover:bg-leather-dark text-white rounded text-xs uppercase tracking-[0.2em] font-semibold flex items-center justify-center space-x-2 transition-colors shadow-md"
               >
                 <Lock size={15} />
-                <span>{isCheckingOut ? 'Procesando en Staging...' : 'Finalizar Compra Segura'}</span>
-              </button>
+                <span>Finalizar Compra Segura</span>
+              </Link>
 
               <div className="pt-2 text-center space-y-2">
                 <div className="flex items-center justify-center space-x-2 text-xs text-pampa-500">

@@ -147,7 +147,7 @@ export function CartDrawer() {
               </div>
 
               <Link
-                href="/carrito"
+                href="/checkout"
                 onClick={closeCart}
                 className="w-full py-3.5 bg-leather text-white flex items-center justify-center space-x-2 text-xs uppercase tracking-[0.2em] font-semibold hover:bg-leather-dark transition-colors shadow-md rounded"
               >

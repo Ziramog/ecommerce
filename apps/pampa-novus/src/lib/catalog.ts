@@ -1,4 +1,5 @@
 import { medusa } from './medusa'
+import { isMockFallbackAllowed, assertLiveCommerceAvailable } from '@mercadal/commerce-core'
 
 export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
   'montura-criolla-de-trabajo':
@@ -205,7 +206,10 @@ export async function getB2CProducts(): Promise<StorefrontProduct[]> {
     })
 
     if (!res.products || res.products.length === 0) {
-      return STATIC_B2C_FALLBACK_PRODUCTS
+      if (isMockFallbackAllowed()) {
+        return STATIC_B2C_FALLBACK_PRODUCTS
+      }
+      return []
     }
 
     return res.products.map((p) => {
@@ -230,11 +234,16 @@ export async function getB2CProducts(): Promise<StorefrontProduct[]> {
       }
     })
   } catch (error) {
-    console.warn(
-      '[B2C Catalog] No se pudo conectar con el backend Medusa en vivo. Usando catálogo estático de resiliencia.',
-      error instanceof Error ? error.message : error
-    )
-    return STATIC_B2C_FALLBACK_PRODUCTS
+    if (isMockFallbackAllowed()) {
+      console.warn(
+        '[B2C Catalog] No se pudo conectar con el backend Medusa. Mocks permitidos por entorno local.',
+        error instanceof Error ? error.message : error
+      )
+      return STATIC_B2C_FALLBACK_PRODUCTS
+    }
+    // Fail-closed policy for production
+    assertLiveCommerceAvailable(error)
+    return []
   }
 }
 
@@ -249,7 +258,10 @@ export async function getProductByHandle(handle: string): Promise<StorefrontProd
 
     const p = res.products?.[0]
     if (!p) {
-      return STATIC_B2C_FALLBACK_PRODUCTS.find((prod) => prod.handle === handle) || null
+      if (isMockFallbackAllowed()) {
+        return STATIC_B2C_FALLBACK_PRODUCTS.find((prod) => prod.handle === handle) || null
+      }
+      return null
     }
 
     const variant = p.variants?.[0]
@@ -272,10 +284,14 @@ export async function getProductByHandle(handle: string): Promise<StorefrontProd
       inStock: true,
     }
   } catch (error) {
-    console.warn(
-      `[B2C Catalog] No se pudo obtener producto ${handle} desde Medusa. Usando fallback estático.`,
-      error instanceof Error ? error.message : error
-    )
-    return STATIC_B2C_FALLBACK_PRODUCTS.find((p) => p.handle === handle) || null
+    if (isMockFallbackAllowed()) {
+      console.warn(
+        `[B2C Catalog] Error al consultar ${handle}. Usando fallback local permitido.`,
+        error instanceof Error ? error.message : error
+      )
+      return STATIC_B2C_FALLBACK_PRODUCTS.find((p) => p.handle === handle) || null
+    }
+    assertLiveCommerceAvailable(error)
+    return null
   }
 }
