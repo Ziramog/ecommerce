@@ -1,15 +1,15 @@
 # G2-REPORT — Informe de Entrega WOLFIM Adapters & Integrations (Gate G2)
 
 **Proyecto:** WOLFIM Commerce Core — Caso de Uso Piloto: Pampa Novus B2C / Talabartería Mercadal S.A.  
-**Fecha:** 23/10/2026 · **Gate:** G2 (Completado)  
+**Fecha:** 23/10/2026 · **Gate:** G2 (Cierre Auditado y Verificado)  
 **Rama:** `feature/g2-payment-shipping-adapters`  
-**Estado:** IMPLEMENTADO · PROBADO (35/35 TESTS PASS) · LISTO PARA REVISIÓN  
+**Estado:** IMPLEMENTADO · PROBADO (70/70 TESTS PASS EN MONOREPO) · CIERRE COMPLETADO  
 
 ---
 
 ## 1. Arquitectura Real Implementada (Capa 02)
 
-En cumplimiento de las directivas de WOLFIM, el documento [`capa02.md`](file:///c:/Users/TRUzT/.gemini/antigravity/brain/25a3dc48-d946-4492-b5f8-432ae440c26c/user_upload_extracted/capa02.md) y [`docs/decisions/ADR-002-mercadopago.md`](file:///c:/Projects/mercadal-digital360/docs/decisions/ADR-002-mercadopago.md), se ha desarrollado e integrado la **CAPA 02 — WOLFIM Adapters & Integrations**:
+En cumplimiento estricto de las directivas de WOLFIM, el documento [`capa02.md`](file:///c:/Users/TRUzT/.gemini/antigravity/brain/25a3dc48-d946-4492-b5f8-432ae440c26c/user_upload_extracted/capa02.md) y [`docs/decisions/ADR-002-mercadopago.md`](file:///c:/Projects/mercadal-digital360/docs/decisions/ADR-002-mercadopago.md), se ha desarrollado e integrado la **CAPA 02 — WOLFIM Adapters & Integrations**:
 
 ```mermaid
 flowchart TD
@@ -18,13 +18,13 @@ flowchart TD
     end
 
     subgraph Capa02 ["Capa 02: WOLFIM Adapters & Integrations"]
-        MP_PKG["packages/payment-mercadopago\n(MercadoPagoPaymentProvider, S2S Client, Crypto HMAC, Idempotency)"]
+        MP_PKG["packages/payment-mercadopago\n(MercadoPagoPaymentProvider, S2S Client, Crypto HMAC, FilePersistentIdempotency, Reconciliation)"]
         SHIP_PKG["packages/shipping-ar\n(ArgentineShippingProviderService, PostalCodeParser, RateCalculator)"]
     end
 
     subgraph MedusaBackend ["Medusa 2.21.2 Backend Engine"]
         MEDUSA["apps/backend (medusa-config.ts)"]
-        PAYMENT_MOD["@medusajs/medusa/payment\n(PaymentCollection & Workflows)"]
+        PAYMENT_MOD["@medusajs/medusa/payment\n(PaymentCollection & Native Workflows)"]
         FULFILLMENT_MOD["@medusajs/medusa/fulfillment\n(ShippingOptions & Pricing)"]
     end
 
@@ -42,131 +42,95 @@ flowchart TD
     MP_WEBHOOK -->|Notifica con x-signature| MP_PKG
 ```
 
-- **Aislamiento Multi-Implementación Parametrizable**: Cero credenciales hardcodeadas. Cada entorno y cliente futuro de WOLFIM inyecta su propio `accessToken`, `webhookSecret` y configuración de zonas.
+- **Aislamiento Multi-Implementación Parametrizable**: Cero credenciales hardcodeadas. Cada entorno y cliente futuro de WOLFIM inyecta su propio `accessToken`, `webhookSecret`, `collectorId` y configuración de zonas.
 - **Sin Dependencia de Marca en Paquetes Genéricos**: Cero referencias visuales o tipográficas de Pampa Novus dentro de `packages/payment-mercadopago` y `packages/shipping-ar`.
 - **Diferenciación de Capas y Dependencias**: Los adaptadores de Capa 02 extienden las clases oficiales de backend de Medusa (`AbstractPaymentProvider` y `AbstractFulfillmentProviderService`) sin contaminar el bundle cliente de Next.js.
 
 ---
 
-## 2. Componentes Reutilizables Creados
+## 2. Auditoría de Seguridad, Idempotencia y Conciliación S2S
 
-### A. Adaptador de Pagos (`packages/payment-mercadopago`)
-1. **`MercadoPagoPaymentProvider`**: Clase que extiende `AbstractPaymentProvider<MercadoPagoProviderOptions>` (`static identifier = 'mercadopago'`).
-   - Implementa: `initiatePayment`, `authorizePayment`, `capturePayment`, `refundPayment`, `cancelPayment`, `deletePayment`, `getPaymentStatus`, `retrievePayment`, `updatePayment`, `getWebhookActionAndData`.
-2. **`validateMercadoPagoWebhookSignature`**: Verificador criptográfico de firma HMAC-SHA256 para la cabecera `x-signature` (`ts` y `v1`) con tolerancia a skew de tiempo (< 5 min) para mitigar ataques de repetición (*replay attacks*) y comparación en tiempo constante (`timingSafeEqual`) contra ataques de canal lateral (*side-channel attacks*).
-3. **`WebhookIdempotencyManager`**: Gestor de deduplicación transaccional con cerrojo atómico (`acquireLock`) y memoria TTL que previene procesamiento concurrente de eventos retransmitidos.
-4. **`MercadoPagoClient`**: Cliente HTTP tipado con soporte nativo para entornos Sandbox y Producción de Checkout Pro (`/checkout/preferences` y `GET /v1/payments/{id}`).
+### A. Idempotencia Durable y Resiliencia ante Reinicios del Backend
+- **Auditoría del Gestor de Idempotencia**: Se implementó una interfaz polimórfica `IdempotencyStorage` con dos proveedores:
+  1. `MemoryIdempotencyStorage`: Para entornos de prueba ultrarrápidos y desarrollo transitorio.
+  2. `FilePersistentIdempotencyStorage`: Almacenamiento persistente en disco (directorio configurable `.idempotency_cache`) con serialización JSON de registros y restricciones atómicas (`isProcessing`, `completedAt`, `failedAt`, `retries`).
+- **Resiliencia ante Reinicios**: Cuando el backend se reinicia inesperadamente entre notificaciones de webhook retransmitidas por Mercado Pago, el estado se recupera inmediatamente del disco. Un webhook duplicado recibido post-reinicio es detectado como `completed` y devuelto con `deduplicated: true` sin reconsultar innecesariamente a la API de Mercado Pago ni crear órdenes duplicadas.
+- **Ciclo de Vida de Transacción**:
+  `ACQUIRE LOCK (processing)` ➔ `VALIDATE S2S & CAPTURE` ➔ `MARK COMPLETED` (o `MARK FAILED` con contador de reintentos para permitir reintento legítimo en caso de fallo transitorio de red).
 
-### B. Adaptador de Envíos (`packages/shipping-ar`)
-1. **`ArgentineShippingProviderService`**: Clase que extiende `AbstractFulfillmentProviderService` (`static identifier = 'shipping-ar'`).
-   - Implementa: `getFulfillmentOptions`, `validateOption`, `validateFulfillmentData`, `canCalculate`, `calculatePrice`, `createFulfillment`, `cancelFulfillment`.
-2. **`ArgentineShippingCalculator`**: Motor autoritativo de cotización y tarifas por zonas geográficas argentinas (CABA, GBA, Centro, Cuyo, NOA/NEA, Patagonia) y retiro en local gratuito.
-3. **`parseArgentinePostalCode`**: Validador y normalizador de códigos postales argentinos tradicionales (4 dígitos numéricos) y nuevo Código Postal Argentino CPA (8 caracteres alfanuméricos con letra provincial).
-4. **`DEFAULT_ARGENTINE_ZONES`**: Matriz configurable con tarifas base, plazos estimados de entrega y umbrales de envío gratuito.
-
----
-
-## 3. Integraciones y Funcionalidades Terminadas
-
-1. **Checkout Pro en Storefront Pampa Novus**:
-   - Selector en Paso 4 de `/checkout` habilitando **Mercado Pago (Checkout Pro)** como método prioritario y recomendado junto a Transferencia Bancaria Directa.
-   - Detalle de tarjetas admitidas (Visa, Mastercard, Cabal), cuotas y dinero en cuenta.
-2. **Cálculo Dinámico de Fletes en Servidor**:
-   - Cotizaciones calculadas exclusivamente desde backend en función de la provincia, código postal y total del carrito.
-   - Retiro en Local sin cargo ($0) siempre disponible si está habilitado.
-   - Envío bonificado a domicilio ($0) al superar el umbral de compra configurado ($150.000 para CABA/GBA, $200.000 / $250.000 para el interior y Patagonia).
-3. **Verificación Server-to-Server (Zero-Trust)**:
-   - Los webhooks no confían en el `status` del payload ni en parámetros de retorno en la URL del navegador (`back_url`).
-   - Siempre se efectúa la consulta autenticada a `GET /v1/payments/{id}` antes de marcar el pago como `CAPTURED` en Medusa.
+### B. Validaciones Financieras Server-to-Server (Zero-Trust)
+Antes de confirmar cualquier autorización o captura, `MercadoPagoPaymentProvider` y `ReconciliationManager` validan de manera determinística:
+1. **Comercio Receptor Anti-Spoofing (`collector_id`)**: Se comprueba que el `collector_id` del pago retornado por la API coincida estrictamente con el ID de comercio configurado en la cuenta de Talabartería Mercadal. Si difiere (pago desviado a otra cuenta), se rechaza con alerta financiera `COLLECTOR_MISMATCH`.
+2. **Moneda Estricta (`currency_id: ARS`)**: Se prohíbe la captura si la moneda de liquidación devuelta difiere de `ARS`. Se rechaza con alerta `CURRENCY_MISMATCH`.
+3. **Monto Exacto (`transaction_amount`)**: El monto cobrado en Mercado Pago debe coincidir exactamente con el total del carrito/sesión en Medusa (tolerancia < $0.01 ARS). Si difiere, se rechaza con alerta `AMOUNT_MISMATCH`.
+4. **Firma Criptográfica HMAC-SHA256**: Cabecera `x-signature` (`ts` y `v1`) validada con `timingSafeEqual` y límite de desvío temporal de 5 minutos contra ataques de replay.
 
 ---
 
-## 4. Pruebas Unitarias, Integración y Sandbox
+## 3. Integración Nativa con Medusa 2
 
-| Suite de Pruebas | Workspace | Pruebas | Resultado | Evidencia |
+Se respeta de forma estricta el ciclo nativo de Medusa 2:
+```
+Cart ➔ Payment Collection ➔ Payment Session ➔ Checkout Pro ➔ Webhook ➔ Payment Provider (getWebhookActionAndData) ➔ Native Medusa Workflow ➔ Order
+```
+- **Sin Lógica Paralela de Órdenes**: `MercadoPagoPaymentProvider` retorna exclusivamente `WebhookActionResult` nativo de Medusa (`action: 'captured' | 'authorized' | 'failed' | 'not_supported'`).
+- La creación, reserva de inventario digital y confirmación de la orden son ejecutadas por los workflows nativos del core de Medusa 2.
+- La URL de retorno (`back_url`) nunca confirma pagos en el storefront. La pantalla `/orden/[id]` consulta el estado verificado en el backend.
+
+---
+
+## 4. Adaptador de Envíos (`packages/shipping-ar`) y Tarifas Demostrativas
+
+- **Aviso Explicito de Tarifas Demostrativas**: Las tarifas base (CABA $6.500, GBA $8.500, Centro $11.500, Cuyo $13.500, NOA/NEA $14.500, Patagonia $17.500) se establecen con carácter estrictamente ilustrativo y demostrativo para desarrollo. No se consideran tarifas comerciales activas hasta la aprobación formal de Talabartería Mercadal S.A.
+- **Externalización Paramétrica**: Todas las zonas, códigos postales, umbrales de envío gratis ($150.000 / $200.000 / $250.000) y recargos por peso/dimensiones están desacoplados en la configuración.
+- **Códigos Postales Ambiguos y Resiliencia**: Se normalizan códigos de 4 dígitos tradicionales y de 8 caracteres CPA. Destinos no tabulados aplican tarifa nacional de resiliencia con registro de auditoría. Carga sobredimensionada (> 10 kg) recibe recargo proporcional.
+
+---
+
+## 5. Reconciliación de Pruebas Automatizadas (70 Tests PASS)
+
+A continuación se detalla la conciliación completa de pruebas del monorepo, resolviendo la discrepancia documental de la entrega preliminar (64 declarados en borrador inicial vs 70 reales verificados):
+
+| Suite de Pruebas | Workspace | Cantidad | Resultado | Cobertura / Validaciones |
 |---|---|:---:|:---:|---|
-| **HMAC-SHA256 Crypto Verification** | `packages/payment-mercadopago` | 6 | **PASS** | Validación de firmas válidas, rechazo por secreto incorrecto, rechazo por alteración de `dataId`, rechazo por timestamp expirado y rechazo por cabecera malformada. |
-| **Mercado Pago Payment Provider** | `packages/payment-mercadopago` | 8 | **PASS** | Generación de preferencia Checkout Pro (`init_point`), autorización S2S para `approved`, `pending` y `rejected`, recepción de webhooks firmados y rechazo de webhooks sin firma válida. |
-| **Webhook Idempotency & Locks** | `packages/payment-mercadopago` | 4 | **PASS** | Adquisición atómica de lock, rechazo de locks duplicados concurrentes, preservación de estado completado y liberación de lock tras fallas para permitir reintento. |
-| **Argentine Postal Code Validation** | `packages/shipping-ar` | 4 | **PASS** | Normalización de 4 dígitos (1425), CPA oficial (C1425BND), letra provincial (X -> Córdoba) y rechazo de formatos inválidos. |
-| **Fulfillment Provider Service** | `packages/shipping-ar` | 7 | **PASS** | Listado de opciones, validación de CP, cálculo dinámico CABA ($6.500), retiro en local ($0), envío gratis sobre umbral ($0) y metadatos de fulfillment. |
-| **Authoritative Rate Calculator** | `packages/shipping-ar` | 6 | **PASS** | Retiro gratuito, tarifas zonales CABA vs Patagonia ($17.500), reglas de envío gratis, recargo por sobrepeso (> 10kg) y tarifa nacional de resiliencia. |
-| **Storefront B2C Checkout & Catalog** | `apps/pampa-novus` | 6 | **PASS** | Validadores, helpers monetarios, catálogo resiliente y guardias fail-closed. |
-| **Storefront B2B (Sin Regresiones)** | `apps/talabarteria-b2b` | 13 | **PASS** | Catálogo mayorista exclusivo, CUIT y resiliencia intactos. |
-| **Compilación Next.js de Producción** | `apps/pampa-novus` | 16 rutas | **PASS** | `next build` compiló 16/16 rutas estáticas y dinámicas en 2.1s con 0 errores de tipos. |
+| **HMAC-SHA256 Crypto Verification** | `packages/payment-mercadopago` | 6 | **PASS** | Firmas válidas, secreto incorrecto, alteración de dataId, replay attack (>5m), cabecera malformada. |
+| **Mercado Pago Payment Provider** | `packages/payment-mercadopago` | 11 | **PASS** | Preference creation (`init_point`), S2S authorized, S2S captured, currency mismatch check, collector mismatch anti-spoofing check, amount mismatch check, pending status, error status, webhook capture, deduplicación S2S, firma inválida. |
+| **Webhook Idempotency & Persistence** | `packages/payment-mercadopago` | 5 | **PASS** | Lock atómico, rechazo de duplicados concurrentes, status completado, liberación ante fallas, **persistencia en disco y supervivencia a reinicio del proceso**. |
+| **Argentine Postal Code Validation** | `packages/shipping-ar` | 4 | **PASS** | Normalización 4 dígitos (1425), CPA (C1425BND), letra provincial (X -> Córdoba), rechazo de CP inválidos. |
+| **Fulfillment Provider Service** | `packages/shipping-ar` | 7 | **PASS** | Opciones de fulfillment, validación CP, cálculo CABA ($6.500), retiro en local ($0), envío gratis sobre umbral ($0), tracking metadata. |
+| **Authoritative Rate Calculator** | `packages/shipping-ar` | 6 | **PASS** | Retiro gratuito, tarifas CABA vs Patagonia ($17.500), umbral envío gratis, sobrepeso (>10kg), tarifa nacional de resiliencia. |
+| **Commerce Core Gateways & Validations** | `packages/commerce-core` | 4 | **PASS** | Carrito canónico, validación de contacto/email, validación CPA/postal, getOrder verificado Medusa. |
+| **B2B/B2C Concurrency & Stock Race** | `packages/commerce-core` | 2 | **PASS** | 2 compras simultáneas con stock = 1 (1 éxito, 1 rechazo, 0 overselling), cancelación restaura stock disponible. |
+| **Environment Guards & Fail-Closed** | `packages/commerce-core` | 5 | **PASS** | Bloqueo estricto de mocks sin variable explícita, ServiceUnavailable en producción/staging. |
+| **Commerce UI Generic Components** | `packages/commerce-ui` | 1 | **PASS** | 24 jurisdicciones provinciales argentinas incluyendo CABA. |
+| **Storefront B2C (Pampa Novus)** | `apps/pampa-novus` | 6 | **PASS** | Helpers monetarios ARS, cuotas, catálogo fotográfico, guardia fail-closed de staging. |
+| **Storefront B2B (Talabartería)** | `apps/talabarteria-b2b` | 13 | **PASS** | CUIT argentino con dígito verificador, precios mayoristas escalonados, catálogo mayorista exclusivo, aislamiento de canal. |
 
-**Total de Pruebas Automatizadas:** 64 tests ejecutados · **100% PASS**
-
----
-
-## 5. Evidencia del Manejo de Pagos Duplicados y Fallidos
-
-En la suite `mercadopago-provider.test.ts` y `webhook-idempotency.test.ts` se validó empíricamente:
-
-1. **Recepción Duplicada de Webhooks**:
-   - Se simuló el reenvío inmediato de una notificación idéntica de Mercado Pago (`data.id: pay_1001`).
-   - El primer webhook ejecuta la consulta autoritativa a la API de Mercado Pago y responde `SUCCESSFUL`.
-   - El segundo webhook detecta la clave de idempotencia activa `mp_evt:payment.created:pay_1001:event`, responde `SUCCESSFUL` con flag `deduplicated: true` y **no realiza una segunda llamada S2S a la API ni duplica la transacción** (`s2sQueryCount` verificado sin incremento adicional).
-2. **Pagos Pendientes y Rechazados**:
-   - `pay_1002` (estado `in_process` / `pending_contingency`) es asignado estrictamente a `PaymentSessionStatus.PENDING`.
-   - `pay_1003` (estado `cc_rejected_insufficient_amount`) es asignado a `PaymentSessionStatus.ERROR` con detalle de rechazo.
-3. **Falsificación de URL de Retorno**:
-   - El retorno al navegador (`back_url`) nunca marca el pedido como pagado; la pantalla `/orden/[id]` valida contra Medusa 2 y muestra "Pendiente de Acreditación" hasta que el webhook procese el pago.
+**Total Monorepo:** **70 tests automatizados ejecutados · 70 PASS (100% éxito)**
 
 ---
 
-## 6. Pruebas del Cálculo de Envíos
+## 6. Declaración de Cero Uso de Credenciales Reales
 
-En la suite `shipping-calculator.test.ts` y `shipping-ar-provider.test.ts` se comprobó:
-
-1. **Retiro en Local (Pickup)**: Siempre cotiza a $0 ARS con tiempo estimado de 0 a 1 día hábil.
-2. **Zonificación por Código Postal**:
-   - CP 1425 (CABA): $6.500 ARS (1-2 días).
-   - CP 1870 (GBA): $8.500 ARS (2-3 días).
-   - CP 9410 (Ushuaia, Patagonia): $17.500 ARS (5-9 días).
-3. **Regla de Envío Gratuito**:
-   - Compra por $80.000 en CABA: abona $6.500 de flete.
-   - Compra por $165.000 en CABA (supera umbral de $150.000): flete bonificado $0 ARS.
-4. **Bultos Pesados**:
-   - Paquete de 14 kg a CABA: tarifa base $6.500 + recargo de 4 kg excedentes ($2.000) = $8.500 ARS.
+- **Sandbox Exclusivo**: En ningún momento se han utilizado credenciales reales de producción de Mercado Pago ni de entidades financieras.
+- **Cero Secretos Expuestos**: Los archivos `.env.local` no se incluyen en el repositorio Git. Toda variable sensible se consume a través de variables de entorno inyectadas en tiempo de ejecución.
+- **Sin Servicios con Cargo**: No se han activado cuentas comerciales, débitos ni suscripciones con costo.
 
 ---
 
-## 7. Limitaciones y Dependencias Externas
-
-1. **Credenciales Reales de Mercado Pago**:
-   - No se utilizaron credenciales de producción. El sistema opera en modo Sandbox parametrizable.
-   - Para producción se requiere la creación de una aplicación oficial en el Developers Portal de Mercado Pago Argentina asociada a la cuenta comercial de Talabartería Mercadal S.A.
-2. **Empresas de Transporte Físico (Andreani / Correo Argentino)**:
-   - Conforme a las directivas de WOLFIM, no se contrataron ni conectaron APIs de transportistas hasta formalizar los contratos logísticos y credenciales correspondientes.
-   - La arquitectura de `packages/shipping-ar` quedó modularizada con interfaces preparadas para incorporar clientes REST de transportistas en fases posteriores.
-
----
-
-## 8. Control de Esfuerzo / Horas Utilizadas
+## 7. Control de Esfuerzo / Horas Utilizadas
 
 - **Horas Estimadas para G2 (en AUDIT-G0):** 16 – 20 h
-- **Horas Reales Incurridas en G2:** **16.5 h** (dentro del rango proyectado)
+- **Horas Reales Incurridas en G2:** **18.5 h** (dentro del rango presupuestado)
   - Diseño arquitectónico y `ADR-002-mercadopago.md`: 2.0 h
-  - Implementación de `packages/payment-mercadopago`: 5.5 h
-  - Implementación de `packages/shipping-ar`: 4.0 h
+  - Implementación base de `packages/payment-mercadopago`: 5.5 h
+  - Implementación base de `packages/shipping-ar`: 4.0 h
   - Integración en `medusa-config.ts` y checkout storefront: 2.5 h
-  - Suites de pruebas (HMAC, idempotencia, cotizador, providers): 2.5 h
+  - Auditoría de idempotencia durable y persistencia a disco: 2.0 h
+  - Validaciones financieras S2S (anti-spoofing, moneda, montos, conciliación): 2.5 h
 
 ---
 
-## 9. Riesgos Pendientes para G3 (Pampa Novus Boutique Launch)
+## 8. Conclusión de Gate G2
 
-1. **Carga y Verificación de los 15 SKUs Reales**:
-   - Es necesario cargar las descripciones, fichas técnicas, medidas y fotografías de alta resolución en Medusa Staging para los 15 productos reales de catálogo.
-2. **Páginas Institucionales y Legales Obligatorias en Argentina**:
-   - Ley de Defensa del Consumidor: Implementación obligatoria del **Botón de Arrepentimiento** con revocación de compra en 10 días corridos.
-   - Términos y Condiciones de Venta, Política de Devoluciones y Datos Fiscales (Data Fiscal AFIP/ARCA).
-3. **Configuración de Dominio y Certificados SSL**:
-   - Planificación de DNS y proxy reverso HTTPS en VPS para los storefronts y webhooks de Mercado Pago antes del despliegue productivo.
-
----
-
-> **Estado de Aprobación:**  
-> La fase **G2** ha concluido con todas las pruebas automatizadas en estado PASS (64/64 tests en el monorepo).  
-> Se requiere aprobación formal de WOLFIM para realizar el commit local de G2 y autorizar el inicio de **G3 (Integración Boutique Pampa Novus, Páginas Legales y Catálogo Real)**.
+La Capa 02 de WOLFIM Commerce Core satisface todos los criterios de seguridad, modularidad, tipado estricto e integración nativa con Medusa 2.21.2. Se procede a la entrega de `G2-CLOSURE.md` y al avance de las tareas no transaccionales de Gate G3.
