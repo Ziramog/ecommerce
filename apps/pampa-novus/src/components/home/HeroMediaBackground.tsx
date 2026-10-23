@@ -72,7 +72,7 @@ export function HeroMediaBackground() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-right sm:object-[82%_center] lg:object-[84%_center] select-none"
+          className="object-cover object-[75%_center] sm:object-[82%_center] lg:object-[84%_center] select-none"
         />
       </div>
 
@@ -85,7 +85,7 @@ export function HeroMediaBackground() {
         preload="auto"
         onEnded={handleVideo2Ended}
         onError={() => setCurrentStep('image')}
-        className={`absolute inset-0 w-full h-full object-cover object-[70%_center] lg:object-[75%_center] select-none pointer-events-none transition-opacity duration-1000 ease-in-out ${
+        className={`absolute inset-0 w-full h-full object-cover object-[75%_center] sm:object-[70%_center] lg:object-[75%_center] select-none pointer-events-none transition-opacity duration-1000 ease-in-out ${
           currentStep === 'video2' ? 'opacity-100 z-10' : 'opacity-0 z-0'
         }`}
       />
@@ -100,12 +100,12 @@ export function HeroMediaBackground() {
         preload="auto"
         onEnded={handleVideo1Ended}
         onError={() => setCurrentStep('video2')}
-        className={`absolute inset-0 w-full h-full object-cover object-[70%_center] lg:object-[75%_center] select-none pointer-events-none transition-opacity duration-1000 ease-in-out ${
+        className={`absolute inset-0 w-full h-full object-cover object-[75%_center] sm:object-[70%_center] lg:object-[75%_center] select-none pointer-events-none transition-opacity duration-1000 ease-in-out ${
           currentStep === 'video1' ? 'opacity-100 z-20' : 'opacity-0 z-0'
         }`}
       />
 
-      {/* Editorial Scrim: Gradiente sofisticado y continuo de izquierda a derecha — casi invisible como efecto, preservando 100% el cine ecuestre */}
+      {/* Editorial Scrim Desktop: Gradiente sofisticado y continuo de izquierda a derecha — casi invisible como efecto, preservando 100% el cine ecuestre */}
       <div
         className="absolute inset-0 pointer-events-none z-30 hidden sm:block"
         style={{
@@ -113,16 +113,16 @@ export function HeroMediaBackground() {
             'linear-gradient(90deg, rgba(250, 247, 242, 0.95) 0%, rgba(250, 247, 242, 0.92) 32%, rgba(250, 247, 242, 0.84) 48%, rgba(250, 247, 242, 0.55) 62%, rgba(250, 247, 242, 0.20) 74%, rgba(250, 247, 242, 0.03) 86%, rgba(250, 247, 242, 0) 96%)',
         }}
       />
-      {/* En mobile: gradiente vertical suave para proteger el bloque superior sin cortar la foto */}
+      {/* En mobile: Scrim cinemático premium (estilo Ralph Lauren / Hermès) — preserva 100% la riqueza y saturación del video sin velo lechoso */}
       <div
         className="absolute inset-0 pointer-events-none z-30 sm:hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(250, 247, 242, 0.96) 0%, rgba(250, 247, 242, 0.92) 55%, rgba(250, 247, 242, 0.70) 72%, rgba(250, 247, 242, 0.25) 86%, rgba(250, 247, 242, 0) 100%)',
+            'linear-gradient(180deg, rgba(26, 15, 10, 0.45) 0%, rgba(26, 15, 10, 0.18) 28%, rgba(26, 15, 10, 0.22) 52%, rgba(26, 15, 10, 0.65) 82%, rgba(26, 15, 10, 0.82) 100%)',
         }}
       />
-      {/* Sutil viñeta inferior para integración natural */}
-      <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#FAF7F2]/30 to-transparent pointer-events-none z-30" />
+      {/* Sutil viñeta inferior para integración natural en desktop */}
+      <div className="hidden sm:block absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#FAF7F2]/30 to-transparent pointer-events-none z-30" />
     </div>
   )
 }
