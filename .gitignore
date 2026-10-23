@@ -18,6 +18,7 @@ build/
 dist/
 .turbo/
 .medusa/
+*.tsbuildinfo
 
 # Debug and Logs
 npm-debug.log*

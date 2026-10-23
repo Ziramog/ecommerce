@@ -23,6 +23,45 @@ module.exports = defineConfig({
   },
   admin: {
     disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
-  }
+  },
+  modules: [
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "@mercadal/payment-mercadopago",
+            id: "mercadopago",
+            options: {
+              accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || "TEST-ACCESS-TOKEN-PLACEHOLDER",
+              webhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET,
+              sandbox: process.env.MERCADOPAGO_SANDBOX !== "false",
+              statementDescriptor: "MERCADAL",
+              backUrls: {
+                success: process.env.MERCADOPAGO_BACK_URL_SUCCESS || "http://localhost:3000/checkout?status=success",
+                pending: process.env.MERCADOPAGO_BACK_URL_PENDING || "http://localhost:3000/checkout?status=pending",
+                failure: process.env.MERCADOPAGO_BACK_URL_FAILURE || "http://localhost:3000/checkout?status=failure",
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: "@medusajs/medusa/fulfillment",
+      options: {
+        providers: [
+          {
+            resolve: "@mercadal/shipping-ar",
+            id: "shipping-ar",
+            options: {
+              enablePickup: true,
+              pickupAddress: "Av. Alvear 1850, Recoleta, CABA",
+              globalFreeShippingThreshold: 200000,
+            },
+          },
+        ],
+      },
+    },
+  ],
 })
-

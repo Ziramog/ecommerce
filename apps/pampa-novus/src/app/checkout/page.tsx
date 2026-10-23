@@ -35,7 +35,7 @@ export default function CheckoutPage() {
   const [shippingAddress, setShippingAddress] = useState<CommerceAddress | undefined>(cart?.shippingAddress)
   const [shippingOptions, setShippingOptions] = useState<CommerceShippingOption[]>([])
   const [selectedShippingId, setSelectedShippingId] = useState<string>('')
-  const [paymentMethod, setPaymentMethod] = useState<'transfer' | 'mock_card'>('transfer')
+  const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer' | 'mock_card'>('mercadopago')
 
   const [stepErrors, setStepErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,17 +44,38 @@ export default function CheckoutPage() {
   // Load shipping options when entering shipping step
   useEffect(() => {
     if (cartId && (currentStep === 'shipping' || currentStep === 'payment')) {
+      const fallbackOpts: CommerceShippingOption[] = [
+        {
+          id: 'shipping_pickup_local',
+          name: 'Retiro en Local / Taller (Sin Cargo) — Av. Alvear 1850, CABA',
+          amount: 0,
+          isCalculated: false,
+        },
+        {
+          id: 'shipping_standard_delivery',
+          name: 'Envío Estándar a Domicilio (Argentina)',
+          amount: subtotal >= 150000 ? 0 : 6500,
+          isCalculated: false,
+        },
+      ]
+
       cartGateway
         .listShippingOptions(cartId)
         .then((options) => {
-          setShippingOptions(options)
-          if (options.length > 0 && !selectedShippingId) {
-            setSelectedShippingId(options[0].id)
+          if (options && options.length > 0) {
+            setShippingOptions(options)
+            if (!selectedShippingId) setSelectedShippingId(options[0].id)
+          } else {
+            setShippingOptions(fallbackOpts)
+            if (!selectedShippingId) setSelectedShippingId(fallbackOpts[0].id)
           }
         })
-        .catch((err) => console.warn('Error listando opciones de envío:', err))
+        .catch(() => {
+          setShippingOptions(fallbackOpts)
+          if (!selectedShippingId) setSelectedShippingId(fallbackOpts[0].id)
+        })
     }
-  }, [cartId, currentStep, cartGateway, selectedShippingId])
+  }, [cartId, currentStep, cartGateway, selectedShippingId, subtotal])
 
   // Pampa Novus Boutique Theme Tokens for Commerce UI components
   const themeClasses = {
@@ -368,6 +389,53 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-3">
+                  {/* Mercado Pago Checkout Pro */}
+                  <div
+                    onClick={() => setPaymentMethod('mercadopago')}
+                    className={`p-4 border rounded-[2px] cursor-pointer transition-colors ${
+                      paymentMethod === 'mercadopago'
+                        ? 'border-2 border-[#2E1C12] bg-[#FAF7F2]'
+                        : 'border-[#D9C9A8] bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            paymentMethod === 'mercadopago' ? 'border-[#2E1C12]' : 'border-neutral-400'
+                          }`}
+                        >
+                          {paymentMethod === 'mercadopago' && <div className="w-2 h-2 rounded-full bg-[#2E1C12]" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#221814]">
+                            Mercado Pago (Checkout Pro)
+                          </p>
+                          <p className="text-xs text-[#4A2D1B]/80 mt-0.5">
+                            Tarjetas de crédito (hasta 12 cuotas), débito y dinero en cuenta
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-sky-800 bg-sky-50 px-2.5 py-1 rounded">
+                        Recomendado
+                      </span>
+                    </div>
+
+                    {paymentMethod === 'mercadopago' && (
+                      <div className="mt-4 pt-3 border-t border-[#D9C9A8]/60 text-xs text-[#4A2D1B] space-y-2 font-sans">
+                        <div className="flex flex-wrap gap-2 text-[11px] text-[#221814]">
+                          <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded-[2px]">Visa</span>
+                          <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded-[2px]">Mastercard</span>
+                          <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded-[2px]">Cabal</span>
+                          <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-300 rounded-[2px]">Dinero en Cuenta</span>
+                        </div>
+                        <p className="text-[11px] text-[#8B5A2B]">
+                          Al confirmar la compra serás derivado a la plataforma oficial cifrada de Mercado Pago.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Transfer Option */}
                   <div
                     onClick={() => setPaymentMethod('transfer')}
@@ -462,7 +530,11 @@ export default function CheckoutPage() {
                     disabled={isSubmitting}
                     className={themeClasses.button}
                   >
-                    {isSubmitting ? 'Confirmando pedido en Medusa 2...' : 'Confirmar y Finalizar Pedido →'}
+                    {isSubmitting
+                      ? 'Procesando en Medusa 2...'
+                      : paymentMethod === 'mercadopago'
+                      ? 'Continuar a Mercado Pago →'
+                      : 'Confirmar y Finalizar Pedido →'}
                   </button>
                 </div>
               </div>

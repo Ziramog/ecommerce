@@ -1,0 +1,25 @@
+{
+  "name": "@mercadal/shipping-ar",
+  "version": "0.1.0",
+  "description": "WOLFIM Commerce Core — Argentine Shipping & Logistics Adapter for Medusa 2.21.2",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsx --test src/__tests__/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@medusajs/framework": "2.21.2"
+  },
+  "devDependencies": {
+    "@medusajs/types": "2.21.2",
+    "@types/node": "^20.12.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
