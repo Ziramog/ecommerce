@@ -105,8 +105,15 @@ export function HeroMediaBackground() {
         }`}
       />
 
-      {/* Gradiente progresivo suave y cálido: asegura lectura óptima de titulares y CTA sobre cualquier fotograma */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/75 via-[#FAF7F2]/30 to-transparent sm:from-[#FAF7F2]/55 sm:via-[#FAF7F2]/15 lg:to-transparent pointer-events-none z-30" />
+      {/* Gradiente editorial luminoso en la mitad izquierda para máxima fuerza, nitidez y contraste de textos */}
+      <div className="absolute inset-0 z-30 pointer-events-none">
+        {/* Scrim cálido marfil: 95% a la izquierda, 80% en zona de texto, y se disuelve suavemente hacia el video/imagen */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/95 via-[#FAF7F2]/82 to-transparent w-full md:w-[72%] lg:w-[60%] xl:w-[54%]" />
+        {/* Viñeta sutil inferior para dar peso y presencia a la base */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+        {/* Resplandor superior derecho para dar lectura impecable al sello institucional */}
+        <div className="hidden lg:block absolute top-0 right-0 w-80 h-40 bg-gradient-to-b from-[#FAF7F2]/70 via-[#FAF7F2]/30 to-transparent" />
+      </div>
     </div>
   )
 }
