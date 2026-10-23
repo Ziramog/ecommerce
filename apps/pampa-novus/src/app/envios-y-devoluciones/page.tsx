@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Truck, RotateCcw, Package, ShieldCheck, MapPin, Clock } from 'lucide-react'
+import { ArrowLeft, Truck, RotateCcw, Package, ShieldCheck, MapPin, AlertCircle } from 'lucide-react'
+import { CLIENT_COMMERCIAL_CONFIG } from '@/config/client-commercial-config'
 
 export const metadata = {
   title: 'Envíos y Devoluciones | Pampa Novus',
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default function EnviosYDevolucionesPage() {
+  const { shippingPolicy, company } = CLIENT_COMMERCIAL_CONFIG
+
   return (
     <div className="bg-[#FAF7F2] min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -39,8 +42,18 @@ export default function EnviosYDevolucionesPage() {
           </h1>
 
           <p className="text-sm text-pn-espresso/80 leading-relaxed font-light">
-            En Pampa Novus cuidamos cada detalle desde el taller artesanal hasta la puerta de su hogar. Cada pieza de cuero y platería viaja protegida con embalaje térmico y seguro integral de carga.
+            En Pampa Novus cuidamos cada detalle desde el taller artesanal hasta la puerta de su hogar. Cada pieza de cuero y platería viaja protegida con embalaje especializado y cobertura asegurada.
           </p>
+
+          {/* Aviso de Gobernanza Logística */}
+          {shippingPolicy.approvalStatus === 'PENDING_CLIENT_APPROVAL' && (
+            <div className="mt-4 bg-amber-50 border-l-4 border-amber-600 p-3 rounded-[2px] text-xs text-amber-950 flex items-start gap-2.5 font-light">
+              <AlertCircle size={16} className="text-amber-700 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Aviso de homologación tarifaria:</strong> Los valores aquí reflejados son demostrativos para el entorno de desarrollo y pruebas. Las tarifas finales y acuerdos con empresas de transporte serán homologados formalmente por {company.legalName.value} antes de la apertura comercial.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Tarjetas Informativas Destacadas */}
@@ -53,7 +66,7 @@ export default function EnviosYDevolucionesPage() {
               Envío Bonificado
             </h3>
             <p className="text-xs text-pn-espresso/75 font-light leading-relaxed">
-              En compras superiores a <strong>$150.000 ARS</strong> en CABA y Gran Buenos Aires, y en compras superiores a <strong>$200.000 / $250.000 ARS</strong> en el resto del país.
+              En compras superiores al umbral promocional en CABA/GBA ($150.000 ARS) y resto del país ($200.000 / $250.000 ARS).
             </p>
           </div>
 
@@ -74,10 +87,10 @@ export default function EnviosYDevolucionesPage() {
               <ShieldCheck size={20} />
             </div>
             <h3 className="font-serif text-base font-bold text-pn-espresso mb-1">
-              Retiro Gratuito
+              Retiro en Showroom
             </h3>
             <p className="text-xs text-pn-espresso/75 font-light leading-relaxed">
-              Retire sin costo en nuestro Showroom de Recoleta (Av. Alvear 1850) previa coordinación con su número de orden.
+              Retire sin costo en nuestro Showroom ({company.showroomAddress.value}) previa coordinación con su número de orden.
             </p>
           </div>
         </div>
@@ -90,7 +103,7 @@ export default function EnviosYDevolucionesPage() {
               Zonas de Despacho y Tiempos Estimados
             </h2>
             <p>
-              Los envíos se despachan dentro de las 24 horas hábiles posteriores a la confirmación del pago. Las tarifas base de referencia se calculan automáticamente según el código postal:
+              Los envíos se despachan tras la acreditación del pago. Las tarifas base orientativas se calculan según el código postal:
             </p>
 
             <div className="overflow-x-auto border border-[#EFE8DE] rounded-[2px]">
@@ -99,7 +112,7 @@ export default function EnviosYDevolucionesPage() {
                   <tr>
                     <th className="py-3 px-4">Zona Geográfica</th>
                     <th className="py-3 px-4">Plazo de Entrega</th>
-                    <th className="py-3 px-4">Tarifa de Referencia</th>
+                    <th className="py-3 px-4">Tarifa de Prueba</th>
                     <th className="py-3 px-4">Envío Sin Cargo</th>
                   </tr>
                 </thead>
@@ -107,7 +120,7 @@ export default function EnviosYDevolucionesPage() {
                   <tr>
                     <td className="py-2.5 px-4 font-medium text-pn-espresso">CABA (Ciudad Autónoma de Buenos Aires)</td>
                     <td className="py-2.5 px-4">1 a 2 días hábiles</td>
-                    <td className="py-2.5 px-4">$6.500 ARS</td>
+                    <td className="py-2.5 px-4">${shippingPolicy.cabaBaseRate.value.toLocaleString('es-AR')} ARS</td>
                     <td className="py-2.5 px-4 text-emerald-800 font-medium">Desde $150.000</td>
                   </tr>
                   <tr>
@@ -137,7 +150,7 @@ export default function EnviosYDevolucionesPage() {
                   <tr>
                     <td className="py-2.5 px-4 font-medium text-pn-espresso">Patagonia Argentina y Tierra del Fuego</td>
                     <td className="py-2.5 px-4">5 a 9 días hábiles</td>
-                    <td className="py-2.5 px-4">$17.500 ARS</td>
+                    <td className="py-2.5 px-4">${shippingPolicy.patagoniaBaseRate.value.toLocaleString('es-AR')} ARS</td>
                     <td className="py-2.5 px-4 text-emerald-800 font-medium">Desde $250.000</td>
                   </tr>
                 </tbody>
@@ -145,7 +158,7 @@ export default function EnviosYDevolucionesPage() {
             </div>
 
             <p className="text-xs text-pn-espresso/60 italic font-light">
-              * Las tarifas aquí expresadas son ilustrativas y pueden variar en función del peso y dimensiones de monturas o bultos especiales. La tarifa final vinculante se cotiza en tiempo real en la pantalla de pago.
+              * Las tarifas aquí expresadas son ilustrativas y pueden variar en función del peso y dimensiones de monturas o bultos especiales. La cotización se calcula de forma autoritativa en el checkout.
             </p>
           </section>
 
@@ -162,17 +175,16 @@ export default function EnviosYDevolucionesPage() {
                   1. Cambios de Modelo o Talle (30 Días)
                 </h4>
                 <p className="text-xs text-pn-espresso/80 font-light">
-                  Si necesita cambiar el talle de un cinturón o prefiere otro modelo de apero, contáctenos por WhatsApp al +54 9 11 5555-7267 o por correo a{' '}
-                  <span className="font-medium">cambios@pampanovus.com.ar</span> indicando su número de orden. Coordinaremos el envío de la nueva pieza. El producto devuelto debe encontrarse en perfectas condiciones y con sus etiquetas originales.
+                  Si necesita cambiar el talle de un cinturón o prefiere otro modelo de apero, contáctenos para coordinar el reemplazo de la pieza. El producto devuelto debe encontrarse en perfectas condiciones y con sus embalajes originales.
                 </p>
               </div>
 
               <div className="bg-[#FAF7F2] p-4 rounded-[2px] border border-[#EFE8DE]">
                 <h4 className="font-medium text-pn-espresso text-xs uppercase tracking-wider mb-1">
-                  2. Devolución por Arrepentimiento (10 Días Ley 24.240)
+                  2. Devolución por Arrepentimiento (10 Días Ley 24.240 y Disp. 954/2025)
                 </h4>
                 <p className="text-xs text-pn-espresso/80 font-light">
-                  Si desea revocar la compra y solicitar el reembolso total de su dinero, puede ejercer su derecho legal sin expresión de causa dentro de los 10 días corridos de recibido el producto a través de nuestro formulario oficial.
+                  Si desea revocar la compra y solicitar el reembolso total de su dinero, puede ejercer su derecho legal sin costo alguno dentro de los 10 días corridos de recibido el producto a través de nuestro formulario oficial.
                 </p>
               </div>
             </div>

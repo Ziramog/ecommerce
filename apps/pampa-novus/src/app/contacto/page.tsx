@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Phone, Mail, Clock, Send, CheckCircle2, MessageSquare } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, Mail, Clock, Send, CheckCircle2, MessageSquare, AlertTriangle } from 'lucide-react'
+import { CLIENT_COMMERCIAL_CONFIG } from '@/config/client-commercial-config'
 
 export default function ContactoPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -13,6 +14,8 @@ export default function ContactoPage() {
     subject: 'Consulta General',
     message: '',
   })
+
+  const { company, contact } = CLIENT_COMMERCIAL_CONFIG
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +54,16 @@ export default function ContactoPage() {
           <p className="text-sm text-pn-espresso/80 leading-relaxed font-light">
             Estamos a su entera disposición para asesorarlo en la elección de piezas ecuestres, regalos de autor a medida o consultas sobre pedidos en curso.
           </p>
+
+          {/* Aviso de Gobernanza Comercial */}
+          {contact.phoneFormatted.status === 'PENDING_CLIENT_APPROVAL' && (
+            <div className="mt-4 bg-amber-50/80 border border-amber-200/80 p-3 rounded-[2px] text-[11px] text-amber-900 flex items-start gap-2 font-light">
+              <AlertTriangle size={14} className="text-amber-700 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Aviso de homologación comercial:</strong> Las líneas de atención directa y dirección de showroom se encuentran en proceso de confirmación operativa por parte de {company.legalName.value}. Las consultas enviadas mediante este formulario son canalizadas a la casilla técnica de soporte.
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -58,7 +71,7 @@ export default function ContactoPage() {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white border border-[#EFE8DE] rounded-[3px] p-6 sm:p-8 shadow-sm space-y-6">
               <h2 className="font-serif text-xl font-bold text-pn-espresso border-b border-[#EFE8DE] pb-3">
-                Canales Oficiales
+                Canales de Atención
               </h2>
 
               <div className="flex items-start gap-3.5">
@@ -68,11 +81,7 @@ export default function ContactoPage() {
                     Showroom & Taller Central
                   </h4>
                   <p className="text-xs text-pn-espresso/80 font-light leading-relaxed">
-                    Av. Alvear 1850, Recoleta
-                    <br />
-                    Ciudad Autónoma de Buenos Aires
-                    <br />
-                    República Argentina
+                    {company.showroomAddress.value}
                   </p>
                   <span className="inline-block mt-1 text-[11px] text-pn-cognac italic">
                     Visitas personalizadas con cita previa
@@ -87,9 +96,9 @@ export default function ContactoPage() {
                     Horarios de Atención
                   </h4>
                   <p className="text-xs text-pn-espresso/80 font-light leading-relaxed">
-                    Lunes a Viernes: 10:00 a 19:00 hs
+                    {contact.businessHoursWeekday.value}
                     <br />
-                    Sábados: 10:00 a 14:00 hs
+                    {contact.businessHoursSaturday.value}
                   </p>
                 </div>
               </div>
@@ -101,7 +110,7 @@ export default function ContactoPage() {
                     Teléfono & WhatsApp
                   </h4>
                   <p className="text-xs text-pn-espresso/80 font-light leading-relaxed">
-                    +54 9 11 5555-7267
+                    {contact.phoneFormatted.value}
                     <br />
                     Atención directa de especialistas
                   </p>
@@ -115,9 +124,9 @@ export default function ContactoPage() {
                     Correos Electrónicos
                   </h4>
                   <p className="text-xs text-pn-espresso/80 font-light leading-relaxed">
-                    Consultas generales: <span className="font-medium text-pn-espresso">info@pampanovus.com.ar</span>
+                    Consultas: <span className="font-medium text-pn-espresso">{contact.generalEmail.value}</span>
                     <br />
-                    Postventa y envíos: <span className="font-medium text-pn-espresso">soporte@pampanovus.com.ar</span>
+                    Soporte: <span className="font-medium text-pn-espresso">{contact.supportEmail.value}</span>
                   </p>
                 </div>
               </div>
@@ -159,7 +168,7 @@ export default function ContactoPage() {
                     Mensaje Recibido
                   </h3>
                   <p className="text-xs text-pn-espresso/80 max-w-sm mx-auto font-light leading-relaxed">
-                    Gracias por comunicarse con Pampa Novus. Uno de nuestros maestros talabarteros o asesores comerciales responderá a su consulta dentro de las próximas 24 horas hábiles.
+                    Gracias por comunicarse con Pampa Novus. Un asesor responderá a su consulta a la brevedad.
                   </p>
                   <button
                     type="button"

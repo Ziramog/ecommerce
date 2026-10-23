@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Compass, Award, Sparkles, Feather } from 'lucide-react'
+import { ArrowLeft, Award, Sparkles, Feather, AlertCircle } from 'lucide-react'
+import { CLIENT_COMMERCIAL_CONFIG } from '@/config/client-commercial-config'
 
 export const metadata = {
   title: 'Nuestra Historia | Pampa Novus',
@@ -10,6 +11,8 @@ export const metadata = {
 }
 
 export default function HistoriaPage() {
+  const { historyNarrative } = CLIENT_COMMERCIAL_CONFIG
+
   return (
     <div className="bg-[#FAF7F2] min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -41,6 +44,16 @@ export default function HistoriaPage() {
           <p className="text-sm sm:text-base text-pn-espresso/80 max-w-2xl mx-auto font-light leading-relaxed">
             Pampa Novus nace del linaje centenario de <strong>Talabartería Mercadal</strong>. Una visión que honra la nobleza de la tierra argentina, fusionando la solidez de los aperos criollos con la sofisticación estética de la alta marroquinería internacional.
           </p>
+
+          {/* Aviso de Gobernanza de Contenidos */}
+          {historyNarrative.approvalStatus === 'PENDING_CLIENT_APPROVAL' && (
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200/80 rounded-[2px] text-amber-900 text-xs font-light">
+              <AlertCircle size={14} className="text-amber-700 flex-shrink-0" />
+              <span>
+                <strong>Nota de gobernanza:</strong> Reseña editorial en proceso de ratificación formal por los directivos de Talabartería Mercadal S.A.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Sección 1: El Origen y el Oficio */}

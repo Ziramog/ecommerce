@@ -43,3 +43,13 @@ desktop.ini
 *.njsproj
 *.sln
 *.sw?
+
+# Local revocation claim store
+.revocation_store/
+apps/*/.revocation_store/
+
+# WOLFIM Market Intelligence Token Vault
+.meli_tokens.enc
+.meli_vault_key
+.env.meli*
+

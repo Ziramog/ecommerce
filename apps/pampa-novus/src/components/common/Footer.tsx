@@ -2,8 +2,11 @@ import React from 'react'
 import Link from 'next/link'
 import { PampaNovusLogo } from '@/components/brand/PampaNovusLogo'
 import { ShieldCheck, Truck, CreditCard, RotateCcw, ShieldAlert, ArrowRight } from 'lucide-react'
+import { CLIENT_COMMERCIAL_CONFIG } from '@/config/client-commercial-config'
 
 export function Footer() {
+  const { company, financialPromotions } = CLIENT_COMMERCIAL_CONFIG
+
   return (
     <footer id="contacto" className="bg-pn-espresso text-pn-crema/90 pt-10 pb-8 border-t border-pn-marron/40 font-sans">
       {/* 4 Insignias de Valor */}
@@ -19,8 +22,12 @@ export function Footer() {
           <div className="flex items-center space-x-3.5">
             <CreditCard className="w-5 h-5 text-pn-arena flex-shrink-0" strokeWidth={1.75} />
             <div>
-              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">Hasta 3 Cuotas</h4>
-              <p className="text-[11px] text-pn-arena/85">Sin interés bancarias</p>
+              <h4 className="text-white text-xs uppercase tracking-wider font-semibold">
+                Hasta {financialPromotions.installmentsMax.value} Cuotas
+              </h4>
+              <p className="text-[11px] text-pn-arena/85">
+                {financialPromotions.interestFreeAllowed.value ? 'Sin interés' : 'Vía Mercado Pago'}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-3.5">
@@ -40,7 +47,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Franja Regulatoria Oficial: Botón de Arrepentimiento (Res. 424/2020 SCI - Ley 24.240) */}
+      {/* Franja Regulatoria Oficial: Botón de Arrepentimiento (Disposición 954/2025 - Res. 424/2020 - Ley 24.240) */}
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 mb-9">
         <div className="bg-pn-marron/40 border border-pn-arena/30 rounded-[2px] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-left">
@@ -49,10 +56,10 @@ export function Footer() {
             </div>
             <div>
               <span className="text-[10px] uppercase tracking-[0.18em] text-pn-arena font-semibold block">
-                Defensa del Consumidor · Res. 424/2020 SCI
+                Defensa del Consumidor · Disp. 954/2025 & Ley 24.240 Art. 34
               </span>
               <p className="text-xs text-pn-crema/90 font-light">
-                Derecho a revocar su compra dentro de los 10 días corridos de recibido el producto sin costo alguno.
+                Derecho a revocar su compra online dentro de los 10 días corridos de recibido el producto sin costo alguno.
               </p>
             </div>
           </div>
@@ -173,14 +180,23 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar con Identificación y Alertas de Homologación */}
         <div className="pt-6 border-t border-pn-marron/30 flex flex-col sm:flex-row justify-between items-center text-xs text-pn-arena/70">
-          <p>© {new Date().getFullYear()} Pampa Novus — Canal minorista de Talabartería Mercadal S.A. CUIT 30-71234567-8.</p>
+          <p>
+            © {new Date().getFullYear()} {company.brandName.value} — Canal minorista de {company.legalName.value}.{' '}
+            {company.cuit.status === 'APPROVED' ? (
+              <span>CUIT {company.cuit.value}.</span>
+            ) : (
+              <span className="text-amber-300/80 italic font-mono text-[10px]">
+                [CUIT en trámite de homologación comercial]
+              </span>
+            )}
+          </p>
           <div className="flex flex-wrap gap-4 mt-3 sm:mt-0">
             <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
               Términos y Condiciones
             </Link>
-            <Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">
+            <Link href="/terminos-y-condiciones#privacidad" className="hover:text-white transition-colors">
               Privacidad de Datos
             </Link>
             <Link href="/arrepentimiento" className="hover:text-white transition-colors font-medium text-pn-arena">

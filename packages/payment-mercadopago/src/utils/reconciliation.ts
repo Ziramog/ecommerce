@@ -14,6 +14,7 @@ export type ReconciliationDiscrepancyType =
   | 'REFERENCE_MISMATCH'
   | 'UNEXPECTED_STATUS'
   | 'POST_CAPTURE_FAILURE'
+  | 'ORPHAN_CAPTURED_PAYMENT'
 
 export interface ReconciliationIncident {
   id: string
@@ -96,6 +97,27 @@ export class ReconciliationManager {
     )
 
     return incident
+  }
+
+  /**
+   * Registra un cobro efectivamente capturado en pasarela cuyo workflow de orden
+   * en Medusa fue interrumpido o falló por causas de red/base de datos.
+   */
+  public recordOrphanPayment(
+    paymentId: string | number,
+    amount: number,
+    currency: string,
+    details: string,
+    externalReference?: string
+  ): ReconciliationIncident {
+    return this.recordIncident({
+      discrepancyType: 'ORPHAN_CAPTURED_PAYMENT',
+      paymentId,
+      receivedAmount: amount,
+      receivedCurrency: currency,
+      externalReference,
+      details: `[ORPHAN PAYMENT RECONCILIATION] Cobro confirmado en Mercado Pago sin orden finalizada en Medusa: ${details}`,
+    })
   }
 
   /**

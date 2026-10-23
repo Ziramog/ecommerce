@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Scale, ShieldCheck, FileText, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Scale, AlertCircle } from 'lucide-react'
+import { CLIENT_COMMERCIAL_CONFIG } from '@/config/client-commercial-config'
 
 export const metadata = {
   title: 'Términos y Condiciones de Venta | Pampa Novus',
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default function TerminosYCondicionesPage() {
+  const { company, contact } = CLIENT_COMMERCIAL_CONFIG
+
   return (
     <div className="bg-[#FAF7F2] min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -39,7 +42,7 @@ export default function TerminosYCondicionesPage() {
           </h1>
 
           <p className="text-xs text-pn-espresso/70 font-light">
-            Última actualización: 23 de octubre de 2026 · Versión 1.2
+            Última actualización: 23 de octubre de 2026 · Versión 1.3
           </p>
         </div>
 
@@ -47,7 +50,7 @@ export default function TerminosYCondicionesPage() {
         <div className="bg-amber-50 border-l-4 border-amber-600 p-4 rounded-[2px] mb-8 text-xs text-amber-950 flex items-start gap-3">
           <AlertCircle size={18} className="text-amber-700 flex-shrink-0 mt-0.5" />
           <p className="font-light leading-relaxed">
-            <strong>Nota institucional de gobernanza:</strong> El presente documento constituye las bases modelo de contratación electrónica para el canal minorista Pampa Novus. Toda cláusula queda supeditada a la revisión y aprobación formal final por parte de la asesoría legal corporativa de <strong>Talabartería Mercadal S.A.</strong> antes de su plena vigencia en producción.
+            <strong>Nota institucional de gobernanza:</strong> El presente documento constituye las bases modelo de contratación electrónica para el canal minorista {company.brandName.value}. Toda cláusula societaria, tributaria y procedimental queda expresamente supeditada a la revisión y aprobación formal final por parte de la asesoría legal corporativa de <strong>{company.legalName.value}</strong> antes de su plena vigencia en entornos de producción.
           </p>
         </div>
 
@@ -59,10 +62,10 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">01.</span> Identificación de la Empresa y Titularidad
             </h2>
             <p>
-              El presente sitio web y la marca comercial <strong>Pampa Novus</strong> constituyen la unidad de venta minorista directa (B2C) de <strong>Talabartería Mercadal S.A.</strong>, sociedad anónima legalmente constituida bajo las leyes de la República Argentina, con CUIT N° <strong>30-71234567-8</strong>, con domicilio legal en Av. Alvear 1850, Ciudad Autónoma de Buenos Aires, República Argentina.
+              El presente sitio web y la marca comercial <strong>{company.brandName.value}</strong> constituyen la unidad de venta minorista directa (B2C) de <strong>{company.legalName.value}</strong>, sociedad legalmente constituida bajo las leyes de la República Argentina, con CUIT N° <strong>{company.cuit.value}</strong> {company.cuit.status === 'PENDING_CLIENT_APPROVAL' && <span className="text-amber-800 italic text-xs font-mono">(en trámite de homologación tributaria)</span>}, con domicilio legal en {company.legalAddress.value}.
             </p>
             <p>
-              Toda comunicación formal, consulta o intimación legal debe cursarse a dicho domicilio o a la casilla oficial de notificación electrónica: <span className="font-medium text-pn-espresso">legal@mercadal.com.ar</span>.
+              Toda comunicación formal, consulta o intimación legal debe cursarse a dicho domicilio o a la casilla oficial de notificación electrónica: <span className="font-medium text-pn-espresso">{contact.legalEmail.value}</span>.
             </p>
           </section>
 
@@ -72,7 +75,7 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">02.</span> Ámbito de Aplicación y Capacidad para Contratar
             </h2>
             <p>
-              Las compras efectuadas a través de Pampa Novus están destinadas exclusivamente a consumidores finales bajo el amparo de la <strong>Ley de Defensa del Consumidor N° 24.240</strong>. Solo podrán contratar personas humanas mayores de 18 años con plena capacidad jurídica para obligarse o personas jurídicas debidamente representadas.
+              Las compras efectuadas a través de {company.brandName.value} están destinadas exclusivamente a consumidores finales bajo el amparo de la <strong>Ley de Defensa del Consumidor N° 24.240</strong>. Solo podrán contratar personas humanas mayores de 18 años con plena capacidad jurídica para obligarse o personas jurídicas debidamente representadas.
             </p>
             <p>
               Las compras corporativas, mayoristas o con escala comercial por volumen deberán canalizarse de forma obligatoria y excluyente a través de nuestro portal mayorista privado: <strong>Talabartería Mercadal B2B</strong>.
@@ -85,7 +88,7 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">03.</span> Precios, Moneda e Impuestos
             </h2>
             <p>
-              Todos los precios exhibidos en Pampa Novus se encuentran expresados en <strong>Pesos Argentinos (ARS)</strong> e incluyen el Impuesto al Valor Agregado (IVA - alícuota general del 21%), salvo indicación expresa en contrario.
+              Todos los precios exhibidos en {company.brandName.value} se encuentran expresados en <strong>Pesos Argentinos (ARS)</strong> e incluyen el Impuesto al Valor Agregado (IVA - alícuota general del 21%), salvo indicación expresa en contrario.
             </p>
             <p>
               Los precios no incluyen los costos de despacho y envío a domicilio, los cuales son calculados de manera autoritativa por nuestro servidor en el paso final del checkout según el destino geográfico del comprador, informándose con total transparencia antes de que el consumidor preste su consentimiento de pago.
@@ -102,10 +105,10 @@ export default function TerminosYCondicionesPage() {
             </p>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>
-                <strong>Mercado Pago:</strong> Permite tarjetas de crédito (Visa, Mastercard, Cabal), tarjetas de débito y dinero en cuenta. Los planes de cuotas se rigen por los acuerdos comerciales vigentes al momento del checkout.
+                <strong>Mercado Pago:</strong> Permite tarjetas de crédito (Visa, Mastercard, Cabal), tarjetas de débito y dinero en cuenta. Los planes de cuotas se rigen por las promociones y costos de financiación vigentes de la entidad financiera emisora.
               </li>
               <li>
-                <strong>Transferencia Bancaria:</strong> El pedido se reserva temporalmente por 48 horas hábiles hasta la acreditación efectiva de los fondos en la cuenta bancaria de Talabartería Mercadal S.A.
+                <strong>Transferencia Bancaria:</strong> El pedido se reserva temporalmente por 48 horas hábiles hasta la acreditación efectiva de los fondos en la cuenta bancaria de {company.legalName.value}.
               </li>
             </ul>
             <p>
@@ -119,7 +122,7 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">05.</span> Envíos, Despachos y Recepción
             </h2>
             <p>
-              Efectuamos despachos a todo el territorio de la República Argentina mediante empresas de transporte especializadas con póliza de seguro sobre mercadería en tránsito. Los plazos de entrega estimados comienzan a computarse a partir de la acreditación fehaciente del pago y la preparación del paquete:
+              Efectuamos despachos a todo el territorio de la República Argentina mediante empresas de transporte con seguro sobre mercadería en tránsito. Los plazos de entrega estimados comienzan a computarse a partir de la acreditación fehaciente del pago y la preparación del paquete:
             </p>
             <ul className="list-disc pl-5 space-y-1">
               <li>CABA y Gran Buenos Aires: 24 a 72 horas hábiles.</li>
@@ -137,14 +140,14 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">06.</span> Derecho de Revocación y Botón de Arrepentimiento
             </h2>
             <p>
-              En estricto cumplimiento del <strong>Artículo 34 de la Ley 24.240</strong> y la <strong>Resolución 424/2020 de la Secretaría de Comercio Interior</strong>, el consumidor tiene la facultad irrenunciable de revocar la compra durante el plazo de <strong>10 (diez) días corridos</strong> computados desde la recepción efectiva del producto.
+              En estricto cumplimiento del <strong>Artículo 34 de la Ley 24.240</strong>, la <strong>Resolución 424/2020 SCI</strong> y la <strong>Disposición 954/2025</strong> de la Subsecretaría de Defensa del Consumidor, el consumidor tiene la facultad irrenunciable de revocar la compra durante el plazo de <strong>10 (diez) días corridos</strong> computados desde la recepción efectiva del producto.
             </p>
             <p>
-              Para ejercer este derecho, el cliente podrá utilizar en cualquier momento el{' '}
+              Para ejercer este derecho sin requerir inicio de sesión previo, el cliente podrá utilizar en cualquier momento el{' '}
               <Link href="/arrepentimiento" className="font-medium text-pn-cognac underline hover:text-pn-espresso">
                 Botón de Arrepentimiento
               </Link>{' '}
-              disponible de manera permanente y visible en nuestro sitio, obteniendo un código numérico identificador de su solicitud. Los gastos de devolución serán soportados íntegramente por Talabartería Mercadal S.A.
+              disponible de manera permanente y visible en nuestro sitio, obteniendo un identificador único de gestión interna de su solicitud. Los gastos de devolución serán soportados íntegramente por {company.legalName.value}.
             </p>
           </section>
 
@@ -162,12 +165,12 @@ export default function TerminosYCondicionesPage() {
           </section>
 
           {/* Sección 8 */}
-          <section className="space-y-3">
+          <section id="privacidad" className="space-y-3">
             <h2 className="font-serif text-xl font-bold text-pn-espresso flex items-center gap-2">
               <span className="text-pn-cognac font-mono text-sm">08.</span> Protección de Datos Personales
             </h2>
             <p>
-              Talabartería Mercadal S.A. cumple cabalmente con la <strong>Ley de Protección de Datos Personales N° 25.326</strong>. Los datos suministrados por los clientes son utilizados exclusivamente para la gestión de pedidos, facturación y envíos, bajo estrictos estándares de seguridad y confidencialidad. Los titulares podrán ejercer sus derechos de acceso, rectificación y supresión enviando un correo a <span className="font-medium text-pn-espresso">privacidad@pampanovus.com.ar</span>.
+              {company.legalName.value} cumple cabalmente con la <strong>Ley de Protección de Datos Personales N° 25.326</strong>. Los datos suministrados por los clientes son utilizados exclusivamente para la gestión de pedidos, facturación y envíos, bajo estrictos estándares de seguridad y confidencialidad. Los titulares podrán ejercer sus derechos de acceso, rectificación y supresión enviando un correo a <span className="font-medium text-pn-espresso">{contact.privacyEmail.value}</span>.
             </p>
           </section>
 
@@ -177,7 +180,7 @@ export default function TerminosYCondicionesPage() {
               <span className="text-pn-cognac font-mono text-sm">09.</span> Jurisdicción y Legislación Aplicable
             </h2>
             <p>
-              El presente contrato se rige exclusivamente por las leyes vigentes de la República Argentina. Ante cualquier divergencia que no pueda ser resuelta de mutuo acuerdo, las partes se someten a la competencia de los Tribunales Ordinarios en lo Comercial de la Ciudad Autónoma de Buenos Aires, sin perjuicio de las facultades que asisten al consumidor ante los organismos competentes en materia de Defensa del Consumidor (Ley 24.240).
+              El presente contrato se rige exclusivamente por las leyes vigentes de la República Argentina. Ante cualquier divergencia que no pueda ser resuelta de mutuo acuerdo, las partes se someten a la competencia de los {company.jurisdiction.value}, sin perjuicio de las facultades que asisten al consumidor ante los organismos competentes en materia de Defensa del Consumidor (Ley 24.240).
             </p>
           </section>
         </div>
