@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getProductByHandle, getB2CProducts } from '@/lib/catalog'
+import { getProductByHandle, getB2CProducts, STATIC_B2C_FALLBACK_PRODUCTS, StorefrontProduct } from '@/lib/catalog'
 import { formatCurrencyARS, formatInstallments } from '@/lib/utils'
 import { ProductAddToCart } from '@/components/product/ProductAddToCart'
 import { ShieldCheck, Truck, RotateCcw, ChevronRight, CheckCircle2 } from 'lucide-react'
@@ -10,10 +10,20 @@ import { ShieldCheck, Truck, RotateCcw, ChevronRight, CheckCircle2 } from 'lucid
 export const revalidate = 60
 
 export async function generateStaticParams() {
-  const products = await getB2CProducts()
-  return products.map((p) => ({
-    handle: p.handle,
-  }))
+  try {
+    const products = await getB2CProducts()
+    return products.map((p) => ({
+      handle: p.handle,
+    }))
+  } catch (err) {
+    console.warn(
+      '[B2C generateStaticParams] Error al consultar backend durante build estático. Usando catálogo estático:',
+      err instanceof Error ? err.message : err
+    )
+    return STATIC_B2C_FALLBACK_PRODUCTS.map((p) => ({
+      handle: p.handle,
+    }))
+  }
 }
 
 export default async function ProductDetailPage({
@@ -22,7 +32,13 @@ export default async function ProductDetailPage({
   params: Promise<{ handle: string }>
 }) {
   const { handle } = await params
-  const product = await getProductByHandle(handle)
+  let product: StorefrontProduct | null = null
+  try {
+    product = await getProductByHandle(handle)
+  } catch (err) {
+    console.warn(`[ProductDetailPage] Error consultando ${handle}:`, err)
+    product = STATIC_B2C_FALLBACK_PRODUCTS.find((p) => p.handle === handle) || null
+  }
 
   if (!product) {
     notFound()

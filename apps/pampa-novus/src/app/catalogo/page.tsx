@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { getB2CProducts } from '@/lib/catalog'
+import { getB2CProducts, STATIC_B2C_FALLBACK_PRODUCTS, StorefrontProduct } from '@/lib/catalog'
 import { ProductCard } from '@/components/product/ProductCard'
 import { SlidersHorizontal, ArrowLeft } from 'lucide-react'
 
@@ -21,7 +21,13 @@ const CATEGORY_FILTERS = [
 
 export default async function CatalogoPage({ searchParams }: CatalogoPageProps) {
   const params = searchParams ? await searchParams : {}
-  const allProducts = await getB2CProducts()
+  let allProducts: StorefrontProduct[] = []
+  try {
+    allProducts = await getB2CProducts()
+  } catch (err) {
+    console.warn('[CatalogoPage] Error al obtener productos del backend:', err)
+    allProducts = STATIC_B2C_FALLBACK_PRODUCTS
+  }
 
   // Filter products if search or category is active
   let filteredProducts = allProducts

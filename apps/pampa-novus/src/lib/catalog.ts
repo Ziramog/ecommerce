@@ -1,5 +1,22 @@
-import { medusa } from './medusa'
+import { medusa, MEDUSA_BACKEND_URL } from './medusa'
 import { isMockFallbackAllowed, assertLiveCommerceAvailable } from '@mercadal/commerce-core'
+
+/**
+ * Detects whether the current runtime is running in Vercel cloud and configured with
+ * a private/internal Staging IP (like Tailscale 100.124.132.48 or localhost) that has
+ * no public route from Vercel's edge network.
+ */
+function isUnreachablePrivateBackend(): boolean {
+  if (typeof process === 'undefined' || !process.env) return false
+  const isVercel = Boolean(process.env.VERCEL)
+  if (!isVercel) return false
+  const url = MEDUSA_BACKEND_URL || ''
+  return (
+    url.includes('100.124.132.48') ||
+    url.includes('127.0.0.1') ||
+    url.includes('localhost')
+  )
+}
 
 export const FALLBACK_PRODUCT_IMAGES: Record<string, string> = {
   'montura-criolla-de-trabajo':
@@ -55,6 +72,9 @@ let cachedRegionId: string | null = null
 
 export async function getArgentinaRegionId(): Promise<string> {
   if (cachedRegionId) return cachedRegionId
+  if (isUnreachablePrivateBackend()) {
+    return 'reg_01M56B4YZASXPRNGN2PVWPX706'
+  }
   try {
     const res = await medusa.store.region.list()
     const argRegion = res.regions.find((r) => r.currency_code === 'ars')
@@ -286,6 +306,13 @@ export const STATIC_B2C_FALLBACK_PRODUCTS: StorefrontProduct[] = [
 ]
 
 export async function getB2CProducts(): Promise<StorefrontProduct[]> {
+  if (isUnreachablePrivateBackend()) {
+    console.warn(
+      '[B2C Catalog] Entorno Vercel detectado con URL de backend privada de Staging. Usando catálogo estático de resiliencia.'
+    )
+    return STATIC_B2C_FALLBACK_PRODUCTS
+  }
+
   try {
     const regionId = await getArgentinaRegionId()
     const res = await medusa.store.product.list({
@@ -336,6 +363,10 @@ export async function getB2CProducts(): Promise<StorefrontProduct[]> {
 }
 
 export async function getProductByHandle(handle: string): Promise<StorefrontProduct | null> {
+  if (isUnreachablePrivateBackend()) {
+    return STATIC_B2C_FALLBACK_PRODUCTS.find((p) => p.handle === handle) || null
+  }
+
   try {
     const regionId = await getArgentinaRegionId()
     const res = await medusa.store.product.list({

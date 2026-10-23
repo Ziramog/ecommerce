@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     '@mercadal/commerce-core',
     '@mercadal/commerce-ui',
   ],
+  env: {
+    // Permite catálogo de resiliencia durante build estático cuando Medusa está en red privada (Tailscale)
+    NEXT_PUBLIC_ALLOW_MOCK_FALLBACK:
+      process.env.NEXT_PUBLIC_ALLOW_MOCK_FALLBACK ?? 'true',
+  },
   images: {
     remotePatterns: [
       {
