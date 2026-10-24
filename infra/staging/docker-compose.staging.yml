@@ -1,0 +1,148 @@
+name: mercadal-staging
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercadal-staging-postgres
+    restart: "no"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mercadal_staging_db}
+      POSTGRES_USER: ${POSTGRES_USER:-mercadal_staging_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Debe definirse POSTGRES_PASSWORD en .env.staging}
+    volumes:
+      - mercadal_staging_pgdata:/var/lib/postgresql/data
+    networks:
+      - mercadal_staging_net
+    # Aislamiento estricto: sin puertos publicados en el host, solo visible dentro de mercadal_staging_net
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mercadal_staging_user} -d ${POSTGRES_DB:-mercadal_staging_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 384M
+    oom_score_adj: 500
+
+  redis:
+    image: redis:7-alpine
+    container_name: mercadal-staging-redis
+    restart: "no"
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Debe definirse REDIS_PASSWORD en .env.staging}"]
+    volumes:
+      - mercadal_staging_redisdata:/data
+    networks:
+      - mercadal_staging_net
+    # Aislamiento estricto: sin puertos publicados en el host
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 192M
+    oom_score_adj: 500
+
+  medusa-api:
+    image: mercadal-staging-medusa:${MEDUSA_IMAGE_TAG:-2.21.2-staging}
+    container_name: mercadal-staging-medusa
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env.staging
+    networks:
+      - mercadal_staging_net
+    ports:
+      # Vinculación exclusiva a la interfaz privada de Tailscale mesh o loopback. Cero exposición pública en 0.0.0.0
+      - "${STAGING_BIND_IP:-100.124.132.48}:9000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:9000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.25"
+          memory: 896M
+    oom_score_adj: 500
+
+  # Storefronts opcionales en staging (perfil 'storefronts' a demanda)
+  pampa-novus-preview:
+    image: mercadal-staging-pampa-novus:${STOREFRONT_IMAGE_TAG:-staging}
+    container_name: mercadal-staging-pampa-novus
+    restart: "no"
+    profiles:
+      - storefronts
+    depends_on:
+      medusa-api:
+        condition: service_healthy
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://${STAGING_BIND_IP:-100.124.132.48}:9000
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${STAGING_PK_B2C}
+      - NEXT_PUBLIC_BRAND_ID=pampa_novus
+      - NEXT_PUBLIC_STOREFRONT_NAME=Pampa Novus — Preview Staging
+    networks:
+      - mercadal_staging_net
+    ports:
+      - "${STAGING_BIND_IP:-100.124.132.48}:3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 384M
+    oom_score_adj: 500
+
+  talabarteria-b2b-preview:
+    image: mercadal-staging-talabarteria-b2b:${STOREFRONT_IMAGE_TAG:-staging}
+    container_name: mercadal-staging-talabarteria-b2b
+    restart: "no"
+    profiles:
+      - storefronts
+    depends_on:
+      medusa-api:
+        condition: service_healthy
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://${STAGING_BIND_IP:-100.124.132.48}:9000
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${STAGING_PK_B2B}
+      - NEXT_PUBLIC_BRAND_ID=talabarteria_mercadal
+      - NEXT_PUBLIC_STOREFRONT_NAME=Talabartería Mercadal B2B — Preview Staging
+    networks:
+      - mercadal_staging_net
+    ports:
+      - "${STAGING_BIND_IP:-100.124.132.48}:3001:3001"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 384M
+    oom_score_adj: 500
+
+networks:
+  mercadal_staging_net:
+    driver: bridge
+    name: mercadal_staging_net
+
+volumes:
+  mercadal_staging_pgdata:
+    name: mercadal_staging_pgdata
+  mercadal_staging_redisdata:
+    name: mercadal_staging_redisdata

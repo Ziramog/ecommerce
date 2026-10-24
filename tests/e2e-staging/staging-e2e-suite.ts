@@ -249,4 +249,56 @@ describe('WOLFIM E2E Staging Certification Suite — Capa C (End-to-End)', () =>
       'El incidente debe estar disponible para conciliación por operador'
     )
   })
+
+  test('E2E-07: Live Medusa Store API Cart & Inventory Protection over Tailscale', async () => {
+    assert.strictEqual(isStagingLive, true, 'El contenedor Medusa en Staging debe estar accesible vía Tailscale (100.124.132.48:9000)')
+
+    const pkB2C = 'pk_9cdf686a153ec2a8cf7b6933217c328933735be186aa433e426f7703a3c8872d'
+
+    // 1. Crear carrito de invitado en el Medusa real de Staging
+    const createRes = await fetch(`${STAGING_URL}/store/carts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': pkB2C,
+      },
+      body: JSON.stringify({ currency_code: 'ars' }),
+    })
+    assert.strictEqual(createRes.status, 200)
+    const { cart } = (await createRes.json()) as any
+    assert.ok(cart.id, 'Debe devolver un ID de carrito real de Medusa')
+
+    // 2. Agregar 1 unidad de Montura Criolla (SKU-CRI-001, stock = 1)
+    const addFirstRes = await fetch(`${STAGING_URL}/store/carts/${cart.id}/line-items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': pkB2C,
+      },
+      body: JSON.stringify({
+        variant_id: 'variant_01M56B4ZCJSQGYBCYZBSK4ZD0V',
+        quantity: 1,
+      }),
+    })
+    assert.strictEqual(addFirstRes.status, 200)
+    const updatedCartData = (await addFirstRes.json()) as any
+    assert.strictEqual(updatedCartData.cart.total, 450000)
+
+    // 3. Intentar agregar una 2da unidad sobre stock = 1 -> Debe ser bloqueado con 400 insufficient_inventory
+    const addSecondRes = await fetch(`${STAGING_URL}/store/carts/${cart.id}/line-items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': pkB2C,
+      },
+      body: JSON.stringify({
+        variant_id: 'variant_01M56B4ZCJSQGYBCYZBSK4ZD0V',
+        quantity: 1,
+      }),
+    })
+    assert.strictEqual(addSecondRes.status, 400, 'Debe rechazar sobreventa con HTTP 400')
+    const errorPayload = (await addSecondRes.json()) as any
+    assert.strictEqual(errorPayload.code, 'insufficient_inventory')
+  })
 })
+
